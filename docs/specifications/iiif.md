@@ -101,7 +101,9 @@ A basic annotation can look like:
 
 ### External Web resource
 
-An EWR is identified by an IRI and has properties. All properties of an EWR MAY be contained within the annotation itself. In the example below, 
+An EWR is identified by an IRI and has properties. All properties of an EWR MAY be contained within the annotation itself. 
+
+In the example below, the IRIs point to the EWR to access, while all other properties are described in the annotation's body.
 
 ```js
 // Beatrice records a long analysis of a patent, and publishes the audio on her website as an mp3. She then creates an Annotation with the mp3 as the body, and the PDF of the patent as the target.
