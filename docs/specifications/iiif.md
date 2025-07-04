@@ -129,10 +129,47 @@ In the example below, the IRIs point to the EWR to access, while all other prope
 
 #### Targets and Bodies
 
-- they MUST be identified by an IRI, but the Resource described by a Target or Body MAY be more specific than its IRI (a T or B can be a segment of a resource, a specific state of it, a T or B can have a specific role in an annotation...)
+- they MUST be identified by an IRI
+- the Resource described by a Target or Body MAY be more specific than its IRI: a T or B can be:
+    - a segment of a resource, 
+    - a specific state of it, 
+    - a T or B can have a specific role in an annotation
 
-// J'EN SUIS À 3.2.2 CLASSES
+#### General attributes of an EWR
 
+- `id`: the IRI identifying the body or target.
+    - if the `id` identifies a segment of an EWR (i.e., part of an image), the IRI's `fragment` should identify the specific part of the resource that is being targeted.
+    - example: `{"id": "http://example.com/image1#xywh=100,100,300,300"}`
+- `type`:
+    - the type attribute of a target or body describes the class it belongs to.
+    - allowed values are: `Dataset | Image | Video | Sound | Text`
+- `format`: the mimetype of the resource. not to be confused with `type`, that describes the general class the EWR
+
+#### Embedded textual body
+
+In a lot of cases, the annotation's body is just an HTML string. In those cases, it can be included directly in the annotation, to avoid fetching content from external sources. Embedded textual body attributes are:
+
+- `id`: the IRI of the body. this attribute MAY be used to identify the textual body
+- `type`: 
+    - it SHOULD have the value `"TextualBody"` and may have other classes
+    - the class `TextualBody` indicates that the body is embedded within the annotation
+- `value`:
+    - the value MUST be used. it contains the content of the body.
+
+```js
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno5",
+  "type": "Annotation",
+  "body": {
+    "type" : "TextualBody",
+    "value" : "<p>j'adore !</p>",
+    "format" : "text/html",
+    "language" : "fr"
+  },
+  "target": "http://example.org/photo1"
+}
+```
 ---
 
 ## Annotation API
