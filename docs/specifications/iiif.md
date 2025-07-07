@@ -91,7 +91,7 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
         <th>IIIF Presentation 2.0 data model</th>
     </tr>
     <tr>
-        <td><img src="./include/presentation_3.0.png"></td>
+        <td><img src="./include/presentation_3.0_resize.png"></td>
         <td><img src="./include/presentation_2.0_white.png"></td>
     
     </tr>
