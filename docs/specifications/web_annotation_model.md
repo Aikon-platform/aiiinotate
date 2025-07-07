@@ -59,19 +59,19 @@ A basic annotation can look like:
 
 ### Annotations data model
 
-- property `@context`:
+- `@context`: `IRI | IRI[]`
     - `"http://www.w3.org/ns/anno.jsonld"` MUST be in the context, or the entire context. if there's only this value, it MUST be provided as a string
-- property `id`: `string`
+- `id`: `string`
     - the IRI identifying the resource
-- property `type`:
+- `type`: `string | string[]`
     - Relationship describing the type of the annotation.
     - accepts 1+ values. if it has only 1 value, it MUST be `"Annotation"`
-- relationship `body`:
+- `body`: `IRI | Object`
     - accepts 0..n values, but there SHOULD be at least 1 body
     - the Body MAY be embedded in the annotation, or it is an IRI pointing to an EWR
-- relationship `target`:
+- `target`: `Object | IRI`
     - accepts 0..n values, but there SHOULD be at least 1 body
-    - the Target MUST be an IRI pointing to an EWR
+    - the Target MUST be an IRI pointing to an EWR, or a SpecificResource
 
 ```js
 // a complete annotation
@@ -126,13 +126,15 @@ All properties of an EWR MAY be contained within the annotation itself. In the e
 
 ### General attributes of a Body or Target
 
-- `id`: the IRI identifying the body or target.
+- `id`: `IRI` 
+    - the IRI identifying the body or target.
     - if the `id` identifies a segment of an EWR (i.e., part of an image), the IRI's `fragment` should identify the specific part of the resource that is being targeted. Example: `{"id": "http://example.com/image1#xywh=100,100,300,300"}`
     - for more fine-grained ways to retrieve part of a Resource, see [Specific Resources](https://www.w3.org/TR/annotation-model/#specific-resources), which allows to specify CSS selectors, XPATH...
-- `type`:
+- `type`: `string`
     - the type attribute of a target or body describes the class it belongs to.
     - allowed values are: `Dataset | Image | Video | Sound | Text`
-- `format`: the mimetype of the resource. not to be confused with `type`, that describes the general class of the EWR
+- `format`: `mimetype` 
+    - the mimetype of the resource. not to be confused with `type`, that describes the general class of the EWR
 
 ### String body (`bodyValue`)
 
@@ -157,11 +159,12 @@ The simplest body is a plain string. It is expressed using `bodyValue` attribute
 
 To include metafdata with an embedded body, use the Embedded textual body construct. Embedded textual body attributes are:
 
-- `id`: the IRI of the body. this attribute MAY be used to identify the textual body
-- `type`:
+- `id`: `IRI`
+    - the IRI of the body. this attribute MAY be used to identify the textual body
+- `type`: `string | string[]`
     - it SHOULD have the value `"TextualBody"` and may have other classes
     - the class `TextualBody` indicates that the body is embedded within the annotation
-- `value`:
+- `value`: `string`
     - the value MUST be used. it contains the content of the body.
 
 `TextualBody` should be preffered over `bodyValue`.
@@ -236,7 +239,8 @@ An annotation can have 0+ bodies and 1+ targets.
 The class `Choice` allows to select only one resourrce from an array. The client MAY use any algorithm to decide which resource to use. Otherwise, it MAY require the uer to make the decision.
 
 Attribures are:
-- `id`: the IRI of the Choice
+- `id`: `string`
+    - the IRI of the Choice
 - `type`: `Choice`.
     - A Choice resourrce MUST have only 1 value and the only allowed value is `Choice`
 - `items`: `[]`
@@ -275,15 +279,16 @@ A `SpecificResource` allows to target a section with more precision than just an
 
 ### Specific resources data model
 
-- `id`: the SpecificResource's IRI (optional)
+- `id`: `IRI`
+    - the SpecificResource's IRI (optional)
 - `type`: `SpecificResource`
     - it SHOULD have `SpecificResource` value and MAY have other values too
-- `source`:
+- `source`: `IRI | Object`
     - the relationship between SecificResource and the Resource it represents.
-    - there MUST be exactly 1 source, described in detail or identified by its URI.
+    - there MUST be exactly 1 source, described in detail or identified by its IRI.
 - `purpose`: optional
     - describe the motivation for the annotation
-- `selector`: 
+- `selector`: `string | string[] | object | object[]`
     - may be a string, an object or an array of strings or objects
     - custom selectors for the annotation
     - there MAY be 0+ selectors
@@ -313,12 +318,15 @@ A `SpecificResource` allows to target a section with more precision than just an
 
 
 Other attributes specific to a certain type of selector are possible.
-- `type`:  the type of selector we are using
+- `type`:  `string`
+    - the type of selector we are using
     - a selector MUST have only 1 value
     - possible values are: `FragmentSelector | CssSelector | XPathSelector | TextQuoteSelector | TextPositionSelector | DataPositionSelector | SvgSelector | RangeSelector`
-- `value`: the content of the selector
+- `value`: `string`
+    - the content of the selector
     - a selector MUST have only 1 value
-- `refinedBy`: a selector within a selector to augment specificity of a selector.
+- `refinedBy`: `IRI | Object`
+    a selector within a selector to augment specificity of a selector.
 
 ```js
 // the Target is a SpecificResource with a CSS selector
@@ -434,7 +442,7 @@ An annotation Collection
     - an Annotation Page MUST have 1 IRI to identify it
 - `type`: `AnnotationPage`
     - MUST have 1+ types, including `AnnotationPage`
-- `partOf`: `IRI|Object`
+- `partOf`: `IRI | Object`
     - the relation to the Collection
     - the Collection MAY be identified by its IRI or by an Object containing properties of the Collection and at least the Collection's `id`
 - `items`: `[]`
