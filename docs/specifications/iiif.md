@@ -92,7 +92,7 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
     </tr>
     <tr>
         <td><img src="./include/presentation_3.0.png"></td>
-        <td><div style="background-color: white"><img src="./include/presentation_2.0.webp"></div></td>
+        <td><img src="./include/presentation_2.0_white.png"></td>
     
     </tr>
 </table>
