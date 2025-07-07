@@ -92,10 +92,9 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
     </tr>
     <tr>
         <td><img src="./include/presentation_3.0.png"></td>
-        <td><img src="./include/presentation_2.0.webp"></td>
+        <td><div style="background-color: white"><img src="./include/presentation_2.0.webp"></div></td>
     
     </tr>
 </table>
 
-![3.0](./include/presentation_3.0.png)
 
