@@ -43,6 +43,7 @@ A basic annotation can look like:
 - **SpecificResource**: a Target or Body that is more specific than the Resource identified by an IRI:
     - the SpecificResource refers to the source resource and the constraints that make it more specific.
     - examples: a specific segment or state, a T or B that plays a specific role in the annotation...
+- **AnnotationCollection**: an ordered list of annotations
 
 ---
 
@@ -56,7 +57,7 @@ A basic annotation can look like:
 - an Annotation has 0..n Bodies and 1..n Targets. it typically has 1 Body and 1 Target.
 - Annotations, Bodies and Targets MAY have their own properties and relationships
 
-### Data model
+### Annotations data model
 
 - property `@context`:
     - `"http://www.w3.org/ns/anno.jsonld"` MUST be in the context, or the entire context. if there's only this value, it MUST be provided as a string
@@ -72,7 +73,8 @@ A basic annotation can look like:
     - accepts 0..n values, but there SHOULD be at least 1 body
     - the Target MUST be an IRI pointing to an EWR
 
-```
+```js
+// a complete annotation
 {
   "@context": "http://www.w3.org/ns/anno.jsonld",
   "id": "http://example.org/anno1",
@@ -86,7 +88,7 @@ A basic annotation can look like:
 
 ## Bodies and targets
 
-### Embedded Web Resources
+### External Web Resources
 
 An EWR is identified by an IRI and has properties. It is a pattern used to reference content external to the annotation JSON.
 
@@ -130,9 +132,9 @@ All properties of an EWR MAY be contained within the annotation itself. In the e
 - `type`:
     - the type attribute of a target or body describes the class it belongs to.
     - allowed values are: `Dataset | Image | Video | Sound | Text`
-- `format`: the mimetype of the resource. not to be confused with `type`, that describes the general class the EWR
+- `format`: the mimetype of the resource. not to be confused with `type`, that describes the general class of the EWR
 
-### String body `bodyValue`
+### String body (`bodyValue`)
 
 In a lot of cases, the annotation's body is just an HTML string. In those cases, the Body may not be an EWR and can be included directly in the annotation, to avoid fetching content from external sources. 
 
@@ -151,7 +153,7 @@ The simplest body is a plain string. It is expressed using `bodyValue` attribute
 }
 ```
 
-### Embedded textual body `TextualBody`
+### Embedded textual body (`TextualBody`)
 
 To include metafdata with an embedded body, use the Embedded textual body construct. Embedded textual body attributes are:
 
@@ -194,7 +196,7 @@ And the equivalent in `bodyValue` (note that HTML markup is removed)
 ### Cardinality (number of bodies and targets)
 
 An annotation can have 0+ bodies and 1+ targets.
-- when there is 0 body, the attribute `body | bodyValue` is omitted. an annotation with no body is semantically similar to highlighting part of a resource
+- when there is 0 body, the attribute `body | bodyValue` is omitted. an annotation with no body is semantically similar to highlighting part of a resource.
 - when there are 2+ bodies or targets, the `body` and `target` attributes are mapped to an array.
 - when there are several bodies/targets, each body is related to each target individually
 
@@ -259,5 +261,309 @@ Attribures are:
     ]
   },
   "target": "http://example.org/website1"
+}
+```
+
+---
+
+## Specific Resources
+
+A `SpecificResource` allows to target a section with more precision than just an IRI and its fragment: CSS selectors, XPATH, text range...
+- it is used in between the Body and Target
+- they MAY be EWRs with their IRIs, but it is better to include them inside the annotation to avoid extra queries
+- possible types of specificities (categories of Specific Resources) are: `Purpose | Selector | State | Style | Rendering | Scope`
+
+### Specific resources data model
+
+- `id`: the SpecificResource's IRI (optional)
+- `type`: `SpecificResource`
+    - it SHOULD have `SpecificResource` value and MAY have other values too
+- `source`:
+    - the relationship between SecificResource and the Resource it represents.
+    - there MUST be exactly 1 source, described in detail or identified by its URI.
+- `purpose`: optional
+    - describe the motivation for the annotation
+- `selector`: 
+    - may be a string, an object or an array of strings or objects
+    - custom selectors for the annotation
+    - there MAY be 0+ selectors
+    - multiple selectors SHOULD select the same content
+
+```js
+// a SpecificResource with "tagging" purposes
+
+
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno18",
+  "type": "Annotation",
+  "body": {
+    "type": "SpecificResource",
+    "purpose": "tagging",
+    "source": "http://example.org/city1"
+  },
+  "target": {
+    "id": "http://example.org/photo1",
+    "type": "Image"
+  }
+}
+```
+
+### Selectors data model
+
+
+Other attributes specific to a certain type of selector are possible.
+- `type`:  the type of selector we are using
+    - a selector MUST have only 1 value
+    - possible values are: `FragmentSelector | CssSelector | XPathSelector | TextQuoteSelector | TextPositionSelector | DataPositionSelector | SvgSelector | RangeSelector`
+- `value`: the content of the selector
+    - a selector MUST have only 1 value
+- `refinedBy`: a selector within a selector to augment specificity of a selector.
+
+```js
+// the Target is a SpecificResource with a CSS selector
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno21",
+  "type": "Annotation",
+  "body": "http://example.org/note1",
+  "target": {
+    "source": "http://example.org/page1.html",
+    "selector": {
+      "type": "CssSelector",
+      "value": "#elemid > .elemclass + p"
+    }
+  }
+}
+```
+
+```js
+// the Target is a SpecificResource that points to "annotation" preceded by "this is an " and suffixed by " that has some"
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno23",
+  "type": "Annotation",
+  "body": "http://example.org/comment1",
+  "target": {
+    "source": "http://example.org/page1",
+    "selector": {
+      "type": "TextQuoteSelector",
+      "exact": "anotation",
+      "prefix": "this is an ",
+      "suffix": " that has some"
+    }
+  }
+}
+```
+
+```js
+// refinedBy in action: 1st selector targets a fragment, second selector targets a quote
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno29",
+  "type": "Annotation",
+  "body": "http://example.org/comment1",
+  "target": {
+    "source": "http://example.org/page1",
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "para5",
+      "refinedBy": {
+        "type": "TextQuoteSelector",
+        "exact": "Selected Text",
+        "prefix": "text before the ",
+        "suffix": " and text after it"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Annotation collections 
+
+An annotation Collection
+- is an ordered list grouping annotations
+- is divided in 2 sections: 
+    - Annotation Collection manages the identify and description of the list (metadata that contextualises the collection and helps in its understanding)
+    - Annotation Pages list all annotations that are members of the Collection. Each Page is an ordered list of Annotations.
+- contains 0+ annotations
+- MAY have multiple pages that are traversed through `first/last` (at collection level) and `prev/next` (at page level)
+
+### Annotation Collection data model
+
+- `@context`: `http://www.w3.org/ns/anno.jsonld`
+    - MUST have one or more value and MUST contain the value `http://www.w3.org/ns/anno.jsonld`
+- `id`: IRI
+    - MUST have exactly 1 IRI that identifies the collection
+- `type`: `AnnotationCollection`
+    - MUST have 1+ types and MUST have the type `AnnotationCollection`
+- `label`: `string | string[]`
+    - a human readable label for the collection
+    - SHOULD have 1+ labels 
+- `total`: `int`
+    - the number of Annotations in the collection
+    - SHOULD be used
+- `first`: the first Annotation Page
+    - a Collection with >1 annotations MUST have a `first`
+    - the first Annotation Page MAY be embedded within the Collection, or it MAY be an IRI
+- `last`: the last Annotation Page
+    - a Collection with >1 annotations SHOULD have a `last`
+    - `last` is an IRI pointing to the last Annotation Page
+
+```js
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/collection1",
+  "type": "AnnotationCollection",
+  "label": "Steampunk Annotations",
+  "creator": "http://example.com/publisher",
+  "total": 42023,
+  "first": "http://example.org/page1",
+  "last": "http://example.org/page42"
+}
+```
+
+### Annotation Page data model
+
+- `@context`: `IRI?`
+    - if Page is not embedded in a collection, it MUST have 1+ values including `http://www.w3.org/ns/anno.jsonld`.
+    - if Page is embedded, it SHOULD NOT have an `@context`
+- `id`: IRI
+    - an Annotation Page MUST have 1 IRI to identify it
+- `type`: `AnnotationPage`
+    - MUST have 1+ types, including `AnnotationPage`
+- `partOf`: `IRI|Object`
+    - the relation to the Collection
+    - the Collection MAY be identified by its IRI or by an Object containing properties of the Collection and at least the Collection's `id`
+- `items`: `[]`
+    - the list of annotations on the Page.
+    - MUST be used
+- `next`: `IRI`
+    - next Page related to the current Page in the Collection
+    - MUST be used unless the current Page is the last one
+- `prev`: `IRI`
+    - previous page in the Collection
+    - SHOULD be used unless the current Page is the first one
+- `startIndex`: `int`
+    - SHOULD be used, MUST be a single positive or null integer
+    - represents the index of the 1st annotation on the page relative to all the annotations in the Collection
+
+```js
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/page1",
+  "type": "AnnotationPage",
+  "partOf": {
+    "id": "http://example.org/collection1",
+    "label": "Steampunk Annotations",
+    "total": 42023
+  },
+  "next": "http://example.org/page2",
+  "startIndex": 0,
+  "items": [
+    {
+      "id": "http://example.org/anno1",
+      "type": "Annotation",
+      "body": "http://example.net/comment1",
+      "target": "http://example.com/book/chapter1"
+    },
+    {
+      "id": "http://example.org/anno2",
+      "type": "Annotation",
+      "body": "http://example.net/comment2",
+      "target": "http://example.com/book/chapter2"
+    }
+  ]
+}
+```
+
+---
+
+## Complete Example
+
+```js
+{
+  "@context": "http://www.w3.org/ns/anno.jsonld",
+  "id": "http://example.org/anno38",
+  "type": "Annotation",
+  "motivation": "commenting",
+  "creator": {
+    "id": "http://example.org/user1",
+    "type": "Person",
+    "name": "A. Person",
+    "nickname": "user1"
+  },
+  "created": "2015-10-13T13:00:00Z",
+  "generator": {
+    "id": "http://example.org/client1",
+    "type": "Software",
+    "name": "Code v2.1",
+    "homepage": "http://example.org/homepage1"
+  },
+  "generated": "2015-10-14T15:13:28Z",
+  "stylesheet": {
+    "id": "http://example.org/stylesheet1",
+    "type": "CssStylesheet"
+  },
+  "body": [
+    {
+      "type": "TextualBody",
+      "purpose": "tagging",
+      "value": "love"
+    },
+    {
+      "type": "Choice",
+      "items": [
+        {
+          "type": "TextualBody",
+          "purpose": "describing",
+          "value": "I really love this particular bit of text in this XML. No really.",
+          "format": "text/plain",
+          "language": "en",
+          "creator": "http://example.org/user1"
+        },
+        {
+          "type": "SpecificResource",
+          "purpose": "describing",
+          "source": {
+            "id": "http://example.org/comment1",
+            "type": "Audio",
+            "format": "audio/mpeg",
+            "language": "de",
+            "creator": {
+              "id": "http://example.org/user2",
+              "type": "Person"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "target": {
+    "type": "SpecificResource",
+    "styleClass": "mystyle",
+    "source": "http://example.com/document1",
+    "state": [
+      {
+        "type": "HttpRequestState",
+        "value": "Accept: application/xml",
+        "refinedBy": {
+          "type": "TimeState",
+          "sourceDate": "2015-09-25T12:00:00Z"
+        }
+      }
+    ],
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xpointer(/doc/body/section[2]/para[1])",
+      "refinedBy": {
+        "type": "TextPositionSelector",
+        "start": 6,
+        "end": 27
+      }
+    }
+  }
 }
 ```
