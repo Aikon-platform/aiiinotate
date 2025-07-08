@@ -5,7 +5,8 @@
 - image API docs [here](https://iiif.io/api/image/3.0/)
 - presentation API 2.x [here](https://iiif.io/api/presentation/2.1/) (most widely used)
 - presentation API 3.0 [here](https://iiif.io/api/presentation/3.0/) (newest version)
-- annotations API docs [here](https://iiif.io/api/annex/openannotation/)
+- relationship to the W3C annotations data model [here](https://iiif.io/api/annex/openannotation/)
+- IIIF annotation exmple [here](https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/)
 
 ---
 
@@ -96,4 +97,45 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
     </tr>
 </table>
 
+### Presentation API 3.0
 
+> NOTE: only some general informations on the manifest and more specific informations for the Annotations are included
+
+#### Terminology
+
+- embedded: a resource that is included in the same document as a parent resource, called the embedder
+- referenced: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
+
+#### Ressource types
+
+- `Collection`: an ordered list of Manifests or Collections of Manifests
+- `Manifest`: a description of the structure and properties of the compound object (book...)
+- `Range`: an ordered list of Canvases, or Range of Canvases
+- `Canvas`: a virtual container that represents a particular view of the object and has content resources associated to it. The Canvas allows to describe how content is laid out on it, spatially and temporally. Annotations are used to populate the Canvas with images, text, sound...
+- `Annotation Collection`: a list of ANnotation Pages that allows higher level-groupings (different ttranscriptions of a single text may each get their Annotation Collection)
+- `Annotation Page`: an ordered list of Annotations associated with a Canvas. Annotation Pages can also provide commentary on a resource that is part of a canvas (like a text commentary for an image)
+- `Annotation`: annotations are used to store a canvas' content: image, video, text...
+
+#### Properties
+
+Most can be used on any resource type. Some important properties are:
+
+- `id`: `URI`
+    - all resources MUST have an id used to identify the resource
+    - if the resource identified by this ID is embedded in another resource, the URI MAY be the URI of the embedding resource with a unique fragment on the end. 
+    - canvases MUST have their own URI without a fragment. 
+- `type`: `Dataset | Image | Model | Sound | Text | Video | <other>`
+    - the class the resource belongs to
+- height` and `width`: `int`
+    - the height of the Canvas or Content resource. 
+    - Canvas MAY have a height AND width, Content resources SHOULD have a height and width. other types MUST NOT have a height.
+    - for Content resource, the height/width is in pixels. 
+    - for Canvases, it does not have a unit: height and width are used to express the Canvas' apsect ratio
+- `viewingDirection`: `left-to-right | right-to-left | top-to-bottom | bottom-to-top`
+    - the direction in which to display a set of canvases
+    - MAY use this property: Collection, Manifest, Range
+    - MUST NOT: all other types
+
+--- 
+
+### Useful links
