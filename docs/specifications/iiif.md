@@ -84,7 +84,7 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
 
 ---
 
-## Presentation API
+## Presentation API (in general)
 
 <table>
     <tr>
@@ -97,44 +97,153 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
     </tr>
 </table>
 
-### Presentation API 3.0
+---
 
-> NOTE: only some general informations on the manifest and more specific informations for the Annotations are included
+## Presentation API 3.0
 
-#### Terminology
+> NOTE: only some general informations on the manifest's structure and the way images are embedded in the manifest is included.
+
+### Terminology
 
 - embedded: a resource that is included in the same document as a parent resource, called the embedder
 - referenced: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
 
-#### Ressource types
+### Ressource types
 
 - `Collection`: an ordered list of Manifests or Collections of Manifests
 - `Manifest`: a description of the structure and properties of the compound object (book...)
 - `Range`: an ordered list of Canvases, or Range of Canvases
 - `Canvas`: a virtual container that represents a particular view of the object and has content resources associated to it. The Canvas allows to describe how content is laid out on it, spatially and temporally. Annotations are used to populate the Canvas with images, text, sound...
-- `Annotation Collection`: a list of ANnotation Pages that allows higher level-groupings (different ttranscriptions of a single text may each get their Annotation Collection)
+- `Annotation Collection`: a list of Annotation Pages that allows higher level-groupings (different ttranscriptions of a single text may each get their Annotation Collection)
 - `Annotation Page`: an ordered list of Annotations associated with a Canvas. Annotation Pages can also provide commentary on a resource that is part of a canvas (like a text commentary for an image)
 - `Annotation`: annotations are used to store a canvas' content: image, video, text...
 
-#### Properties
+### Images and Annotations in the manifest
 
-Most can be used on any resource type. Some important properties are:
+The global structure is: 
+> `Canvas / AnnotationPage[] / Annotation[]`
 
-- `id`: `URI`
-    - all resources MUST have an id used to identify the resource
-    - if the resource identified by this ID is embedded in another resource, the URI MAY be the URI of the embedding resource with a unique fragment on the end. 
-    - canvases MUST have their own URI without a fragment. 
-- `type`: `Dataset | Image | Model | Sound | Text | Video | <other>`
-    - the class the resource belongs to
-- height` and `width`: `int`
-    - the height of the Canvas or Content resource. 
-    - Canvas MAY have a height AND width, Content resources SHOULD have a height and width. other types MUST NOT have a height.
-    - for Content resource, the height/width is in pixels. 
-    - for Canvases, it does not have a unit: height and width are used to express the Canvas' apsect ratio
-- `viewingDirection`: `left-to-right | right-to-left | top-to-bottom | bottom-to-top`
-    - the direction in which to display a set of canvases
-    - MAY use this property: Collection, Manifest, Range
-    - MUST NOT: all other types
+#### Canvas
+
+The `Canvas` represents a single page (for a book) or a single view within a manifest. 
+- `id` MUST be used and MUST be a URI identifying the canvas.
+- `type`: `AnnotationPage`
+- a canvas MAY be embedded or referenced within the parent manifest
+- content is associated to a `Canvas` through Web annotations.
+- `id` MUST be used and MUST be a URI identifying the canvas.
+- `items` is the property containing a list of AnnotationPages  
+
+```js
+{
+  // Metadata about this canvas
+  "id": "https://example.org/iiif/book1/canvas/p1",
+  "type": "Canvas",
+  "label": { "none": [ "p. 1" ] },
+  "height": 1000,
+  "width": 750,
+
+  "items": [
+    {
+      "id": "https://example.org/iiif/book1/content/p1/1",
+      "type": "AnnotationPage",
+      "items": [
+        // Painting Annotations on the Canvas are included here
+      ]
+    }
+  ],
+
+  "annotations": [
+    {
+      "id": "https://example.org/iiif/book1/comments/p1/1",
+      "type": "AnnotationPage",
+      "items": [
+        // Non-Painting Annotations on the Canvas are included here
+      ]
+    }
+
+  ]
+}
+```
+
+#### AnnotationPage
+
+An `AnnotationPage` contains a list of annotations. 
+- `id` MUST be used and MUST be a URI identifying the canvas.
+- `type`: `AnnotationPage`
+- the AnnotationPage MAY have any of the other properties defined in the Web Annotation specification
+- an AnnotationPage may be embedded in the manifest, or referenced by the manifest.
+    - if embedded, the property `items` contains a list of Annotations  
+    - if referenced, the AnnotationPage 
+        - MUST have the minimal structure `{"id": "<uri>","type": "AnnotationPage"}`
+        - MUST NOT have the property `items`
+        - MAY contain other properties
+
+```js
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://example.org/iiif/book1/annopage/p1",
+  "type": "AnnotationPage",
+
+  "items": [
+    {
+      "id": "https://example.org/iiif/book1/annopage/p1/a1",
+      "type": "Annotation"
+      // ...
+    },
+    {
+      "id": "https://example.org/iiif/book1/annopage/p1/a2",
+      "type": "Annotation"
+      // ...
+    }
+  ]
+}
+```
+
+#### Annotation
+
+**`Annotations`** store a canvas' content.
+- annotations are contained within `AnnotationPage`s
+- there are 2 types of Annotations: painting and non-painting Annotations. Painting Annotations will be rendered as the canvas' content while non-painting Annotations are *about* the canvas in another way. 
+- `id` MUST be used and MUST be a URI
+- `type`: `Annotation`
+- `target` SHOULD contain a reference to the Canvas' `id`
+- `motivation` is the property describing the role of the Annotation (painting or non-painting):
+    - painting Annotations MUST have the attribute `motivation: "painting"` (rendered annotations ar the images that will be visible on the canvas)
+    - informations derived from the Canvas's content (like the OCR of a text page) MUST be associated by an Annotation with `motivation: "supplementing"`
+    - in short, content of any type may be associated with the Canvas via an Annotation that has the `motivation` value `painting`, meaning the content is part of the Canvas; an Annotation that has the `motivation` value `supplementing`, meaning the content is from the Canvas but not necessarily part of it; or an Annotation with another `motivation` meaning that it is somehow about the Canvas.
+
+```js
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://example.org/iiif/book1/annotation/p0001-image",
+  "type": "Annotation",
+  "motivation": "painting",
+  "body": {
+    "id": "https://example.org/images/page1.jpg",
+    "type": "Image"
+  },
+  "target": "https://example.org/iiif/book1/canvas/p1"
+}
+```
+
+#### AnnotationCollection
+
+The `AnnotationCollection` object is used to group sevral AnnotationPages that should be managed together, regardless of the Canvas resource they target. For example, an AnnotationCollection may be a single translation of a text, thus allowing to have several translation for a text.
+- `id` MUST be used and MUST be an URI
+- `label` SHOULD be used to display infor;ation the collection
+- other properties MAY be used.
+
+```js
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://example.org/iiif/book1/annocoll/transcription",
+  "type": "AnnotationCollection",
+  "label": {"en": ["Diplomatic Transcription"]},
+
+  "first": { "id": "https://example.org/iiif/book1/annopage/l1", "type": "AnnotationPage" },
+  "last": { "id": "https://example.org/iiif/book1/annopage/l120", "type": "AnnotationPage" }
+}
+```
 
 --- 
 
