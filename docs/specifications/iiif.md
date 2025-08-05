@@ -97,16 +97,24 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
     </tr>
 </table>
 
+### Terminology
+
+- embedded: a resource that is included in the same document as a parent resource, called the embedder
+- referenced: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
+
+### Differences between 2.0 and 3.0:
+
+- 2.0 is mostly aimed at image documents (books), 3.0 also allows for audio-video documents
+- ressources `AnnotationCollection` and `AnnotationPage` exist only in 3.0, and `Sequence` and `AnnotationList` exist only in 2.x.
+- (image) annotations in the 2.0 specification follow the Open Annotations standard, while 3.0 follows the W3C Web Annotations standard, derived from the former.
+- 3.0 is more modular and allows for more embedded ressources.
+- some vocabularies and attributes are embedded (`@id` attribute in 2.0 become `id` in 3.0, `oa:Annotation` value in `2.0` becomes `Annotation` in 3.0, `sc:painting` value in 2.0 becomes `painting` in 3.0)
+
 ---
 
 ## Presentation API 3.0
 
 > NOTE: only some general informations on the manifest's structure and the way images are embedded in the manifest is included.
-
-### Terminology
-
-- embedded: a resource that is included in the same document as a parent resource, called the embedder
-- referenced: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
 
 ### Ressource types
 
@@ -239,11 +247,156 @@ The `AnnotationCollection` object is used to group sevral AnnotationPages that s
   "id": "https://example.org/iiif/book1/annocoll/transcription",
   "type": "AnnotationCollection",
   "label": {"en": ["Diplomatic Transcription"]},
-
   "first": { "id": "https://example.org/iiif/book1/annopage/l1", "type": "AnnotationPage" },
   "last": { "id": "https://example.org/iiif/book1/annopage/l120", "type": "AnnotationPage" }
 }
 ```
+
+---
+
+## Presentation API 2.0
+
+### Ressource types
+
+- `Manifest`
+- `Sequence`: the order of the views in the object. A manifest may contain several Sequences to describe multiple equally valid orders in the content
+- `Canvas`: container for a single or view
+- `Content`: content resources, such as image or text associated with a canvas.
+
+### Images in the manifest
+
+#### Canvas
+
+A `Canvas` represents a single view within the manifest. It is a 2D rectangular shape with a defined `width` and `height` defined as positive integers.
+- images are linked to a canvas as Annotatios that are embedded in the `images` property
+- `images` stores the image annotations
+- `otherContent` stores references to other annotation lists: transcriptions, commentary etc.
+- an canvas MAY be embedded or referenced from the manifest by an URI.
+
+```js
+{
+  // Metadata about this canvas
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://example.org/iiif/book1/canvas/p1",
+  "@type": "sc:Canvas",
+  "label": "p. 1",
+  "height": 1000,
+  "width": 750,
+  "thumbnail" : {
+    "@id" : "http://example.org/iiif/book1/canvas/p1/thumb.jpg",
+    "@type": "dctypes:Image",
+    "height": 200,
+    "width": 150
+  },
+  "images": [
+    {
+      "@type": "oa:Annotation"
+      // Link from Image to canvas should be included here, as below
+    }
+  ],
+  "otherContent": [
+    {
+      // Reference to list of other Content resources, _not included directly_
+      "@id": "http://example.org/iiif/book1/list/p1",
+      "@type": "sc:AnnotationList"
+    }
+  ]
+
+}
+```
+
+#### Image resource
+
+Image ressources are Annotations linked to the canvas.
+- `@id` MAY be used to identify the image and SHOULD be an HTTP URI if used
+- `motivation` MUST be used and its value MUST be `sc:painting` to distinguish it from non-painting annotations
+- `resource` is the property linking the image itself to the annotation
+    - `@id` MUST be used and MUST be the URI at which the image is accessed and the URI MAY be a IIIF image URI.
+    - `@type: "dtypes:Image"` shuld be used
+    - `format` may be used to describe the image's mediatype
+    - `on` attribute MUST be used and the value MUST be the Canvas' `@id`
+
+```js
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://example.org/iiif/book1/annotation/p0001-image",
+  "@type": "oa:Annotation",
+  "motivation": "sc:painting",
+  "resource": {
+    "@id": "http://example.org/iiif/book1/res/page1.jpg",
+    "@type": "dctypes:Image",
+    "format": "image/jpeg",
+    "service": {
+      "@context": "http://iiif.io/api/image/2/context.json",
+      "@id": "http://example.org/images/book1-page1",
+      "profile": "http://iiif.io/api/image/2/level2.json"
+    },
+    "height":2000,
+    "width":1500
+  },
+  "on": "http://example.org/iiif/book1/canvas/p1"
+}
+```
+
+#### AnnotationList
+
+`AnnotationList`s are used to add additional resources to the canvas: the full text of the object... 
+- they are collections of annotatins
+- they MUST be referenced from the canvas they are associated with by an URI. they MUST NOT be embedded in the manifest. 
+    - they SHOULD be loaded by the client when they are encountered. 
+    - separation between Canvas and AnnotationList allows to accelerate loading time for the manifest (it is lighter since it does not contain all extra annotations).
+
+URI pattern : `{scheme}://{host}/{prefix}/{identifier}/list/{name}`
+- `{name}` MUST identify uniquely the list. the name MAY be the canvas' name, but since a canvas may have several annotations it must not be assumed that the list's and the canvas' name will be the same.
+
+Properties of the annotation list are:
+- `@id`: MUST be the HTTPS URI used to access the AnnotationList
+- `resources` is a list of annotations
+    - each resource MUST be something other than an image if the `motivation` is `sc:painting` (a Canvas' painting images is defined by its `images` key)
+    - `on` property MUST be used and point to the canvas' `@id`
+    - `format` SHOULD be included and MUST be the ressource's media type
+    - `motivation` is used to describe the role of the resource. if the resource is to be rendered it MUST be `sc:painting` (such as images, text transcriptions, performances of music from the manuscript and so forth)
+    - other possible properties are: `label`, `description`, `metadata`, `license` and `attribution`
+
+```js
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://example.org/iiif/book1/list/p1",
+  "@type": "sc:AnnotationList",
+
+  "resources": [
+    {
+      "@type": "oa:Annotation",
+      "motivation": "sc:painting",
+      "resource":{
+        "@id": "http://example.org/iiif/book1/res/music.mp3",
+        "@type": "dctypes:Sound",
+        "format": "audio/mpeg"
+      },
+      "on": "http://example.org/iiif/book1/canvas/p1"
+    },
+    {
+      "@type": "oa:Annotation",
+      "motivation": "sc:painting",
+      "resource":{
+        "@id": "http://example.org/iiif/book1/res/tei-text-p1.xml",
+        "@type": "dctypes:Text",
+        "format": "application/tei+xml"
+      },
+      "on": "http://example.org/iiif/book1/canvas/p1"
+    }
+    // ... and so on
+  ]
+}
+```
+
+---
+
+## Annotations
+
+https://training.iiif.io/iiif-online-workshop/day-four/annotations-and-annotation-lists.html
+
+https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/
 
 --- 
 
