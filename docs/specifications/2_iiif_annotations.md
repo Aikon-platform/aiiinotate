@@ -90,8 +90,6 @@ And the structure of an Annotation is (with some extra metadata):
 {
   "@id" : "http://aikon.enpc.fr/sas/annotation/wit90_pdf105_anno195_c10_69f692ce732f42698208c05515d085de",
   "@type" : "oa:Annotation",
-  "dcterms:created" : "2025-05-14T07:05:43",
-  "dcterms:modified" : "2025-05-14T07:05:43",
   "resource" : {
     "@type" : "dctypes:Text",
     "format" : "text/html",
