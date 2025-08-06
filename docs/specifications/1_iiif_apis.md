@@ -1,4 +1,6 @@
-# IIIF ANNOTATIONS
+# IIIF APIs
+
+This document is a summary of relevant elements of the IIIF specifications, and especially of the IIIF Presentation APIs. See [this document](./2_iiif_annotations.md) for a more focused look on annotations.
 
 ## Specifications
 
@@ -6,7 +8,6 @@
 - presentation API 2.x [here](https://iiif.io/api/presentation/2.1/) (most widely used)
 - presentation API 3.0 [here](https://iiif.io/api/presentation/3.0/) (newest version)
 - relationship to the W3C annotations data model [here](https://iiif.io/api/annex/openannotation/)
-- IIIF annotation exmple [here](https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/)
 
 ---
 
@@ -26,7 +27,7 @@ The Annotation API is based on the IIIF image api. As a reminder, the IIIF image
 
 [https://iiif.io/api/annex/openannotation](https://iiif.io/api/annex/openannotation)
 
-IIIF is based on the W3C Web Annotation data model, and not just for the IIIF annotations but for all its APIs ! In IIIF annotations, document parts are targeted as `SpecificResource`. The IIIF standard defines several custom selectors to extend the W3C standard. 
+IIIF 3.0 is based on the W3C Web Annotation data model (2.0 is based on Open Annotations), and not just for the IIIF annotations but for all its APIs ! In IIIF annotations, document parts are targeted as `SpecificResource`. The IIIF standard defines several custom selectors to extend the W3C standard. 
 
 ### `ImageApiSelector`
 
@@ -99,16 +100,19 @@ Out of scope here, but there are `AudioContentSelector` and `VisualContentSelect
 
 ### Terminology
 
-- embedded: a resource that is included in the same document as a parent resource, called the embedder
-- referenced: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
+- `embedded`: a resource that is included in the same document as a parent resource, called the embedder
+- `referenced`: a resource that is not (entierly) present in another resource, and for which it is necessary to fetch the referenced resource's id to retrieve information
+- `Annotations`, in the IIIF specifications, are not just "comments made on an image". Since IIIF APIs v2.x and 3.0 are based on Web Annotations specifications (W3C annotations for the v3.0, Open Annotations for the v.2.x), annotations are used in general to connect content to a Canvas. In turn, the image painted on a canvas is an annotation, since content is connected to Canvases using Web Annotations. Text, images etc that are comments on the image on a canvas are also annotations. To differenciate, there are 2 kinds of annotations:
+    - `painting annotations`: the primary content of a Canvas that will be displayed.
+    - `non-painting annotations`: annotations that are "about the canvas" (like transcriptions of a document)
 
 ### Differences between 2.0 and 3.0:
 
 - 2.0 is mostly aimed at image documents (books), 3.0 also allows for audio-video documents
-- ressources `AnnotationCollection` and `AnnotationPage` exist only in 3.0, and `Sequence` and `AnnotationList` exist only in 2.x.
 - (image) annotations in the 2.0 specification follow the Open Annotations standard, while 3.0 follows the W3C Web Annotations standard, derived from the former.
+- ressources `AnnotationCollection` and `AnnotationPage` exist only in 3.0, and `Sequence` and `AnnotationList` exist only in 2.x.
+- some vocabularies and attributes are modified (`@id` attribute in 2.0 become `id` in 3.0, `oa:Annotation` value in `2.0` becomes `Annotation` in 3.0, `sc:painting` value in 2.0 becomes `painting` in 3.0)
 - 3.0 is more modular and allows for more embedded ressources.
-- some vocabularies and attributes are embedded (`@id` attribute in 2.0 become `id` in 3.0, `oa:Annotation` value in `2.0` becomes `Annotation` in 3.0, `sc:painting` value in 2.0 becomes `painting` in 3.0)
 
 ---
 
@@ -390,14 +394,3 @@ Properties of the annotation list are:
 }
 ```
 
----
-
-## Annotations
-
-https://training.iiif.io/iiif-online-workshop/day-four/annotations-and-annotation-lists.html
-
-https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/
-
---- 
-
-### Useful links
