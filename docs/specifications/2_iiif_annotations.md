@@ -43,17 +43,8 @@ The structre of an AnnotationPage is:
   "type": "AnnotationPage",
 
   "items": [
-    {
-      "id": "https://example.org/iiif/book1/annopage/p1/a1",
-      "type": "Annotation"
-      // ...
-    },
-    {
-      "id": "https://example.org/iiif/book1/annopage/p1/a2",
-      "type": "Annotation"
-      // ...
-    }
-  ]
+    // annotations go here
+ ]
 }
 ```
 
