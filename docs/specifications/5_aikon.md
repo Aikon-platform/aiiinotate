@@ -44,7 +44,7 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 ### Provided by SAS but not currently used in AIKON:
 
 - `POST /annotation/create`: crate a single annotation
-- `POST `/annotation/update`: update a single annotation
+- `POST /annotation/update`: update a single annotation
 
 ---
 
@@ -52,10 +52,25 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 
 ### Fetch data
 
-- get all annotations for a single manifest [code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L32)
+- get all annotations for a single manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L32)).
+    - this behaviour is implemented by SAS but results are paginated which requires to run several queries
+- get the total number of annotations in a single manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L648))
 
+### Create / update data
 
+- index all annotations for a manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L197)).
 
+### Delete data
+
+- unindex a manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L769))
+- remove all annotations for a single manifest in 1 query ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L798)). currently, we need to 
+    - loop over each canvas in a manifest
+    - loop over each annotation in a manifest
+    - delete that annotation in an HTTP request => tons of HTTP requests
+
+### Other
+
+- annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
 
 
 
