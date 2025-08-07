@@ -8,6 +8,23 @@
 - [endpoints](https://github.com/glenrobson/SimpleAnnotationServer/blob/master/doc/Endpoints.md)
 - [IIIF annotations search](https://github.com/glenrobson/SimpleAnnotationServer/blob/master/doc/IIIFSearch.md)
 
+---
+
+## What does SAS do ?
+
+From what I gather, SAS stores 2 types of data:
+- IIIF annotations
+- IIIF manifests
+- annotations and manifests seem to follow the IIIF 2.x presentation API (instead of the most recent 3.0). 
+
+SAS has 2 main functionnalities:
+- "backend": store and serve annotations in JSON format
+- "frontend": provide a GUI to manage IIIF collections and, most importantly, collections of IIIF annotations. 
+    - SAS uses Mirador as its IIIF graphical interface. 
+    - the SAS mirador plugin is integrated from the rest of mirador so that annotations etc. made on Mirador can be integrated into the SAS server database.
+
+In turn, annotations are the primary ressources stored by SAS. SAS also needs to store manifests, so that it can enrich the manifests with the annitations, in order to send a complete manifest (a manifest in which annotations are either referenced or embdded).
+
 --- 
 
 ## Endpoints
