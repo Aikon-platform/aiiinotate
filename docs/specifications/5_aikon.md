@@ -58,7 +58,7 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 
 ### Create / update data
 
-- index all annotations for a manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L197)).
+- index all annotations for a manifest in 1 query ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L197)).
 
 ### Delete data
 
