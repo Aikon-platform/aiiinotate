@@ -37,7 +37,9 @@ GET /annotation/search?uri=$canvasUri
 POST /annotation/populate
 ```
 - import an AnnotationList into SAS
-- POST body: the IIIF AnnotationList```
+- POST body: the IIIF AnnotationList
+
+```
 POST /annotation/create
 ```
 - create an annotation
