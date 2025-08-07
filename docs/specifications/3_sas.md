@@ -76,4 +76,9 @@ DELETE /annotation/destroy/?uri=$annotationUri
 ```
 - `$annotationUri` is the `@id` of the annotation to delete
 
-
+#### Unindex a manifest
+```
+DELETE /manifests/$manifestId
+```
+- `$manifestId` is the short manifest identifier
+- actually I'm not 100% sure it is implemented by SAS but we [would need it](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L769)
