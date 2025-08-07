@@ -23,7 +23,7 @@ GET /search-api/$manifestShortId/search
     - `date`: date ranges
     - `users`: the usrs who edited the annotation
 - if no parameters are supplied, all annotations are returned
-- *example: `https://aikon.enpc.fr/sas/search-api/wit9_man11_anno165/search?q=`*
+- *example: https://aikon.enpc.fr/sas/search-api/wit9_man11_anno165/search?q=*
 
 
 ```
@@ -31,7 +31,7 @@ GET /annotation/search?uri=$canvasUri
 ```
 - show all annotations for a canvas
 - `$canvasUri` is the URI for the canvas we want annotations for
-- *example: `https://aikon.enpc.fr/sas/annotation/search?uri=https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670` shows annotations for canvas `https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670`*
+- *example: https://aikon.enpc.fr/sas/annotation/search?uri=https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670 shows annotations for canvas https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670*
 
 ```
 POST /annotation/populate
