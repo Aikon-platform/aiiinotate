@@ -12,10 +12,11 @@
 
 ## Endpoints
 
+### IIIF search API
+
 ```
 GET /search-api/$manifestShortId/search
 ```
-- IIIF search API URL
 - `$manifestShortId` is the manifest's ID
 - search parameters are [as per the IIIF docs](https://iiif.io/api/search/2.0/#request-1): 
     - `q`: query string, searched in the annotation's textual body or its URI
@@ -25,37 +26,41 @@ GET /search-api/$manifestShortId/search
 - if no parameters are supplied, all annotations are returned
 - *example: https://aikon.enpc.fr/sas/search-api/wit9_man11_anno165/search?q=*
 
+### Show all annotations for a canvas
 
 ```
 GET /annotation/search?uri=$canvasUri
 ```
-- show all annotations for a canvas
 - `$canvasUri` is the URI for the canvas we want annotations for
 - *example: https://aikon.enpc.fr/sas/annotation/search?uri=https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670 shows annotations for canvas https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670*
+
+### Import an AnnotationList into SAS
 
 ```
 POST /annotation/populate
 ```
-- import an AnnotationList into SAS
 - POST body: the IIIF AnnotationList
+
+### Create an annotation
 
 ```
 POST /annotation/create
 ```
-- create an annotation
-- POST body:
+- POST body: IIIF Annotation
+
+### Update an annotation
 
 ```
 POST /annotation/update
 ```
-- update an annotation
 - POST body: IIIF Annotation
     - the annotation's `@id` should point to an annotation that exists in the store
+
+### Delete an annotation
 
 ```
 DELETE /annotation/destroy/?uri=$annotationUri
 ```
-- delete an annotation
 - `$annotationUri` is the `@id` of the annotation to delete
 
 
