@@ -71,6 +71,6 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 ### Other
 
 - annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
-
+- store rectangular annotations (bounding boxes) as well as polygonal annotations
 
 
