@@ -1,0 +1,34 @@
+{
+  "name": "aiiinotate",
+  "version": "1.0.0",
+  "description": "a fast IIIF-compliant annotation server",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aikon-platform/aiiinotate.git"
+  },
+  "keywords": [
+    "annotation-server",
+    "iiif",
+    "annotation",
+    "international-image-interoperability-framework"
+  ],
+  "author": "Aikon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Aikon-platform/aiiinotate/issues"
+  },
+  "homepage": "https://github.com/Aikon-platform/aiiinotate#readme",
+  "imports": {
+    "#src/*.js": "./src/*.js",
+    "#db/*.js": "./src/db/*.js",
+    "#utils/*.js": "./src/utils/*.js"
+  }
+}
