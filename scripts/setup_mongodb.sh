@@ -1,13 +1,13 @@
 #!/bin/env bash
 
 # mongo install guide: https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu
-#NOTE ubuntu install only for now
+
+#NOTE only the mongodb installation is done here. for database creation, see `setup_mongodb_populate.sh`
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "$SCRIPT_DIR/utils.sh";
 
 install_mongodb_ubuntu () {
-    echo_title "INSTALL MONGODB"
 
     sudo apt-get install gnupg curl
 
@@ -47,8 +47,15 @@ install_mongodb_mac () {
 }
 
 if ! command -v mongod ; then
-    if [ "$OS" = "Linux" ]; then install_mongodb_ubuntu;
-    elif [ "$OS" = "Mac" ]; then install_mongodb_mac;
+    echo_title "INSTALL MONGODB"
+
+    if [ "$OS" = "Linux" ]; then
+        install_mongodb_ubuntu;
+        sudo systemctl start mongod;
+    elif [ "$OS" = "Mac" ]; then
+        install_mongodb_mac;
+        brew services start mongodb-community@8.0;
     else echo "Unsupported OS: $OS"; exit 1;
     fi;
+
 fi;

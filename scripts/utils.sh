@@ -6,6 +6,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ROOT_DIR=$( dirname "$SCRIPT_DIR" )
 # src/ directory
 SRC_DIR="$ROOT_DIR/src"
+# .env file
+ENV_FILE="$SRC_DIR/config/.env"
+
 
 color_echo() {
     Color_Off="\033[0m"
@@ -119,6 +122,47 @@ float_comparison () {
     (( $(echo "$expr" |bc -l) ));
 }
 
+# sed replacements in place
+# `sed -i` can't be used in the same way with Linux and Mac: it's `sed -i` on Linux, `sed -i ""` on Mac
+sed_repl_inplace() {
+    sed_expr="$1"
+    file="$2"
+
+    if [ "$OS" = "Linux" ]; then
+        sed -i -e "$sed_expr" "$file"
+    else
+        sed -i "" -e "$sed_expr" "$file"
+    fi
+}
+
+# sudo does not inherit from bash functions so this is a copy of "sed_repl_inplace" with sudo privileges (see: https://stackoverflow.com/a/9448969)
+sudo_sed_repl_inplace() {
+    sed_expr="$1"
+    file="$2"
+
+    if [ "$OS" = "Linux" ]; then
+        [ -n "$SUDO_PSW" ] && echo "$SUDO_PSW" | sudo -S sed -i -e "$sed_expr" "$file" || sudo sed -i -e "$sed_expr" "$file"
+    else
+        [ -n "$SUDO_PSW" ] && echo "$SUDO_PSW" | sudo -S sed -i "" -e "$sed_expr" "$file" || sudo sed -i "" -e "$sed_expr" "$file"
+    fi
+}
+
+# ed replacements to a new file
+sed_repl_newfile() {
+    sed_expr="$1"
+    infile="$2"
+    outfile="$3"
+
+    sed "$sed_expr" "$infile" | tee "$outfile" > /dev/null
+}
+
+sudo_sed_repl_newfile() {
+    sed_expr="$1"
+    infile="$2"
+    outfile="$3"
+
+    sudo sed "$sed_expr" "$infile" | sudo tee "$outfile" > /dev/null
+}
 
 run_script() {
     local script_name="$1"
