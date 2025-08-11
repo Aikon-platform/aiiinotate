@@ -1,7 +1,7 @@
 #!/bin/env bash
 
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source "$SCRIPTS_DIR/utils.sh";
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source "$SCRIPT_DIR/utils.sh";
 
 if ! command -v npm &> /dev/null; then
     echo_title "INSTALL NVM & NODE";

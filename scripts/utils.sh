@@ -1,9 +1,9 @@
 #!/bin/env bash
 
-# scripts/ directory
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+# directory of the current script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # root of the app
-ROOT_DIR=$( dirname "$SCRIPTS_DIR" )
+ROOT_DIR=$( dirname "$SCRIPT_DIR" )
 # src/ directory
 SRC_DIR="$ROOT_DIR/src"
 
@@ -123,14 +123,14 @@ float_comparison () {
 run_script() {
     local script_name="$1"
     local description="$2"
-    local SCRIPTS_DIR=${3:-${SCRIPTS_DIR}}
+    local SCRIPT_DIR=${3:-${SCRIPT_DIR}}
     options=("yes" "no")
 
     color_echo blue "Do you want to run $description?"
     answer=$(printf "%s\n" "${options[@]}" | fzy)
     echo ""
     if [ "$answer" = "yes" ]; then
-        bash "$SCRIPTS_DIR/$script_name" \
+        bash "$SCRIPT_DIR/$script_name" \
         && color_echo green "$description completed successfully" \
         || color_echo red "$description failed with exit code. Continuing..."
     else
