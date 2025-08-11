@@ -30,6 +30,7 @@
   "imports": {
     "#src/*.js": "./src/*.js",
     "#db/*.js": "./src/db/*.js",
+    "#views/*.js": "./src/views/*.js",
     "#utils/*.js": "./src/utils/*.js"
   },
   "dependencies": {
