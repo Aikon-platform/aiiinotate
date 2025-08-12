@@ -1,7 +1,9 @@
 "use strict"
 
-// import Fastify from 'fastify'
+import fastifyMongodb from "@fastify/mongodb";
+
 import routes from '#src/routes.js'
+import loadEnv from "#config/config.js";
 
 // /**
 //  * @type {import('fastify').FastifyInstance}
@@ -21,6 +23,10 @@ import routes from '#src/routes.js'
 //   }
 // }
 
+loadEnv();
+
+console.log(process.env.MONGODB_DB);
+
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
@@ -28,6 +34,10 @@ import routes from '#src/routes.js'
 export default async function start (fastify, options) {
   fastify.logger = true;
   fastify.register(routes);
+
+  // fastify.register(fastifyMongodb, {
+  //   forceClose: true,
+  // })
 
   try {
     fastify.listen({ port: 3000 })
