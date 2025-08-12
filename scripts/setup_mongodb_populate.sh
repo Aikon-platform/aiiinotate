@@ -23,8 +23,8 @@ echo_title "SETUP MONGODB DATABASE";
 
 # transform $MONGODB_FILE_TEMPLATE into $MONGODB_FILE based on the contents of the .env file
 #NOTE : further replacements will need to be done with `sed_repl_inplace` to avoid ovrwriting the contents each time !
-connstring="mongodb://$MONGODB_HOST:$MONGODB_PORT"
+connstring="mongodb://$MONGODB_HOST:$MONGODB_PORT/$MONGODB_DB"
 sed_repl_newfile "s~CONNEXION_STRING~$connstring~g" "$MONGODB_FILE_TEMPLATE" "$MONGODB_FILE"
 
-# run migration
+# run migration (at this point it just tests that we managed to connect)
 mongosh -f "$MONGODB_FILE"
