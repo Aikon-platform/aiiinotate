@@ -2,8 +2,8 @@
 
 import fastifyMongodb from "@fastify/mongodb";
 
-import routes from '#src/routes.js'
-import { loadEnv, config } from "#config/config.js";
+import routes from '#src/routes.js';
+import dbConnector from "#db/connector.js";
 
 // /**
 //  * @type {import('fastify').FastifyInstance}
@@ -23,22 +23,17 @@ import { loadEnv, config } from "#config/config.js";
 //   }
 // }
 
-loadEnv();
-
-console.log(config.mongodbConnString);
-
 /**
  * https://github.com/fastify/fastify-cli?tab=readme-ov-file#start
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
 export default async function start (fastify, options) {
-  fastify.logger = true;
-  fastify.register(routes);
 
-  // fastify.register(fastifyMongodb, {
-  //   forceClose: true,
-  // })
+  fastify.logger = true;
+
+  fastify.register(dbConnector);
+  fastify.register(routes);
 
   try {
     fastify.listen({ port: 3000 })
