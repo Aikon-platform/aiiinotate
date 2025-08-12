@@ -3,7 +3,7 @@
 import fastifyMongodb from "@fastify/mongodb";
 
 import routes from '#src/routes.js'
-import loadEnv from "#config/config.js";
+import { loadEnv, config } from "#config/config.js";
 
 // /**
 //  * @type {import('fastify').FastifyInstance}
@@ -25,9 +25,10 @@ import loadEnv from "#config/config.js";
 
 loadEnv();
 
-console.log(process.env.MONGODB_DB);
+console.log(config.mongodbConnString);
 
 /**
+ * https://github.com/fastify/fastify-cli?tab=readme-ov-file#start
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
