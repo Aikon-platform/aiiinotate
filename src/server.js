@@ -32,6 +32,8 @@ export default async function start (fastify, options) {
 
   fastify.logger = true;
 
+  // load plugins. about plugin order, see:
+  // https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
   fastify.register(dbConnector);
   fastify.register(routes);
 
