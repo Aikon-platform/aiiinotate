@@ -9,10 +9,12 @@ import dbConnector from '#db/connector.js'
 export default async function start (fastify, options) {
   fastify.logger = true
 
-  // load plugins. about plugin order, see:
-  // https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
-  await fastify.register(dbConnector) // necessary to await to be sure the mongo client is connected
-  await fastify.register(routes)
+  // load plugins. about plugin order,
+  // see:
+  //  load a plugin: https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
+  //  guide to plugins: https://fastify.dev/docs/latest/Guides/Plugins-Guide/
+  fastify.register(dbConnector) // necessary to await to be sure the mongo client is connected
+  fastify.register(routes)
 
   console.log(fastify.mongo.db)
 
