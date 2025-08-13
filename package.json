@@ -9,8 +9,12 @@
   },
   "scripts": {
     "start": "fastify start src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint"
   },
+  "pre-commit": [
+    "lint"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Aikon-platform/aiiinotate.git"
@@ -41,5 +45,13 @@
     "dotenv": "^17.2.1",
     "fastify-cli": "^7.4.0",
     "mongodb": "^6.18.0"
+  },
+  "devDependencies": {
+    "@eslint/css": "^0.10.0",
+    "@eslint/js": "^9.33.0",
+    "@eslint/json": "^0.13.1",
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
+    "pre-commit": "^1.2.2"
   }
 }
