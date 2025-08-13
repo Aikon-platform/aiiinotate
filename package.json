@@ -10,7 +10,11 @@
   "scripts": {
     "start": "fastify start src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx eslint"
+    "lint": "npx eslint",
+    "migrate-init": "npx migrate-mongo init",
+    "migrate-make": "npx migrate-mongo create",
+    "migrate-apply": "npx migrate-mongo up",
+    "migrate-revert": "npx migrate-mongo down"
   },
   "pre-commit": [
     "lint"
@@ -44,6 +48,7 @@
     "@fastify/mongodb": "^9.0.2",
     "dotenv": "^17.2.1",
     "fastify-cli": "^7.4.0",
+    "migrate-mongo": "^12.1.3",
     "mongodb": "^6.18.0"
   },
   "devDependencies": {

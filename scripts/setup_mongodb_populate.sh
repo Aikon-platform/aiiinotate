@@ -28,3 +28,5 @@ sed_repl_newfile "s~CONNEXION_STRING~$connstring~g" "$MONGODB_FILE_TEMPLATE" "$M
 
 # run migration (at this point it just tests that we managed to connect)
 mongosh -f "$MONGODB_FILE"
+
+mongosh -f "$SCRIPT_DIR/mongodb_structure.js"
