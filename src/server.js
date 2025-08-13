@@ -1,5 +1,9 @@
-import routes from '#src/routes.js'
-import dbConnector from '#db/connector.js'
+import routes from '#src/routes.js';
+import dbConnector from '#db/connector.js';
+import annotation from "#annotation/annotation.js";
+
+import app from "#src/app.js";
+
 
 /**
  * https://github.com/fastify/fastify-cli?tab=readme-ov-file#start
@@ -7,21 +11,29 @@ import dbConnector from '#db/connector.js'
  * @param {object} options
  */
 export default async function start (fastify, options) {
-  fastify.logger = true
+  // fastify = await app(fastify);
 
-  // load plugins. about plugin order,
+  // config
+  fastify.logger = true;
+
+  // load plugins
   // see:
   //  load a plugin: https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
   //  guide to plugins: https://fastify.dev/docs/latest/Guides/Plugins-Guide/
-  fastify.register(dbConnector) // necessary to await to be sure the mongo client is connected
-  fastify.register(routes)
+  //  plugins encapsulation: https://fastify.dev/docs/latest/Guides/Plugins-Guide/#how-to-handle-encapsulation-and-distribution
+  fastify.register(dbConnector);
+  await fastify.after();  // `dbConnector` is async so we need to wait for completion
+  fastify.register(routes);
+  fastify.register(annotation);
+  await fastify.after();
 
-  console.log(fastify.mongo.db)
+  // console.log("xxx", server)
+  // console.log(">>>", server.mongo.db)
 
-  fastify.listen({ port: 3000 }, function (err, address) {
-    if (err) {
-      fastify.log.error(err)
-      process.exit(1)
-    }
-  })
+  try {
+    fastify.listen({ port: 3000 })
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
 };

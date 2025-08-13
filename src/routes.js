@@ -9,5 +9,4 @@ async function routes (fastify, options) {
   })
 }
 
-// ESM
 export default routes
