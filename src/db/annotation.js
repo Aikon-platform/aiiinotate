@@ -1,82 +1,11 @@
-// ACTUALLY I SHOULD SWITCH TO AN INTERNAL ANNOTATION SCHEMA:
-// we are to support 3.0 and 2.x, so we will aldready need data
-// conversion in one of the 2 cases. also, it doesn't really make sense
-// defining a schema that only supports part of the w3c / iiif annotation models.
-// the final schema should contain the maximum amount of data to minimize runtime
-// data transforms
-
-const annotationSchema = {
-  title: "Annotation object validation",
-  required: [ "id", "target" ],  //NOTE better determine what is required baed on W3C annotations
-  properties: {
-    // NOTE:
-    // this is a validator following the IIIF 3.0 specification.
-    // an internal data format could have the keys:
-    // `{id, target, motivation, bodyId, bodyType, bodyValue, bodyFormat}`
-    // and then serialize everything.
-    id: {
-      // IIIF 3.0: a.id
-      //  - the ID is auto-defined by aiiinotate and is the ID of the whole annotation
-      //  - do we store the full URL or just the relevant section for quicker lookup ?
-      //
-      bsonType: "string",
-      description: "string ID of the resource"
-    },
-    target: {
-        // IIIF 3.0: a.target
-        // TBD: how do we target that ?
-        //  - simple URL or ImageApiSelector ? https://github.com/Aikon-platform/aiiinotate/blob/main/docs/specifications/1_iiif_apis.md#imageapiselector
-        //  - what about polygon selectors ?
-    },
-    motivation: {
-      // IIIF 3.0: a.motivation
-      bsonType: ["string"],
-      enum: [ "painting", "supplementing" ],  // TBD regex validation cost ??
-      description: "defines how the annotation is handled see: https://iiif.io/api/presentation/3.0/#35-values"
-    },
-    type: {
-      // IIIF 3.0: a.type
-      bsonType: "string",
-      enum: [ "Annotation" ],
-      description: "defines this resource as an annotation"
-    },
-    body: {
-      // IIIF 3.0: a.body
-      "bsonType": "object",
-      "properties": {
-          id: {
-            // IIIF 3.0: a.body.id
-            bsonType: "string",
-            description: "if the annotation is referenced, URL of the content. otherwise, URL ID for the annotation",
-          },
-          type: {
-            // IIIF 3.0: a.body.type
-            bsonType: "string",
-            type: [ "Dataset", "Image", "Video", "Sound", "Text" ],  // w3c allowed types
-            description: "type of the annotation",
-          },
-          value: {
-            // IIIF 3.0: a.body.value
-            bsonType: "string",
-            description: "content ofthe annotation, if it is embedded",
-          },
-          format: {
-            // IIIF 3.0: a.body.format
-            bsonType: "string",
-            description: "mimetype of the annotation",
-          }
-      }
-    }
-  }
-}
+import { annotationSchema } from '#annotation/annotationInternal.js';
 
 /**
- *
- * @param {} db
- * @param {*} options
+ * @param {import("mongodb").Db} db
+ * @param {object} options
  */
-function createCollection(db, options) {
-    db.createCollection("annotation", {
+async function createCollection(db, options) {
+    return db.createCollection("annotation", {
         validator: {
             $jsonSchema: annotationSchema
         }
@@ -84,10 +13,10 @@ function createCollection(db, options) {
 }
 
 /**
- *
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-function annotation(fastify, options) {
-    createCollection(fastify.db);
+async function annotation(fastify, options, done) {
+  await createCollection(fastify.db);
+  done();
 }

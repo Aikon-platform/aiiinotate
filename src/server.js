@@ -1,27 +1,5 @@
-"use strict"
-
-import fastifyMongodb from "@fastify/mongodb";
-
 import routes from '#src/routes.js';
 import dbConnector from "#db/connector.js";
-
-// /**
-//  * @type {import('fastify').FastifyInstance}
-//  */
-// const fastify = Fastify({
-//   logger: true
-// });
-
-// fastify.register(routes);
-
-// const start = async () => {
-//   try {
-//     fastify.listen({ port: 3000 })
-//   } catch (err) {
-//     fastify.log.error(err);
-//     process.exit(1);
-//   }
-// }
 
 /**
  * https://github.com/fastify/fastify-cli?tab=readme-ov-file#start
@@ -34,13 +12,15 @@ export default async function start (fastify, options) {
 
   // load plugins. about plugin order, see:
   // https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
-  fastify.register(dbConnector);
-  fastify.register(routes);
+  await fastify.register(dbConnector);  // necessary to await to be sure the mongo client is connected
+  await fastify.register(routes);
 
-  try {
-    fastify.listen({ port: 3000 })
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
+  console.log(fastify.mongo.db)
+
+  fastify.listen({ port: 3000 }, function (err, address) {
+    if (err) {
+      fastify.log.error(err);
+      process.exit(1);
+    }
+  })
 };
