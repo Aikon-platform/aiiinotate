@@ -2,7 +2,7 @@
  * create the `annotation` collection with the proper schema
  */
 
-import { annotationsSchema } from '#annotations/annotationModel.js';
+import { annotationsSchema } from '#annotations/annotationsModel.js';
 
 const collectionName = "annotations";
 
