@@ -9,7 +9,7 @@ const dateTimeSchema = {
   description: "timesamp. should be in 'YYYY-MM-DD(THH:MM:SS?Z?)', eg: '2025-03-19T14:38:38'"
 }
 
-const annotationSchema = {
+const annotationsSchema = {
   $jsonSchema: {
     title: 'Annotation object validation',
     required: ['id', 'target'], // NOTE better determine what is required baed on W3C annotations
@@ -63,25 +63,34 @@ const annotationSchema = {
 
 /**
  * @param {Db} db
- * @param {object} annotation: annotation, structure following the `annotationSchema`
+ * @param {object} annotation: annotation, structure following the `annotationsSchema`
  */
-function annotationInsert(db, annotation) {
+async function annotationsInsert(db, annotation) {
   const annotations = db.annotations;
-
-  const result = annotations.insert(annotation);
+  const result = await annotations.insertOne(annotation);
+  return result.insertedId;
 }
 
 /**
  * @param {Db} db
- * @param {object[]} annotationArray: list of annotations, following the `annotationSchema`
+ * @param {object[]} annotationArray: list of annotations, following the `annotationsSchema`
+ * @returns {number} number of inserted ids
  */
-function annotationInsertMany(db, annotationArray) {
-
+async function annotationsInsertMany(db, annotationArray) {
+  const annotations = db.annotations;
+  try {
+    const result = await annotations.insertMany(annotationArray);
+    return result.insertedCount;
+  } catch (e) {
+    console.log("error inserting", e)
+  }
 }
 
 // TBD
-function annotationRead(db, filter) { }
+function annotationsRead(db, filter) { }
 
 export {
-  annotationSchema
+  annotationsSchema,
+  annotationsInsert,
+  annotationsInsertMany,
 }

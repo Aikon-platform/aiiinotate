@@ -1,6 +1,6 @@
 import fastifyPlugin from 'fastify-plugin'
 
-import { annotationSchema } from '#annotation/annotationModel.js'
+import { annotationsSchema } from '#annotation/annotationModel.js'
 
 const collectionName = "annotations";
 
@@ -8,7 +8,7 @@ const collectionName = "annotations";
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-async function annotation(fastify, options) {
+async function annotations(fastify, options) {
   const db = fastify.mongo.db;
 
   // const names = db.listCollections({}, { nameOnly: true })
@@ -21,8 +21,7 @@ async function annotation(fastify, options) {
   // console.log("xxx", typeof(collNames), Array.isArray(collNames))
   // console.log("***", collNames.includes(collectionName))
 
-
   return
 }
 
-export default fastifyPlugin(annotation)
+export default fastifyPlugin(annotations)

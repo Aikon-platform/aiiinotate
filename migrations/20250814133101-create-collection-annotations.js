@@ -2,7 +2,7 @@
  * create the `annotation` collection with the proper schema
  */
 
-import { annotationSchema } from '#annotation/annotationModel.js';
+import { annotationsSchema } from '#annotation/annotationModel.js';
 
 const collectionName = "annotations";
 
@@ -14,7 +14,7 @@ const collectionName = "annotations";
 export const up = async (db, client) => {
     // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
     db.createCollection(collectionName, {
-        validator: annotationSchema,
+        validator: annotationsSchema,
         validationLevel: "strict",
     });
 };

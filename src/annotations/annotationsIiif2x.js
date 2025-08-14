@@ -72,3 +72,8 @@ function fromIiif2Annotation(annotation) {
 function fromIiif2AnnotationList(annotationList) {
   return annotationList.resources.map(fromIiif2Annotation)
 }
+
+export {
+  fromIiif2Annotation,
+  fromIiif2AnnotationList
+}
