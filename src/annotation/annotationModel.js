@@ -1,3 +1,12 @@
+
+// datetime timestamp following RFC3339 section 5.6. see: https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
+// NOTE: full-date format is defined with an offset (that we don't have): YYYY-MM-DDTHH:MM:SS + Z + time-offset. is that a problem ?
+const dateTimeSchema = {
+  bsonTme: "string",
+  format: "date-time",
+  description: "timesamp in 'YYYY-MM-DDTHH:MM:SS', eg: '2025-03-19T14:38:38'"
+}
+
 const annotationSchema = {
   $jsonSchema: {
     title: 'Annotation object validation',
@@ -15,10 +24,15 @@ const annotationSchema = {
       },
       motivation: {
         // IIIF 3.0: a.motivation
+        // NOTE : 3.0 allows only "painting", "supplementing", 2.0 allows "sc:painting", "oa:commenting" and maybe others
+        //    => we will need to do data conversion for those values as well
         bsonType: ['string'],
-        enum: ['painting', 'supplementing'], // TBD regex validation cost ??
         description: 'defines how the annotation is handled see: https://iiif.io/api/presentation/3.0/#35-values'
       },
+      // IIIF 2.0: dcterms:created
+      created: dateTimeSchema,
+      // IIIF 2.0: dcterms:modified
+      modified: dateTimeSchema,
       bodyId: {
         // IIIF 3.0: a.body.id
         bsonType: 'string',
@@ -26,6 +40,7 @@ const annotationSchema = {
       },
       bodyType: {
         // IIIF 3.0: a.body.type
+        //  NOTE : 2.0 allows cd:terms, 3.0 allows only the values defined below => do data conversion
         bsonType: 'string',
         enum: ['Dataset', 'Image', 'Video', 'Sound', 'Text'], // w3c allowed types
         description: 'type of the annotation'
