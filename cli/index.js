@@ -3,7 +3,7 @@
  * usage: npm run cli import -- [args] [opts]
  */
 
-import { Command, Option, Argument } from "commander";
+import { Command } from "commander";
 
 import { makeImportCommand } from "#cli/import.js";
 
