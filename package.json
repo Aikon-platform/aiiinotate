@@ -11,11 +11,11 @@
     "start": "fastify start src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint",
+    "cli": "node cli/index.js",
     "migrate-init": "npx migrate-mongo init",
     "migrate-make": "npx migrate-mongo create",
     "migrate-apply": "npx migrate-mongo up",
-    "migrate-revert": "npx migrate-mongo down",
-    "cli": "node cli/index.js"
+    "migrate-revert": "npx migrate-mongo down"
   },
   "pre-commit": [
     "lint"
@@ -37,6 +37,7 @@
   },
   "homepage": "https://github.com/Aikon-platform/aiiinotate#readme",
   "imports": {
+    "#cli/*.js": "./cli/*.js",
     "#src/*.js": "./src/*.js",
     "#db/*.js": "./src/db/*.js",
     "#views/*.js": "./src/views/*.js",
