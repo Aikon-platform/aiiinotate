@@ -14,7 +14,8 @@
     "migrate-init": "npx migrate-mongo init",
     "migrate-make": "npx migrate-mongo create",
     "migrate-apply": "npx migrate-mongo up",
-    "migrate-revert": "npx migrate-mongo down"
+    "migrate-revert": "npx migrate-mongo down",
+    "cli": "node cli/index.js"
   },
   "pre-commit": [
     "lint"
