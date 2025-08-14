@@ -28,7 +28,10 @@ const annotationsSchema = {
         // IIIF 3.0: a.motivation
         // NOTE : 3.0 allows only "painting", "supplementing", 2.0 allows "sc:painting", "oa:commenting" and maybe others
         //    => we will need to do data conversion for those values as well
-        bsonType: ['string'],
+        bsonType: 'array',
+        items: {
+          type: "string"
+        },
         description: 'defines how the annotation is handled see: https://iiif.io/api/presentation/3.0/#35-values'
       },
       // IIIF 2.0: dcterms:created
