@@ -1,6 +1,6 @@
 // IIIF Presentation API 2.x to internal `annotations` model data converters
 
-import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotation/utils.js";
+import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotations/utils.js";
 
 /**
  * @example
@@ -40,11 +40,11 @@ import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotation/u
 function fromIiif2Annotation(annotation) {
   let out = {
     "id": annotation["@id"],
-    "target": annotation.target,
+    "target": annotation.on,
     "motivation": [],
   };
-  out = addKeyValueToObjIfHasKey(annotation, out, "dcterms:created");
-  out = addKeyValueToObjIfHasKey(annotation, out, "dcterms:modified");
+  out = addKeyValueToObjIfHasKey(annotation, out, "dcterms:created", "created");
+  out = addKeyValueToObjIfHasKey(annotation, out, "dcterms:modified", "modified");
   if ( objectHasKey(annotation, "motivation") ) {
     out.motivation = Array.isArray(annotation.motivation)
       ? annotation.motivation
@@ -63,6 +63,7 @@ function fromIiif2Annotation(annotation) {
       out.bodyValue = resource.chars
     }
   }
+  return out;
 }
 
 /**

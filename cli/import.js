@@ -2,8 +2,10 @@ import path from "path";
 import fs from "fs";
 
 import { Command, Option, Argument } from "commander";
-import { createServer } from "https";
 
+import mongoClient from "#cli/mongoClient.js";
+import { fromIiif2AnnotationList } from "#annotations/annotationsIiif2x.js";
+import { annotationsInsertMany } from "#annotations/annotationsModel.js";
 
 
 const cwd = process.cwd();  // directory the script is run from
@@ -70,13 +72,30 @@ const notImplementedExit = (method) => {
   process.exit(1);
 }
 
+const parseNumber = (x) => Number(x);
+
 ////////////////////////////////////////
 
 async function importAnnotationList(fileArr, iiifVersion) {
+  // TODO: define client,d at top level of CLI and pass it to subcommands.
+  const {client, db} = await mongoClient();
+
   for (const file of fileArr) {
-    let annotationList = await fileRead(file);
-    console.log(annotationList)
+    let annotationList = JSON.parse(await fileRead(file));
+
+    if ( iiifVersion === 2 ) {
+      annotationList = fromIiif2AnnotationList(annotationList);
+      console.log(annotationList);
+      const result = await annotationsInsertMany(db, annotationList);
+
+    } else {
+      console.log("ERROR: annotation list conversion not yet implemented for IIIF version", iiifVersion);
+    }
+
   }
+
+  client.close();
+
   //TOOD
 }
 
@@ -139,6 +158,7 @@ function makeImportCommand() {
   const versionOpt =
     new Option("-i, --iiif-version <version>", "IIIF version")
       .choices(["2", "3"])
+      .argParser(parseNumber)
       .makeOptionMandatory();
 
   const fileOpt =

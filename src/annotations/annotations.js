@@ -1,6 +1,6 @@
 import fastifyPlugin from 'fastify-plugin'
 
-import { annotationsSchema } from '#annotation/annotationModel.js'
+import { annotationsSchema } from '#annotations/annotationModel.js'
 
 const collectionName = "annotations";
 

@@ -4,8 +4,6 @@
 
 import dotenvConfig from "#config/config.js"
 
-console.log(dotenvConfig.mongodbConnString)
-
 const config = {
   mongodb: {
     // TODO Change (or review) the url to your MongoDB:

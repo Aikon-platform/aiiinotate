@@ -1,6 +1,6 @@
 import routes from '#src/routes.js';
 import dbConnector from '#db/connector.js';
-import annotation from "#annotation/annotation.js";
+import annotation from "#annotations/annotation.js";
 
 import app from "#src/app.js";
 

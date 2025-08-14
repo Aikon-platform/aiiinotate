@@ -77,7 +77,7 @@ async function annotationsInsert(db, annotation) {
  * @returns {number} number of inserted ids
  */
 async function annotationsInsertMany(db, annotationArray) {
-  const annotations = db.annotations;
+  const annotations = db.collection("annotations");
   try {
     const result = await annotations.insertMany(annotationArray);
     return result.insertedCount;
