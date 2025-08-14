@@ -1,10 +1,12 @@
+/** @typedef {import("mongodb").Db} Db */
 
-// datetime timestamp following RFC3339 section 5.6. see: https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
+
+// datetime timestamp should follow RFC3339 section 5.6. see: https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
+// we don't add regex validation for performance reasons.
 // NOTE: full-date format is defined with an offset (that we don't have): YYYY-MM-DDTHH:MM:SS + Z + time-offset. is that a problem ?
 const dateTimeSchema = {
-  bsonTme: "string",
-  format: "date-time",
-  description: "timesamp in 'YYYY-MM-DDTHH:MM:SS', eg: '2025-03-19T14:38:38'"
+  bsonType: "string",
+  description: "timesamp. should be in 'YYYY-MM-DD(THH:MM:SS?Z?)', eg: '2025-03-19T14:38:38'"
 }
 
 const annotationSchema = {
@@ -58,6 +60,27 @@ const annotationSchema = {
     }
   }
 }
+
+/**
+ * @param {Db} db
+ * @param {object} annotation: annotation, structure following the `annotationSchema`
+ */
+function annotationInsert(db, annotation) {
+  const annotations = db.annotations;
+
+  const result = annotations.insert(annotation);
+}
+
+/**
+ * @param {Db} db
+ * @param {object[]} annotationArray: list of annotations, following the `annotationSchema`
+ */
+function annotationInsertMany(db, annotationArray) {
+
+}
+
+// TBD
+function annotationRead(db, filter) { }
 
 export {
   annotationSchema

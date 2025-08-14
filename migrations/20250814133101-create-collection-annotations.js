@@ -4,11 +4,11 @@
 
 import { annotationSchema } from '#annotation/annotationModel.js';
 
-const collectionName = "annotation";
+const collectionName = "annotations";
 
 /**
- * @param db {import('mongodb').Db}
- * @param client {import('mongodb').MongoClient}
+ * @param {import('mongodb').Db} db
+ * @param {import('mongodb').MongoClient} client
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
@@ -20,8 +20,8 @@ export const up = async (db, client) => {
 };
 
 /**
- * @param db {import('mongodb').Db}
- * @param client {import('mongodb').MongoClient}
+ * @param {import('mongodb').Db} db
+ * @param {import('mongodb').MongoClient} client
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
@@ -29,4 +29,4 @@ export const down = async (db, client) => {
     // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: false}});
     const collection = db.collection(collectionName);
     await collection.drop()
-};
+}

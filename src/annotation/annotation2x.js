@@ -1,4 +1,4 @@
-// IIIF Presentation API 2.x to internal model data converters
+// IIIF Presentation API 2.x to internal `annotations` model data converters
 
 import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotation/utils.js";
 
@@ -37,7 +37,7 @@ import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotation/u
  * @param {object} annotation
  * @returns {object}
  */
-function annotationToModel(annotation) {
+function fromIiif2Annotation(annotation) {
   let out = {
     "id": annotation["@id"],
     "target": annotation.target,
@@ -63,13 +63,12 @@ function annotationToModel(annotation) {
       out.bodyValue = resource.chars
     }
   }
-  // TODO motivation
 }
 
 /**
  * @param {object} annotationList
  * @returns {object[]}
  */
-function annotationListToModel(annotationList) {
-  return annotationList.resources.map(annotationToModel)
+function fromIiif2AnnotationList(annotationList) {
+  return annotationList.resources.map(fromIiif2Annotation)
 }
