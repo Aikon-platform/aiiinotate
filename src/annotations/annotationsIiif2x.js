@@ -2,6 +2,26 @@
 
 import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotations/utils.js";
 
+const dcTypesToWebAnnotationTypes = (val) => {
+  const converter = {
+    "text": "Text",
+    "image": "Image",
+    "sound": "Sound",
+    "dataset": "Dataset",
+    // valuies below are not supported
+    // "software": "",
+    // "interactive":,
+    // "event":,
+    // "physical object"
+  }
+  val = val.replace("dctypes:", "").toLocaleLowerCase();
+  try {
+    return converter[val];
+  } catch (err) {
+    console.error(`dcTypesToWebAnnotationTypes: no converter for value '${val}'`)
+  }
+}
+
 /**
  * @example
  * x = {
@@ -53,8 +73,11 @@ function fromIiif2Annotation(annotation) {
   if ( objectHasKey(annotation, "resource") ) {
     const resource = annotation.resource;  // source
     out = addKeyValueToObjIfHasKey(resource, out, "@id", "bodyId");
-    out = addKeyValueToObjIfHasKey(resource, out, "@type", "bodyType");
     out = addKeyValueToObjIfHasKey(resource, out, "format", "bodyFormat");
+    if ( objectHasKey(resource, "@type") ) {
+      const bodyType = dcTypesToWebAnnotationTypes(resource["@type"]);
+      out.bodyType = bodyType;
+    }
     if (
       objectHasKey(resource, "chars")
       && !(isNullish(resource.chars))

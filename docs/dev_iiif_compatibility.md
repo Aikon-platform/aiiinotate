@@ -30,3 +30,14 @@ In an annotation, the `motivation` field is a `string[]` array that accepts all 
         - if WA values are in the DB, they are kept as is
         - if OA values are in the DB, they are converted to `painting` (if `sc:painting` is in the array of motivations stored) or `commenting` otherwise.
 
+## DCTypes and the `body.type` attribute
+
+### Problem
+
+- WA allows : `Dataset`, `Image`, `Video`, `Sound`, `Text`
+- OA allows : `text`, `image`, `sound`, `dataset`, `software`, `interactive`, `event`, `physical`, `object`
+- In IIIF 2.x, values are prefixed by `dctypes:`: `dctypes:text`.
+
+### Solution
+
+Since there is a close mapping between the two, we convert to WA allowed types before saving to database.
