@@ -7,7 +7,7 @@ const cwd = process.cwd();  // directory the script is run from
 const fileOk = (f) =>
   fs.promises.access(f, fs.constants.R_OK)
     .then(() =>  true)
-    .catch((err) => {
+    .catch(() => {
       console.log("file does not exist or could not be read: ", f);
       return false
     });
@@ -19,7 +19,7 @@ const fileOk = (f) =>
 const fileRead = (f) =>
   fs.promises.readFile(f, { encoding: 'utf8' })
     .then(data => data)
-    .catch((err) => {
+    .catch(() => {
       console.log("error reading file: ", f);
     });
 
