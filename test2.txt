@@ -1,0 +1,14 @@
+./src/app.test.js
+./src/annotations/annotationsModel.js
+./src/annotations/utils.js
+./src/annotations/annotationsIiif2x.js
+./src/annotations/annotations.js
+./src/annotations/annotationsRoutes.js
+./src/annotations/annotationsIiif3x.js
+./src/routes.js
+./src/app.js
+./src/server.js
+./src/db/connector.js
+./src/config/config.js
+./src/config/.env.template
+./src/config/.env
