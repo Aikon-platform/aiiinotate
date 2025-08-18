@@ -1,11 +1,16 @@
 import fastifyPlugin from 'fastify-plugin'
 
+import routes from "#annotations/routes.js";
+
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
 async function annotations(fastify, options) {
   const db = fastify.mongo.db;
+  const namespace = "annotations";
+
+  fastify.register(routes, { namespace });
 
   // const names = db.listCollections({}, { nameOnly: true })
   // console.log(names)

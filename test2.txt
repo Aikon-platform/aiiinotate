@@ -3,7 +3,7 @@
 ./src/annotations/utils.js
 ./src/annotations/annotationsIiif2x.js
 ./src/annotations/annotations.js
-./src/annotations/annotationsRoutes.js
+./src/annotations/routes.js
 ./src/annotations/annotationsIiif3x.js
 ./src/routes.js
 ./src/app.js
