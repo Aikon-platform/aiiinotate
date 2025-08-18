@@ -12,7 +12,7 @@ const dateTimeSchema = {
 const annotationsSchema = {
   $jsonSchema: {
     title: 'Annotation object validation',
-    required: ['id', 'target'], // NOTE better determine what is required baed on W3C annotations
+    required: ['id', 'target', 'motivation'], // NOTE better determine what is required baed on W3C annotations
     properties: {
       id: {
         // a.id
@@ -80,6 +80,7 @@ async function annotationsInsert(db, annotation) {
  * @returns {number} number of inserted ids
  */
 async function annotationsInsertMany(db, annotationArray) {
+  console.log(annotationArray);
   const annotations = db.collection("annotations");
   try {
     const result = await annotations.insertMany(annotationArray);

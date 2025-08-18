@@ -1,9 +1,5 @@
 import fastifyPlugin from 'fastify-plugin'
 
-import { annotationsSchema } from '#annotations/annotationModel.js'
-
-const collectionName = "annotations";
-
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options

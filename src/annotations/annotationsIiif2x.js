@@ -1,6 +1,7 @@
 // IIIF Presentation API 2.x to internal `annotations` model data converters
+import { v4 as uuidv4 } from "uuid"
 
-import { objectHasKey, addKeyValueToObjIfHasKey, isNullish } from "#annotations/utils.js";
+import { objectHasKey, addKeyValueToObjIfHasKey, isNullish, getHash } from "#annotations/utils.js";
 
 const dcTypesToWebAnnotationTypes = (val) => {
   const converter = {
@@ -20,6 +21,66 @@ const dcTypesToWebAnnotationTypes = (val) => {
   } catch (err) {
     console.error(`dcTypesToWebAnnotationTypes: no converter for value '${val}'`)
   }
+}
+
+/**
+ * get the `on` of an annotation.
+ * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L147
+ * @param {object} annotation
+ * @returns {string}
+ */
+const getAnnotationTarget = (annotation) => {
+  const target = annotation.on;  // either string or SpecificResource
+  if ( typeof(target) === "string" ) {
+    // remove the fragment if necesary to get the full Canvas Id
+    const hashIdx = target.indexOf("#");
+    return hashIdx === -1
+      ? target
+      : target.substring(0, hashIdx);
+  } else {
+    // it's a SpecificResource => get the full image's id.
+    return target.get("full")["@id"];
+  }
+}
+
+/**
+ * generate the annotation's ID from its `@id` key (if defined)
+ * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
+ */
+const makeAnnotationId = (annotation) => {
+  let annotationId = annotation["@id"];
+  if ( isNullish(annotationId) ) {
+    annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
+    console.log(annotationId);
+  }
+  return annotationId
+}
+
+/**
+ * convert the annotation to a SpecificResource
+ * adapted from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
+ */
+const makeTarget = (annotation) => {
+  const target = annotation.on;  // either string or SpecificResource
+  let specificResource
+  if ( typeof(target) === "string" ) {
+    let [full, fragment] = target.split("#");
+    specificResource = {
+      full: full,
+      selector: {
+        type: "FragmentSelector",
+        value: fragment
+      }
+    }
+  } else {
+    //TODO : implement if input is a `SpecificResource`.
+    // in SAS, specificresources are stored as is, but this will be a problem
+    // for compability between IIIF 3 and IIIF 3, since they use different
+    // standards for SpecificResources
+    console.log(target);
+    throw new Error(`makeTarget not implemented if 'annotation.on' is a 'SpecificResource'`)
+  }
+  return specificResource
 }
 
 /**
@@ -58,9 +119,10 @@ const dcTypesToWebAnnotationTypes = (val) => {
  * @returns {object}
  */
 function fromIiif2Annotation(annotation) {
+  // how AnnotationLists are imported into SAS : https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L67
   let out = {
-    "id": annotation["@id"],
-    "target": annotation.on,
+    "id": makeAnnotationId(annotation),
+    "target": makeTarget(annotation),  // NOTE: won't work if `annotation.on` is not a string !
     "motivation": [],
   };
   out = addKeyValueToObjIfHasKey(annotation, out, "dcterms:created", "created");

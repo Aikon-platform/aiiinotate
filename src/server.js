@@ -1,6 +1,6 @@
 import routes from '#src/routes.js';
 import dbConnector from '#db/connector.js';
-import annotation from "#annotations/annotation.js";
+import annotations from "#annotations/annotations.js";
 
 import app from "#src/app.js";
 
@@ -24,14 +24,14 @@ export default async function start (fastify, options) {
   fastify.register(dbConnector);
   await fastify.after();  // `dbConnector` is async so we need to wait for completion
   fastify.register(routes);
-  fastify.register(annotation);
+  fastify.register(annotations);
   await fastify.after();
 
   // console.log("xxx", server)
   // console.log(">>>", server.mongo.db)
 
   try {
-    fastify.listen({ port: 3000 })
+    fastify.listen({ port: process.env.APP_PORT })
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
