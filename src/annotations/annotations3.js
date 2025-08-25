@@ -1,4 +1,4 @@
-import AnnotationsAbstract from "#annotations/annotationsAbstract";
+import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 
 /**
  * @extends {AnnotationsAbstract}
@@ -7,12 +7,15 @@ class Annnotations3 extends AnnotationsAbstract {
   /**
    * @param {import("mongodb").Db} db
    * @param {import("mongodb").MongoClient} client
+   * @param {import("mongodb").Collection} annotationsCollection
    */
-  constructor(db, client) {
-    super(db, client);
+  constructor(client, db, annotationsCollection) {
+    super(client, db, annotationsCollection);
   }
 
 }
+
+export default Annnotations3;
 
 // /**
 //  * JSON schema for IIIF 3.x

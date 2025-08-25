@@ -1,7 +1,11 @@
-// IIIF Presentation API 2.x to internal `annotations` model data converters
+/**
+ * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
+ * exposes an `Annnotations2` class that should contain everything you need
+ */
+
 import { v4 as uuidv4 } from "uuid"
 
-import AnnotationsAbstract from "#annotations/annotationsAbstract";
+import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { objectHasKey, addKeyValueToObjIfHasKey, isNullish, getHash } from "#annotations/utils.js";
 
 /**
@@ -68,9 +72,10 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * @param {import("mongodb").Db} db
    * @param {import("mongodb").MongoClient} client
+   * @param {import("mongodb").Collection} annotationsCollection
    */
-  constructor(db, client) {
-    super(db, client);
+  constructor(client, db, annotationsCollection) {
+    super(client, db, annotationsCollection);
   }
 
   /**
@@ -120,12 +125,18 @@ class Annnotations2 extends AnnotationsAbstract {
 
     /** @param {object} annotation */
     async insertOne(annotation) {
-      //TODO
+      this.errorMessage(this.insertOne, "not implemented")
     }
 
     /** @param {object[]} annotationArray */
     async insertMany(annotationArray) {
-      //TODO
+      try {
+        const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
+        return resultCursor.insertedIds;
+      } catch (e) {
+        console.log(e);
+        throw e;  // TODO polish, this is a bit brutal currently.
+      }
     }
 
     /**
@@ -136,7 +147,6 @@ class Annnotations2 extends AnnotationsAbstract {
       const annotationArray = this.cleanAnnotationList(annotationList);
       this.insertMany(annotationArray);
     }
-
 }
 
 export default Annnotations2;

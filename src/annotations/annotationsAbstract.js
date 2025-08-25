@@ -5,12 +5,17 @@ import { mongodb } from "@fastify/mongodb";
 
 class AnnotationsAbstract {
   /**
+   * NOTE: async constructors are NOT ALLOWED in JS, so be sure that
+   * all arguments are passed as resolved objects, NOT AS PROMISES.
+   *
    * @param {import("mongodb").Db} db
    * @param {import("mongodb").MongoClient} client
+   * @param {import("mongodb").Collection} annotationsCollection
    */
-  constructor(db, client) {
-    this.db = db;
+  constructor(client, db, annotationsCollection) {
     this.client = client;
+    this.db = db;
+    this.annotationsCollection = annotationsCollection;
   }
 
   /** @returns {string} */
@@ -36,15 +41,15 @@ class AnnotationsAbstract {
   }
 
   async insertOne(annotation) {
-    throw new Error("`AnnotationsAbstract.insertOne` is not implemented")
+    this.errorMessage(this.insertOne, "not implemented")
   }
 
   async insertMany(annotationArray) {
-    throw new Error("`AnnotationsAbstract.insertMany` is not implemented")
+    this.errorMessage(this.insertOne, "not implemented")
   }
 
   async read(filter) {
-    throw new Error("`AnnotationsAbstract.read` is not implemented")
+    this.errorMessage(this.insertOne, "not implemented")
   }
 }
 
