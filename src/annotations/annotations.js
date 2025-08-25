@@ -13,8 +13,7 @@ async function annotations(fastify, options) {
 
   const annotations2 = new Annotations2(
     fastify.mongo.client,
-    db,
-    db.collection("annotations2")
+    db
   );
 
   fastify.register(routes, { namespace, annotations2 });

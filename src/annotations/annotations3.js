@@ -5,12 +5,11 @@ import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
  */
 class Annnotations3 extends AnnotationsAbstract {
   /**
-   * @param {import("mongodb").Db} db
    * @param {import("mongodb").MongoClient} client
-   * @param {import("mongodb").Collection} annotationsCollection
+   * @param {import("mongodb").Db} db
    */
-  constructor(client, db, annotationsCollection) {
-    super(client, db, annotationsCollection);
+  constructor(client, db) {
+    super(client, db, db.collection("annotations3"));
   }
 
 }

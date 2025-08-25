@@ -90,8 +90,7 @@ async function action(dataType, options, command, mongoClient) {
 
   const annotations2 = new Annotations2(
     mongoClient,
-    mongoClient.db(),
-    mongoClient.db().collection("annotations2")
+    mongoClient.db()
   );
 
   // run
