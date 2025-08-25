@@ -1,6 +1,3 @@
-/** @typedef {import("mongodb").Db} Db */
-
-
 // datetime timestamp should follow RFC3339 section 5.6. see: https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
 // we don't add regex validation for performance reasons.
 // NOTE: full-date format is defined with an offset (that we don't have): YYYY-MM-DDTHH:MM:SS + Z + time-offset. is that a problem ?
@@ -9,6 +6,7 @@ const dateTimeSchema = {
   description: "timesamp. should be in 'YYYY-MM-DD(THH:MM:SS?Z?)', eg: '2025-03-19T14:38:38'"
 }
 
+/** @deprecated UNUSED old schema internal to store annotations. */
 const annotationsSchema = {
   $jsonSchema: {
     title: 'Annotation object validation',
@@ -65,8 +63,9 @@ const annotationsSchema = {
 }
 
 /**
+ * @deprecated
  * @param {Db} db
- * @param {object} annotation: annotation, structure following the `annotationsSchema`
+ * @param {object} annotation: annotation to insert
  */
 async function annotationsInsert(db, annotation) {
   const annotations = db.annotations;
@@ -75,8 +74,9 @@ async function annotationsInsert(db, annotation) {
 }
 
 /**
+ * @deprecated
  * @param {Db} db
- * @param {object[]} annotationArray: list of annotations, following the `annotationsSchema`
+ * @param {object[]} annotationArray: list of annotations to insert
  * @returns {number} number of inserted ids
  */
 async function annotationsInsertMany(db, annotationArray) {
@@ -88,13 +88,4 @@ async function annotationsInsertMany(db, annotationArray) {
   } catch (e) {
     console.log("error inserting", e)
   }
-}
-
-// TBD
-function annotationsRead(db, filter) { }
-
-export {
-  annotationsSchema,
-  annotationsInsert,
-  annotationsInsertMany,
 }

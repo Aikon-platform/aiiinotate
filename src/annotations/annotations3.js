@@ -1,5 +1,10 @@
-// JSON schema for IIIF 3.x
-export default {
+/**
+ * JSON schema for IIIF 3.x
+ *
+ * NOTE: possibly deprecated
+ */
+
+const annotations3Schema = {
   title: 'Annotation object validation',
   required: ['id', 'target'], // NOTE better determine what is required baed on W3C annotations
   properties: {

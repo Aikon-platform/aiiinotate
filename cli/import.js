@@ -1,6 +1,6 @@
 import { Command, Option, Argument } from "commander";
 
-import { fromIiif2AnnotationList } from "#annotations/annotationsIiif2x.js";
+import { fromIiif2AnnotationList } from "#annotations/annotations2.js";
 import { annotationsInsertMany } from "#annotations/annotationsModel.js";
 import { getFilesToProcess, fileRead } from "#cli/io.js";
 
