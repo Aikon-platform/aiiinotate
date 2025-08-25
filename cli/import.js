@@ -1,7 +1,7 @@
 import { Command, Option, Argument } from "commander";
 
-import { fromIiif2AnnotationList } from "#annotations/annotations2.js";
-import { annotationsInsertMany } from "#annotations/annotationsModel.js";
+import Annotations2 from "#annotations/annotations2.js";
+import Annotations3 from "#annotations/annotations3.js";
 import { getFilesToProcess, fileRead } from "#cli/io.js";
 
 ////////////////////////////////////////
@@ -11,10 +11,26 @@ const importTypes = [
   "annotation",  // import a single annotation
   "annotation-list",  // import a IIIF 2.x annotationList
   "annotation-page",  // import a IIIF 3.x annotationPage
-  "annotation-array",  // import a JSON array of IIIF annotations
   "manifest",  // import a single manifest
-  "manifest-array"  // import a json array of manifests
+  // "annotation-array",  // import a JSON array of IIIF annotations
+  // "manifest-array"  // import a json array of manifests
 ]
+
+// allowed import types per IIIF version
+const allowedImportTypes = {
+  2: ["annotation", "annotation-list", "manifest"],
+  3: ["annotation", "annotation-page", "manifest"]
+}
+
+const checkAllowedImportType = (iiifVersion, dataType) => {
+  if (
+    ! allowedImportTypes[iiifVersion].includes(dataType)
+  ) {
+    console.error(`${checkAllowedImportType.name}: forbidden import type '${dataType}' for IIIF version '${iiifVersion}'. allowed import types are: ${allowedImportTypes[iiifVersion]}`);
+    process.exit(1);
+  };
+
+}
 
 const notImplementedExit = (method) => {
   console.log(`\n\nERROR: import is not implemented '${method}'`);
@@ -25,36 +41,32 @@ const parseNumber = (x) => Number(x);
 
 ////////////////////////////////////////
 
+async function importAnnotationPage(annotations3, fileArr, iiifVersion) {
+  notImplementedExit(`${importAnnotationPage.name} is not implemented`)
+}
+
 /**
  *
- * @param {import("mongodb").MongoClient} mongoClient
+ * @param {Annotations2} annotations2
  * @param {string[]} fileArr
  * @param {2|3} iiifVersion
  */
-async function importAnnotationList(mongoClient, fileArr, iiifVersion) {
+async function importAnnotationList(annotations2, fileArr, iiifVersion) {
   // RUN THE SCRIPT:
   // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
-  const client = mongoClient;
-  const db = client.db();
   let totalImports = 0
 
   for (const file of fileArr) {
-    let annotationList = JSON.parse(await fileRead(file));
-
-    if ( iiifVersion === 2 ) {
-      annotationList = fromIiif2AnnotationList(annotationList);
-      const result = await annotationsInsertMany(db, annotationList);
-      totalImports += result;
-    } else {
-      notImplementedExit("import from annotation list with IIIF version", iiifVersion);
-      process.exit(1);
-    }
+    const annotationList = JSON.parse(await fileRead(file));
+    const result = await annotations2.insertAnnotationList(annotationList);
+    totalImports += Object.keys(result).length;
   }
 
   console.log(`\n\nDONE: imported ${totalImports} annotations into Aiiinotate !`);
-
-  client.close();
+  return
 }
+
+////////////////////////////////////////
 
 /**
  * run the cli
@@ -72,16 +84,25 @@ async function action(dataType, options, command, mongoClient) {
   /** @type {boolean} */
   const listFiles = options.listFiles;
 
+  checkAllowedImportType(iiifVersion, dataType);
+
   const filesToProcess = await getFilesToProcess(files, listFiles);
+
+  const annotations2 = new Annotations2(
+    mongoClient,
+    mongoClient.db(),
+    mongoClient.db().collection("annotations2")
+  );
 
   // run
   switch (dataType) {
     case ("annotation-list"):
-      importAnnotationList(mongoClient, filesToProcess, iiifVersion);
+      await importAnnotationList(annotations2, filesToProcess, iiifVersion);
       break;
     default:
       notImplementedExit(dataType);
   }
+  mongoClient.close();
 
 }
 

@@ -28,7 +28,7 @@ class AnnotationsAbstract {
     if ( typeof func !== "function" ) {
       throw new Error(`${this.className()}.${this.funcName.name} : expected 'func' to be a function, got '${typeof func}' (func = ${func})`);
     }
-    return `${this.className}.${func.name}`
+    return `${this.className()}.${func.name}`
   }
 
   /**

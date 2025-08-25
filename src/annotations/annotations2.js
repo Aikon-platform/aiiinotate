@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from "uuid"
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, addKeyValueToObjIfHasKey, isNullish, getHash } from "#annotations/utils.js";
+import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
 
 /**
  * get the `on` of an annotation.
@@ -78,75 +78,85 @@ class Annnotations2 extends AnnotationsAbstract {
     super(client, db, annotationsCollection);
   }
 
+  ////////////////////////////////////////////////////////////////
+
   /**
    * clean an annotation before saving it to database
    * @param {object} annotation
    * @returns {object}
    */
-    cleanAnnotation(annotation) {
+  cleanAnnotation(annotation) {
 
-      //TODO context
-      //TODO (maybe) process annotation.body["@id"]
-      console.log(`${this.className()}.${this.funcName(this.cleanAnnotation)} : check TODOs !`);
+    //TODO context
+    //TODO (maybe) process annotation.body["@id"]
+    console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
 
-      annotation["@id"] = makeAnnotationId(annotation);
-      annotation.on = makeTarget(annotation);
+    annotation["@id"] = makeAnnotationId(annotation);
+    annotation.on = makeTarget(annotation);
 
-      const resource = annotation.resource || undefined;  // source
-      if ( resource ) {
-        if (
-          objectHasKey(resource, "chars")
-          && (isNullish(resource.chars) || resource.chars === "<p></p>")
-        ) {
-          delete(resource.chars);
-        }
-        annotation.resource = resource;
-      }
-
-      return annotation;
-    }
-
-    /**
-     * take an annotationList, clean it and return it as a array of annotations.
-     * see: https://iiif.io/api/presentation/2.1/#annotation-list
-     * @param {object} annotationList
-     * @returns {object[]}
-     */
-    cleanAnnotationList(annotationList) {
+    const resource = annotation.resource || undefined;  // source
+    if ( resource ) {
       if (
-        annotationList["@type"] !== "sc:AnnotationList"
-        || !objectHasKey(annotationList, "@id")
-        || !Array.isArray(annotationList.resources)
+        objectHasKey(resource, "chars")
+        && (isNullish(resource.chars) || resource.chars === "<p></p>")
       ) {
-        this.errorMessage(this.cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
+        delete(resource.chars);
       }
-      return annotationList.resources.map(this.cleanAnnotation)
+      annotation.resource = resource;
     }
 
-    /** @param {object} annotation */
-    async insertOne(annotation) {
-      this.errorMessage(this.insertOne, "not implemented")
-    }
+    return annotation;
+  }
 
-    /** @param {object[]} annotationArray */
-    async insertMany(annotationArray) {
-      try {
-        const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
-        return resultCursor.insertedIds;
-      } catch (e) {
-        console.log(e);
-        throw e;  // TODO polish, this is a bit brutal currently.
-      }
+  /**
+   * take an annotationList, clean it and return it as a array of annotations.
+   * see: https://iiif.io/api/presentation/2.1/#annotation-list
+   * @param {object} annotationList
+   * @returns {object[]}
+   */
+  cleanAnnotationList(annotationList) {
+    if (
+      annotationList["@type"] !== "sc:AnnotationList"
+      || !objectHasKey(annotationList, "@id")
+      || !Array.isArray(annotationList.resources)
+    ) {
+      this.errorMessage(this.cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
     }
+    //NOTE: using an arrow function is necessary to avoid losing the scope of `this`.
+    // otherwise, `this` is undefined in `cleanAnnotation`.
+    return annotationList.resources.map((ressources) => this.cleanAnnotation(ressources))
+  }
 
-    /**
-     * insert annotations from an annotation list.
-     * @param {object} annotationArray
-     */
-    async insertAnnotationList(annotationList) {
-      const annotationArray = this.cleanAnnotationList(annotationList);
-      this.insertMany(annotationArray);
+  ////////////////////////////////////////////////////////////////
+
+  /** @param {object} annotation */
+  async insertOne(annotation) {
+    this.errorMessage(this.insertOne, "not implemented")
+  }
+
+  /**
+   * @param {object[]} annotationArray
+   * @return {Array}
+   */
+  async insertMany(annotationArray) {
+    try {
+      const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
+      return resultCursor.insertedIds;
+    } catch (e) {
+      console.log(e);
+      throw e;  // TODO polish, this is a bit brutal currently.
     }
+  }
+
+  /**
+   * insert annotations from an annotation list.
+   * @param {object} annotationArray
+   * @returns {Promise<Array>}
+   */
+  async insertAnnotationList(annotationList) {
+    const annotationArray = this.cleanAnnotationList(annotationList);
+    return this.insertMany(annotationArray);
+  }
 }
 
 export default Annnotations2;
