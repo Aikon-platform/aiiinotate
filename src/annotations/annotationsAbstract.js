@@ -21,14 +21,14 @@ class AnnotationsAbstract {
   /** @param {function} func */
   funcName(func) {
     if ( typeof func !== "function" ) {
-      throw new Error(`${this.className}.funcName : expected 'func' to be a function, got '${typeof func}' (func = ${func})`);
+      throw new Error(`${this.className()}.${this.funcName.name} : expected 'func' to be a function, got '${typeof func}' (func = ${func})`);
     }
     return `${this.className}.${func.name}`
   }
 
   /**
    * generate an error message, with format: className.funcName: errMsg
-   * @param {function} func
+   * @param {string} func
    * @param {string} msg
    */
   errorMessage(func, msg) {
