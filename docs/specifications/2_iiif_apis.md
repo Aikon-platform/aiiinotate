@@ -1,6 +1,6 @@
 # IIIF APIs
 
-This document is a summary of relevant elements of the IIIF specifications, and especially of the IIIF Presentation APIs. See [this document](./2_iiif_annotations.md) for a more focused look on annotations.
+This document is a summary of relevant elements of the IIIF specifications, and especially of the IIIF Presentation APIs. See [this document](./3_iiif_annotations.md) for a more focused look on annotations.
 
 ## Specifications
 

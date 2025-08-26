@@ -1,6 +1,6 @@
 # IIIF ANNOTATIONS
 
-This document focuses on the way annotations are handled in IIIF. For a more general on IIIF APIs, see [this document](./1_iiif_apis.md)
+This document focuses on the way annotations are handled in IIIF. For a more general on IIIF APIs, see [this document](./2_iiif_apis.md)
 
 ---
 
