@@ -3,9 +3,6 @@
  * exposes an `Annnotations2` class that should contain everything you need
  */
 
-
-import { v4 as uuidv4 } from "uuid"
-
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
 
@@ -33,13 +30,14 @@ import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
  */
 const getAnnotationTarget = (annotation) => {
   const target = annotation.on;  // either string or SpecificResource
-  console.log(annotation.on);
+
   if ( typeof(target) === "string" ) {
     // remove the fragment if necesary to get the full Canvas Id
     const hashIdx = target.indexOf("#");
     return hashIdx === -1
       ? target
       : target.substring(0, hashIdx);
+
   } else {
     // it's a SpecificResource => get the full image's id.
     return target.get("full")["@id"];
@@ -66,9 +64,9 @@ const makeAnnotationId = (annotation) => {
  */
 const makeTarget = (annotation) => {
   const target = annotation.on;  // either string or SpecificResource
-  let specificResource
+  let specificResource;
 
-  // convert to SpecificResource if necessary
+  // convert to SpecificResource if it's not aldready the case
   if ( typeof(target) === "string" ) {
     let [full, fragment] = target.split("#");
     specificResource = {
@@ -117,13 +115,20 @@ class Annnotations2 extends AnnotationsAbstract {
 
     const resource = annotation.resource || undefined;  // source
     if ( resource ) {
+      // remove body if it's empty. a body is empty if
+      //  - it's got no `@id` and
+      //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
+      // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
+      const
+        hasTextualBody = objectHasKey(resource, "chars") || objectHasKey(resource, "cnt:chars"),
+        resourceChars = resource.chars || resource["cnt:chars"],
+        emptyBody = isNullish(resourceChars) || resourceChars === "<p></p>",
+        resourceId = resource["@id"];
       if (
-        objectHasKey(resource, "chars")
-        && (isNullish(resource.chars) || resource.chars === "<p></p>")
+        isNullish(resourceId) && (!hasTextualBody || emptyBody)
       ) {
-        delete(resource.chars);
+        delete(annotation.resource);
       }
-      annotation.resource = resource;
     }
 
     return annotation;
