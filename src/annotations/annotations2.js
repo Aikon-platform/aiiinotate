@@ -34,10 +34,11 @@ const getAnnotationTarget = (annotation) => {
  */
 const makeAnnotationId = (annotation) => {
   let annotationId = annotation["@id"];
-  if ( isNullish(annotationId) ) {
-    annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
-    console.log(annotationId);
-  }
+  // if ( isNullish(annotationId) ) {
+  //   annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
+  //   console.log(annotationId);
+  // }
+  annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
   return annotationId
 }
 
@@ -69,6 +70,9 @@ const makeTarget = (annotation) => {
  * @extends {AnnotationsAbstract}
  */
 class Annnotations2 extends AnnotationsAbstract {
+
+  context = "https://iiif.io/api/presentation/2/context.json"
+
   /**
    * @param {import("mongodb").MongoClient} client
    * @param {import("mongodb").Db} db
@@ -86,12 +90,12 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   cleanAnnotation(annotation) {
 
-    //TODO context
     //TODO (maybe) process annotation.body["@id"]
     console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
 
     annotation["@id"] = makeAnnotationId(annotation);
     annotation.on = makeTarget(annotation);
+    annotation["@context"] = this.context;
 
     const resource = annotation.resource || undefined;  // source
     if ( resource ) {
@@ -123,7 +127,7 @@ class Annnotations2 extends AnnotationsAbstract {
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`.
     // otherwise, `this` is undefined in `cleanAnnotation`.
-    return annotationList.resources.map((ressources) => this.cleanAnnotation(ressources))
+    return annotationList.resources.map((ressource) => this.cleanAnnotation(ressource))
   }
 
   ////////////////////////////////////////////////////////////////
