@@ -131,6 +131,153 @@ Fragment URIs can be used to target part of a resource.
 
 ---
  
-## SpecificResources
+## Specific Resources
 
-Specific
+[https://web.archive.org/web/20221225112722/http://www.openannotation.org/spec/core/specific.html](https://web.archive.org/web/20221225112722/http://www.openannotation.org/spec/core/specific.html)
+
+`SpecificResources` are an extension of the core data model to reference part of a resource with more precision than Fragment URIs. They can be used either in `Bodies` or `Targets` (though in IIIF they are used mostly in `Targets`).
+
+```js
+// basic IIIF structure
+{
+    "@id": "<annotationId>",
+    "@type": "oa:SpecificResource",
+    "full": {
+        // link to the full image
+    },
+    "selector": {
+        "@type": "<selectorType>",
+        "value": "<selectorValue>"
+    },
+    "within": {
+        // extra context, such as the IIIF manifest in which to include the annotation 
+    },
+}
+```
+
+### Basic units
+
+3 conceptual units are present in the Specific Resource model:
+- `Source resource`: the complete target , i.e. an entire image that we want to select a section of.
+- `SpecificResource`: the segment of the resource described by the `Specifier`
+- `Specifiers`: describes how to determine the aspects of the `Source` that constitute the Specific Resource. 
+
+### Specifiers
+
+There are 3 types of specifiers:
+    - `oa:State`: specifies the state of a `Body` or a `Target` applicable to an `Annotation` in order to retrieve the proper representation of the resource. For example, 
+        -the timestamp at which a `Body` was created (if there are several versions of the same resource with different timestamps)
+    - `oa:Selector`: specifies the segment of a resource relevant to the `Annotation`: text range, image section, SVG selector...
+    - `oa:Style`: a description of how to style an `Annotation`
+
+If `State` and `Selector` are present in a annotation, the `State` will be processed before `Selector` to be sure that we have the proper state.
+
+Keys:
+- `a` (IIIF `@type`) `oa:SpecificResource`: the specific resource
+- `oa:hasSource` (SAS `full`): the `Source Resource` being specified by the `Specific Resource`.
+    - MUST be used: the `Specific Resource` is defined relatively to the `Source Resource`, and so the renderer will fetch the `Source` before targeting the `Specific resource` part.
+
+I'll only present selectors, not `states` or `styles` that aren't used in IIIF.
+
+### Selectors
+
+A `Selector` is a `Specifier` which describes how to determine the segment of interest from within the retrieved representation of the Source resource. There MUST be only 1 `Selector` per specifier, otherwise use the [multiplicity module](https://web.archive.org/web/20221225112718/http://www.openannotation.org/spec/core/multiplicity.html).
+
+- `oa:hasSource` (IIIF `full`): the `Source resource`
+- `oa:hasSelector` (IIIF `selector`): the `Selector`'s content
+
+There are selectors other than those presented below: `RangeSelector`, `TextPositionSelector`, `TextQuoteSelector`... but they are out of scope with IIIF so I won't talk about them
+
+#### FragmentSelector
+
+- `a` (IIIF `@type`): `oa:FragmentSelector`
+- `rdf:value` (IIIF `value`): `string'
+- `dcterms:conformsTo`: the specification that defines the syntax of the fragment.
+    - for IIIF, targets can only be targeted using IIIF-specific `ImageApiSelector` or W3C media fragments (`xhwh=int,int,int,int`).
+    - SHOULD be used
+    - SHOULD be one of: 
+
+<table>
+<tbody><tr><th>Fragment Specification</th><th>Description</th></tr>
+<tr><td>http://tools.ietf.org/rfc/rfc3236</td><td><a href="https://web.archive.org/web/20221225112722/http://tools.ietf.org/rfc/rfc3236">XHTML, and HTML</a>. Example: #namedSection </td></tr>
+<tr><td>http://tools.ietf.org/rfc/rfc3778</td><td><a href="https://web.archive.org/web/20221225112722/http://tools.ietf.org/rfc/rfc3778">PDF</a>. Example: #page=10&amp;viewrect=50,50,640,480</td></tr>
+<tr><td>http://tools.ietf.org/rfc/rfc5147</td><td><a href="https://web.archive.org/web/20221225112722/http://tools.ietf.org/rfc/rfc5147">Plain Text</a>. Example: #char=0,10</td></tr>
+<tr><td>http://tools.ietf.org/rfc/rfc3023</td><td><a href="https://web.archive.org/web/20221225112722/http://tools.ietf.org/rfc/rfc3023">XML</a>. Example: #xpointer(/a/b/c) </td></tr>
+<tr><td>http://www.ietf.org/rfc/rfc3870</td><td><a href="https://web.archive.org/web/20221225112722/http://www.ietf.org/rfc/rfc3870">RDF/XML</a>. Example: #namedResource </td></tr>
+<tr><td>http://www.w3.org/TR/media-frags/</td><td><a href="https://web.archive.org/web/20221225112722/http://www.w3.org/TR/media-frags/">W3C Media Fragments</a>. Example: #xywh=50,50,640,480</td></tr>
+<tr><td>http://www.w3.org/TR/SVG/</td><td><a href="https://web.archive.org/web/20221225112722/http://www.w3.org/TR/SVG/">SVG</a>. Example: #svgView(viewBox(50,50,640,480))</td></tr>
+</tbody></table>
+
+```js
+{
+    // ...
+    selector: {
+        "@type": "oa:FragmentSelector",
+        "value": "xywh=int,int,int,int"  // so here we use the W3C media fragments selector
+    }
+
+}
+```
+
+#### SVG selectors
+
+`SvgSelectors` define an area through an SVG.
+- the `SvgSelector`'s value MUST be a valid and complete SVG document
+- the SVG SHOULD be a single shape: `path|rect|circle|ellipse|polyline|polygone|g`
+- dimensions in the SVG MUST be relative to the `Source resource`. 
+    - For example, given an image which is 600 pixels by 400 pixels, and the desired section is a circle of 100 pixel radius at the center of the image, then the SVG element would be: `<circle cx="300" cy="200" r="100"/>`
+
+
+### Examples
+
+```js
+// specific resource in IIIF.
+{
+    "@type" : "oa:SpecificResource",
+    "within" : {
+      "@id" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/manifest.json",
+      "@type" : "sc:Manifest"
+    },
+    "selector" : {
+        "@type" : "oa:FragmentSelector",
+        "value" : "xywh=0,31,1865,1670"
+    },
+    "full" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json"
+} 
+```
+
+```js
+// specific resource that uses the IIIF ImageApiSelector extension
+{
+    // `@id` uses the IIIF Image api to describe the fragment
+    "@id": "http://www.example.org/iiif/book1-page1/50,50,1250,1850/full/0/default.jpg",
+    "@type": "oa:SpecificResource",
+    
+    // `full` describes the full image.
+    "full": {
+        "@id": "http://example.org/iiif/book1-page1/full/full/0/default.jpg",
+        "@type": "dctypes:Image",
+        "service": {
+            "@context": "http://iiif.io/api/image/2/context.json",
+            "@id": "http://example.org/iiif/book1-page1",
+            "profile": "http://iiif.io/api/image/2/level2.json"
+        }
+    },
+    
+    // `selector` describes the region targeted in `@id`
+    "selector": {
+        "@context": "http://iiif.io/api/annex/openannotation/context.json",
+        "@type": "iiif:ImageApiSelector",
+        "region": "50,50,1250,1850"
+    }
+}
+```
+
+
+
+
+
+
+
+
+
