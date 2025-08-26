@@ -165,10 +165,10 @@ Fragment URIs can be used to target part of a resource.
 ### Specifiers
 
 There are 3 types of specifiers:
-    - `oa:State`: specifies the state of a `Body` or a `Target` applicable to an `Annotation` in order to retrieve the proper representation of the resource. For example, 
-        -the timestamp at which a `Body` was created (if there are several versions of the same resource with different timestamps)
-    - `oa:Selector`: specifies the segment of a resource relevant to the `Annotation`: text range, image section, SVG selector...
-    - `oa:Style`: a description of how to style an `Annotation`
+- `oa:State`: specifies the state of a `Body` or a `Target` applicable to an `Annotation` in order to retrieve the proper representation of the resource. For example, 
+    -the timestamp at which a `Body` was created (if there are several versions of the same resource with different timestamps)
+- `oa:Selector`: specifies the segment of a resource relevant to the `Annotation`: text range, image section, SVG selector...
+- `oa:Style`: a description of how to style an `Annotation`
 
 If `State` and `Selector` are present in a annotation, the `State` will be processed before `Selector` to be sure that we have the proper state.
 
