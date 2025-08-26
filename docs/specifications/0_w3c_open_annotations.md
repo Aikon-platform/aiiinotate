@@ -304,7 +304,7 @@ I have only ever seen `oa:Choice` be used in IIIF so that's the one I'll present
 
 ### `oa:Choice`
 
-```
+```js
 {
     "@type": "oa:Choice",
     "default": /** default choice */,
