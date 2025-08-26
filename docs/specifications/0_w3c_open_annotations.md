@@ -51,9 +51,10 @@ The IIIF 2.x standard relies on the W3C Open annotations (OA) standard. Establis
 
 ## Annotations
 
-### Annotations
-
 An annotation has 1+ `Targets` and 0+ `Bodies`
+- IIIF `@id`: `URI`
+    - is used to identify with an URI the `Annotation`, `Body` and `Target`
+    - in Turtle, there is no specific key because the standard is different.
 - `a` (IIIF `@type`): `oa:Annotation`
     - this indicates that the resource is an `Annotation`
 - `oa:hasBody` (IIIF `resource`): `Body | Body[]`
@@ -65,10 +66,21 @@ An annotation has 1+ `Targets` and 0+ `Bodies`
     - the motivation, or role of the annotation
     - `all allowed values are: `oa:bookmarking | oa:classifying | oa:commenting | oa:describing | oa:editing | oa:highlighting | oa:identifying | oa:linking | oa:moderating | oa:questionning | oa:replying | oa:tagging` 
     - in IIIF, `sc:painting` is also allowed to indicate a painting annotation. The most useful values are `sc:painting | oa:commenting`.  
-- IIIF `@id`: `URI`
-    - is used to identify with an URI the `Annotation`, `Body` and `Target`
-    - in Turtle, there is no specific key because the standard is different.
 
+```js
+// basic structure
+{
+    "@id": "<URI>",
+    "@type": "oa:Annotation",
+    "motivation": "sc:painting" || "oa:commenting",  // or an array of values
+    "resource": {
+        "@id": "<URI?>",
+        "@type": "<dctype>",
+        // other keys
+    },
+    "on": "<URI>" || SpecificResource  // `on` can be either specified as the URI to a canvas, or as a SpecificResource
+}
+```
 ### Bodies and targets
 
 - `a` (IIIF `@type`): `dctypes:Dataset | dctypes:Image | dctypes:MovingImage | dctypes:Sound | dcTypes:Text`
@@ -138,7 +150,7 @@ Fragment URIs can be used to target part of a resource.
 `SpecificResources` are an extension of the core data model to reference part of a resource with more precision than Fragment URIs. They can be used either in `Bodies` or `Targets` (though in IIIF they are used mostly in `Targets`).
 
 ```js
-// basic IIIF structure
+// basic IIIF structure for a SpecificResource
 {
     "@id": "<annotationId>",
     "@type": "oa:SpecificResource",
@@ -230,8 +242,9 @@ There are selectors other than those presented below: `RangeSelector`, `TextPosi
 
 ### Examples
 
+
+`Specific resource` structure in IIIF 2.x.
 ```js
-// specific resource in IIIF.
 {
     "@type" : "oa:SpecificResource",
     "within" : {
@@ -246,8 +259,8 @@ There are selectors other than those presented below: `RangeSelector`, `TextPosi
 } 
 ```
 
+`Specific resource` that uses the IIIF `ImageApiSelector` extension
 ```js
-// specific resource that uses the IIIF ImageApiSelector extension
 {
     // `@id` uses the IIIF Image api to describe the fragment
     "@id": "http://www.example.org/iiif/book1-page1/50,50,1250,1850/full/0/default.jpg",
@@ -273,10 +286,46 @@ There are selectors other than those presented below: `RangeSelector`, `TextPosi
 }
 ```
 
+---
 
+## Multiplicity
 
+[https://web.archive.org/web/20221225112718/http://www.openannotation.org/spec/core/multiplicity.html](https://web.archive.org/web/20221225112718/http://www.openannotation.org/spec/core/multiplicity.html)
 
+In IIIF, this module is useful if we want to specify more than 1 `SpecificResource`. In OA, the multiplicity module is used to have multiple bodies or targets in an annotation (IE: 3 bodies in 3 languages). Options for multiplicity are:
 
+- `oa:Choice`: only one of several bodies/targets will be rendered at once. Done by defining 1 default value and other alternative values
+- `oa:Composite`: when all resources are required for an annotation to function properly.
+- `oa:List`: like a composite, but ordered
+
+`Bodies` and `Targets` can use `multiplicity` by setting their `@type` to `oa:Choice | oa:Composite |oa:List`.
+
+I have only ever seen `oa:Choice` be used in IIIF so that's the one I'll present.
+
+### `oa:Choice`
+
+```
+{
+    "@type": "oa:Choice",
+    "default": /** default choice */,
+    "item": /** one or several other available items */
+}
+```
+
+Example: a choice between a `FragmentSelector` and an `SvgSelector`
+```js
+{
+    "@type" : "oa:Choice",
+    "default" : {
+        "@type" : "oa:FragmentSelector",
+        "value" : "xywh=0,31,1865,1670"
+    },
+    "item" : {
+        "@type" : "oa:SvgSelector",
+        "value" : "<svg xmlns=\"http://www.w3.org/2000/svg\"><path xmlns='http://www.w3.org/2000/svg' d='M0 31 h 932 v 0 h 932 v 835 v 835 h -932 h -932 v -835Z' id='rectangle_wit9_man11_anno165_c16_5ebd8bc8044b45b58aae2a508ca75eed' data-paper-data='{&quot;strokeWidth&quot;:1,&quot;rotation&quot;:0,&quot;annotation&quot;:null,&quot;nonHoverStrokeColor&quot;:[&quot;Color&quot;,0,1,0],&quot;editable&quot;:true,&quot;deleteIcon&quot;:null,&quot;rotationIcon&quot;:null,&quot;group&quot;:null}' fill-opacity='0' fill='#00ff00' fill-rule='nonzero' stroke='#00ff00' stroke-width='1' stroke-linecap='butt' stroke-linejoin='miter' stroke-miterlimit='10' stroke-dashoffset='0' style='mix-blend-mode: normal'/></svg>"
+    }
+}
+```
 
 
 
