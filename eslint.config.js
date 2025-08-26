@@ -3,16 +3,21 @@ import globals from "globals";
 import json from "@eslint/json";
 import css from "@eslint/css";
 import { defineConfig, globalIgnores } from "eslint/config";
+import stylistic from '@stylistic/eslint-plugin'
 
 /** https://eslint.org/docs/latest/use/configure/rules */
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs}"],
-    plugins: { js },
+    plugins: {
+      "js": js,
+      "@stylistic": stylistic
+    },
     extends: ["js/recommended"],
     languageOptions: { globals: {...globals.browser, ...globals.node} },
     rules: {
-      "no-unused-vars": "warn"
+      "no-unused-vars": "warn",
+      // '@stylistic/indent': ['error', 2],
     },
   },
   { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
