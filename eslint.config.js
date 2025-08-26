@@ -13,7 +13,7 @@ export default defineConfig([
     languageOptions: { globals: {...globals.browser, ...globals.node} },
     rules: {
       "no-unused-vars": "warn"
-    }
+    },
   },
   { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
   { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
