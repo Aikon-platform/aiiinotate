@@ -3,10 +3,27 @@
  * exposes an `Annnotations2` class that should contain everything you need
  */
 
+
 import { v4 as uuidv4 } from "uuid"
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
+
+
+/**
+ *
+ */
+// RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
+//
+// Collection 	             {scheme}://{host}/{prefix}/collection/{name}
+// Manifest 	               {scheme}://{host}/{prefix}/{identifier}/manifest
+// Sequence 	               {scheme}://{host}/{prefix}/{identifier}/sequence/{name}
+// Canvas 	                 {scheme}://{host}/{prefix}/{identifier}/canvas/{name}
+// Annotation (incl images)  {scheme}://{host}/{prefix}/{identifier}/annotation/{name}
+// AnnotationList            {scheme}://{host}/{prefix}/{identifier}/list/{name}
+// Range 	                   {scheme}://{host}/{prefix}/{identifier}/range/{name}
+// Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
+// Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
 /**
  * get the `on` of an annotation.
@@ -16,6 +33,7 @@ import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
  */
 const getAnnotationTarget = (annotation) => {
   const target = annotation.on;  // either string or SpecificResource
+  console.log(annotation.on);
   if ( typeof(target) === "string" ) {
     // remove the fragment if necesary to get the full Canvas Id
     const hashIdx = target.indexOf("#");
@@ -33,13 +51,13 @@ const getAnnotationTarget = (annotation) => {
  * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
  */
 const makeAnnotationId = (annotation) => {
-  let annotationId = annotation["@id"];
-  // if ( isNullish(annotationId) ) {
-  //   annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
-  //   console.log(annotationId);
-  // }
-  annotationId = `${process.env.APP_HOST}/${getHash(getAnnotationTarget(annotation))}/${uuidv4()}`;
-  return annotationId
+  const target = getAnnotationTarget(annotation),
+        targetArray = target.split("/"),
+        manifestId = targetArray.at(-3),
+        canvasId = targetArray.at(-1).replace(".json", "");
+
+  // follows the IIIF recommended URI pattern (got a doubt for the PREFIX part)
+  return `${process.env.APP_HOST}/annotation/${manifestId}/annotation/${canvasId}_${getHash(target)}`;
 }
 
 /**
