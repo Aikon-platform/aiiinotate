@@ -35,6 +35,7 @@ In turn, annotations are the primary ressources stored by SAS. SAS also needs to
 ```
 GET /search-api/$manifestShortId/search
 ```
+- **returns**: `AnnotationList` with an empty `@id`
 - `$manifestShortId` is the manifest's ID
 - search parameters are [as per the IIIF docs](https://iiif.io/api/search/2.0/#request-1): 
     - `q`: query string, searched in the annotation's textual body or its URI
@@ -48,6 +49,7 @@ GET /search-api/$manifestShortId/search
 ```
 GET /annotation/search?uri=$canvasUri
 ```
+- **returns** `Annotation[]`
 - `$canvasUri` is the URI for the canvas we want annotations for
 - *example: https://aikon.enpc.fr/sas/annotation/search?uri=https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670 shows annotations for canvas https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670*
 
@@ -55,6 +57,22 @@ GET /annotation/search?uri=$canvasUri
 ```
 GET /manifests
 ```
+
+- **returns**
+    ```js
+    {
+        "@type": "sc:Collection",
+        "@id": "http://annotation//collection/managed.json",
+        "label": "string",
+        "@context": "http://iiif.io/api/presentation/2/context.json",
+        "members": [
+            { 
+                "@type": "sc:Manifest",
+                "@id": "URI"
+            }
+        ]
+    }
+    ``` 
 
 ### Create/Update data
 
