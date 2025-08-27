@@ -18,16 +18,6 @@ async function annotations(fastify, options) {
 
   fastify.register(routes, { namespace, annotations2 });
 
-  // const names = db.listCollections({}, { nameOnly: true })
-  // console.log(names)
-  // console.log("collList", names);
-
-  // const collNamesCursor = db.listCollections({}, { nameOnly: true });
-  // const collNames = (await collNamesCursor.toArray()).map(x => x.name)
-  // console.log("vvv", collNames)
-  // console.log("xxx", typeof(collNames), Array.isArray(collNames))
-  // console.log("***", collNames.includes(collectionName))
-
   return
 }
 

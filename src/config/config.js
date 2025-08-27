@@ -1,13 +1,13 @@
-import dotenv from "dotenv"
 import path from "path"
 
-dotenv.config({
-  path: [path.join(import.meta.dirname, ".env")]
-})
+import dotenv from "dotenv"
+import dotenvExpand from "dotenv-expand";
 
-const config = {
-  mongodbName: process.env.MONGODB_DB,
-  mongodbConnString: `mongodb://${process.env.MONGODB_HOST}:${process.env.MONGODB_PORT}/${process.env.MONGODB_DB}`
+// we use dotenv-expand to expand the variables used in the .env file.
+const loadEnv = () => {
+  dotenvExpand.expand(dotenv.config({
+    path: [path.join(import.meta.dirname, ".env")]
+  }));
 }
 
-export default config
+export default loadEnv;

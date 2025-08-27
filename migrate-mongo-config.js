@@ -2,15 +2,15 @@
 
 // In this file you can configure migrate-mongo
 
-import dotenvConfig from "#config/config.js"
+import loadEnv from "#config/config.js"
+
+loadEnv();
 
 const config = {
   mongodb: {
-    // TODO Change (or review) the url to your MongoDB:
-    url: dotenvConfig.mongodbConnString,
+    url: process.env.MONGODB_CONNSTRING,
 
-    // TODO Change this to your database name:
-    databaseName: dotenvConfig.mongodbName,
+    databaseName: process.env.MONGODB_DB,
 
     options: {
       useNewUrlParser: true, // removes a deprecation warning when connecting
