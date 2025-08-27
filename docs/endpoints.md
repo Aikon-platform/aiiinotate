@@ -13,10 +13,16 @@ URL anatomy is a mix of [SAS endpoints](./specifications/4_sas.md) and IIIF spec
 In turn, URL anatomy is:
 
 ```
-{host}/{prefix}/{slug}
+{host}/{prefix}/{iiif_version}/{slug}
 ```
 
----
+Where:
+- `host`: the host of your app
+- `prefix`: `data | annotations | manifests`
+- `iiif_version`: `2 | 3`, the IIIF version your data is in
+- `slug`: the rest of the qurty URI
+
+--
 
 ## IIIF URIs
 

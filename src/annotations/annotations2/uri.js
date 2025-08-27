@@ -16,14 +16,16 @@
 
 import { v4 as uuid4 } from "uuid";
 
+const IIIF_VERSION = "2";
 
 /**
+ * @example "127.0.0.1:3000/data/2/wit9_man11_anno165/annotation/c26_abda6e3c-2926-4495-9787-cb3f3588e47c"
  * @param {string} manifestId
  * @param {string} canvasId
  * @returns {string}
  */
 const annotationUri = (manifestId, canvasId) =>
-  `${process.env.APP_HOST}/data/${manifestId}/annotation/${canvasId}_${uuid4()}`;
+  `${process.env.APP_BASE_URL}/data/${IIIF_VERSION}/${manifestId}/annotation/${canvasId}_${uuid4()}`;
 
 export {
   annotationUri,

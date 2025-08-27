@@ -2,7 +2,7 @@ import routes from "#src/routes.js";
 import dbConnector from "#db/connector.js";
 import annotations from "#annotations/annotations.js";
 
-import app from "#src/app.js";
+// import app from "#src/app.js";
 
 
 /**
@@ -27,12 +27,10 @@ export default async function start (fastify, options) {
   fastify.register(annotations);
   await fastify.after();
 
-  // console.log("xxx", server)
-  // console.log(">>>", server.mongo.db)
-
   try {
     fastify.listen({ port: process.env.APP_PORT })
   } catch (err) {
+    console.log(">>> 5 hellllllllllllllllllllo")
     fastify.log.error(err)
     process.exit(1)
   }

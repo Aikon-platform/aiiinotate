@@ -15,9 +15,7 @@ async function annotations(fastify, options) {
     fastify.mongo.client,
     db
   );
-
   fastify.register(routes, { namespace, annotations2 });
-
   return
 }
 

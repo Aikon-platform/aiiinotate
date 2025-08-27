@@ -1,7 +1,9 @@
 import fastifyPlugin from "fastify-plugin"
 import fastifyMongo from "@fastify/mongodb"
 
-import config from "#config/config.js"
+import loadEnv from "#config/config.js";
+
+loadEnv();
 
 /** @typedef {import('fastify').FastifyInstance} FastifyInstance */
 
@@ -12,7 +14,7 @@ import config from "#config/config.js"
 function dbConnector(fastify, options, done) {
   fastify.register(fastifyMongo, {
     forceClose: true,
-    url: config.mongodbConnString
+    url: process.env.MONGODB_CONNSTRING
   });
   done();
 }
