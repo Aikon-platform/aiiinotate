@@ -5,7 +5,7 @@
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { objectHasKey, isNullish } from "#annotations/utils.js";
-import { annotationUri } from "#annotations/annotations2/uri.js";
+import { annotationUri, CONTEXT, toAnnotationList } from "#annotations/annotations2/utils.js";
 
 
 /**
@@ -88,8 +88,6 @@ const makeTarget = (annotation) => {
  */
 class Annnotations2 extends AnnotationsAbstract {
 
-  context = "https://iiif.io/api/presentation/2/context.json"
-
   /**
    * @param {import("mongodb").MongoClient} client
    * @param {import("mongodb").Db} db
@@ -99,6 +97,7 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   ////////////////////////////////////////////////////////////////
+  // utils
 
   /**
    * clean an annotation before saving it to database
@@ -111,8 +110,8 @@ class Annnotations2 extends AnnotationsAbstract {
     console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
 
     annotation["@id"] = makeAnnotationId(annotation);
+    annotation["@context"] = CONTEXT["@context"];
     annotation.on = makeTarget(annotation);
-    annotation["@context"] = this.context;
 
     const resource = annotation.resource || undefined;  // source
     if ( resource ) {
@@ -155,6 +154,7 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   ////////////////////////////////////////////////////////////////
+  // insert / updates
 
   /** @param {object} annotation */
   async insertOne(annotation) {
@@ -183,6 +183,34 @@ class Annnotations2 extends AnnotationsAbstract {
   async insertAnnotationList(annotationList) {
     const annotationArray = this.cleanAnnotationList(annotationList);
     return this.insertMany(annotationArray);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // get
+
+  /**
+   * @param {object} queryObj
+   * @returns {Promise<object[]>}
+   */
+  async find(queryObj) {
+    const res = this.annotationsCollection
+      .find(queryObj)
+      .project({_id:0});  // .project removes the `_id` field from response
+    return res.toArray();
+  }
+
+  /**
+   * @param {string} canvasUri
+   * @param {boolean} asAnnotationList
+   * @returns
+   */
+  async findFromCanvasUri(canvasUri, asAnnotationList=false) {
+    const annotations = await this.find({
+      "on.full": canvasUri
+    })
+    return asAnnotationList
+      ? toAnnotationList(annotations)
+      : annotations;
   }
 }
 

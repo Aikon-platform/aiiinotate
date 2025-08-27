@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin"
 const IIIF_VERSION_SCHEMA = {
   type: "integer",
   enum: [1, 2],
-  description: 'IIIF versions'
+  description: "IIIF versions"
 };
 
 
@@ -15,9 +15,10 @@ const IIIF_VERSION_SCHEMA = {
 async function routes (fastify, options) {
   const namespace = options.namespace;
   const annotations2 = options.annotations2;
+  const annotations3 = options.annotations3;
 
   fastify.get(
-    `/annotations/:iiifVersion/search`,
+    "/annotations/:iiifVersion/search",
     {
       schema: {
         querystring: {
@@ -38,12 +39,15 @@ async function routes (fastify, options) {
       const { iiifVersion } = request.params;
       const { uri } = request.query;
 
-      console.log(">>>>", annotations2.annotationsCollection.collectionName);
-      return {"annotations": "iello"};
-      // const annotations = fastify.mongo.db.collection(namespace);
-      // const resultsCursor = await annotations.find();
-      // return resultsCursor.toArray();  // https://www.mongodb.com/docs/drivers/node/current/crud/query/cursor/#std-label-node-access-cursor
-  })
+      console.log(">>>>", iiifVersion, uri);
+
+      if ( iiifVersion === 2 ) {
+        const res = annotations2.findFromCanvasUri(uri);
+        return res;
+      } else {
+        annotations3.notImplementedError();
+      }
+    })
 }
 
 export default fastifyPlugin(routes);

@@ -12,6 +12,10 @@ class Annnotations3 extends AnnotationsAbstract {
     super(client, db, db.collection("annotations3"));
   }
 
+  notImplementedError() {
+    throw new Error(`${this.constructor.name}: not implemented`);
+  }
+
 }
 
 export default Annnotations3;
