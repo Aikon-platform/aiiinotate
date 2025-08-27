@@ -4,7 +4,8 @@
  */
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
+import { objectHasKey, isNullish } from "#annotations/utils.js";
+import { annotationUri } from "#annotations/annotations2/uri.js";
 
 
 /**
@@ -49,13 +50,13 @@ const getAnnotationTarget = (annotation) => {
  * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
  */
 const makeAnnotationId = (annotation) => {
-  const target = getAnnotationTarget(annotation),
+  //NOTE this will work only if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
+  const
+    target = getAnnotationTarget(annotation),
     targetArray = target.split("/"),
     manifestId = targetArray.at(-3),
     canvasId = targetArray.at(-1).replace(".json", "");
-
-  // follows the IIIF recommended URI pattern (got a doubt for the PREFIX part)
-  return `${process.env.APP_HOST}/annotation/${manifestId}/annotation/${canvasId}_${getHash(target)}`;
+  return annotationUri(manifestId, canvasId);
 }
 
 /**

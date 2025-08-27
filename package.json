@@ -15,7 +15,8 @@
     "migrate-init": "npx migrate-mongo init",
     "migrate-make": "npx migrate-mongo create",
     "migrate-apply": "npx migrate-mongo up",
-    "migrate-revert": "npx migrate-mongo down"
+    "migrate-revert": "npx migrate-mongo down",
+    "migrate-revert-all": "for i in ./migrations/*; do npx migrate-mongo down; done"
   },
   "pre-commit": [
     "lint"

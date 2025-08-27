@@ -1,8 +1,5 @@
 /** @typedef {import("mongodb").Db} Db */
 
-import { mongodb } from "@fastify/mongodb";
-
-
 class AnnotationsAbstract {
   /**
    * NOTE: async constructors are NOT ALLOWED in JS, so be sure that
@@ -35,9 +32,17 @@ class AnnotationsAbstract {
    * generate an error message, with format: className.funcName: errMsg
    * @param {string} func
    * @param {string} msg
+   * @param {boolean} throwErr: if true, throw the error. otherwise, print the error message and return it
+   * @returns {string?}
    */
-  errorMessage(func, msg) {
-    throw new Error(`${this.funcName(func)} : ${msg}`);
+  errorMessage(func, msg, throwErr=true) {
+    msg = `${this.funcName(func)} : ${msg}`;
+    if ( throwErr ) {
+      throw new Error(msg);
+    } else {
+      console.error(msg);
+      return msg;
+    }
   }
 
   async insertOne(annotation) {

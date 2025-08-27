@@ -1,7 +1,7 @@
 import { Command, Option, Argument } from "commander";
 
-import Annotations2 from "#annotations/annotations2.js";
-import Annotations3 from "#annotations/annotations3.js";
+import Annotations2 from "#annotations/annotations2/annotations2.js";
+import Annotations3 from "#annotations/annotations3/annotations3.js";
 import { getFilesToProcess, fileRead } from "#cli/io.js";
 
 ////////////////////////////////////////
