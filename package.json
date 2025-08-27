@@ -10,7 +10,7 @@
   "scripts": {
     "start": "fastify start src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx eslint",
+    "lint": "npx eslint --fix",
     "cli": "node cli/index.js",
     "migrate-init": "npx migrate-mongo init",
     "migrate-make": "npx migrate-mongo create",

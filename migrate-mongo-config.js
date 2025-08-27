@@ -41,7 +41,7 @@ const config = {
 
   // Don't change this, unless you know what you're doing
   //NOTE: default value is 'commonjs'
-  moduleSystem: 'esm',
+  moduleSystem: "esm",
 };
 
 export default config;

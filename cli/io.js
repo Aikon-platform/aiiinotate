@@ -17,7 +17,7 @@ const fileOk = (f) =>
  * @return {Promise<string>}
  */
 const fileRead = (f) =>
-  fs.promises.readFile(f, { encoding: 'utf8' })
+  fs.promises.readFile(f, { encoding: "utf8" })
     .then(data => data)
     .catch(() => {
       console.log("error reading file: ", f);
@@ -40,7 +40,7 @@ async function fileArrayValidate (fileArr) {
   const success = await Promise.all(
     fileArr.map(async (f) => await fileOk(f))
   ).then(filesExistArr =>
-      filesExistArr.every(x => x===true)
+    filesExistArr.every(x => x===true)
   );
 
   if (!success) {

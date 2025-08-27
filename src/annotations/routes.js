@@ -1,4 +1,4 @@
-import fastifyPlugin from 'fastify-plugin'
+import fastifyPlugin from "fastify-plugin"
 
 /**
  * Encapsulates the routes

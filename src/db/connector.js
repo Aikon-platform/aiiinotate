@@ -1,7 +1,7 @@
-import fastifyPlugin from 'fastify-plugin'
-import fastifyMongo from '@fastify/mongodb'
+import fastifyPlugin from "fastify-plugin"
+import fastifyMongo from "@fastify/mongodb"
 
-import config from '#config/config.js'
+import config from "#config/config.js"
 
 /** @typedef {import('fastify').FastifyInstance} FastifyInstance */
 

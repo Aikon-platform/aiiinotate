@@ -1,8 +1,8 @@
-import dotenv from 'dotenv'
-import path from 'path'
+import dotenv from "dotenv"
+import path from "path"
 
 dotenv.config({
-  path: [path.join(import.meta.dirname, '.env')]
+  path: [path.join(import.meta.dirname, ".env")]
 })
 
 const config = {

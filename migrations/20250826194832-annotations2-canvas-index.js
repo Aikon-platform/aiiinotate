@@ -4,8 +4,8 @@
  */
 
 const
-    colName = "annotations2",
-    indexSpec = { "on.full": 1 };
+  colName = "annotations2",
+  indexSpec = { "on.full": 1 };
 
 /**
  * @param {import('mongodb').Db} db
@@ -13,9 +13,9 @@ const
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
-    const collection = db.collection(colName);
-    const result = await collection.createIndex(indexSpec);
-    console.log("created index:", result);
+  const collection = db.collection(colName);
+  const result = await collection.createIndex(indexSpec);
+  console.log("created index:", result);
 };
 
 /**
@@ -24,7 +24,7 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-    const collection = db.collection(colName);
-    const result = await collection.dropIndex(indexSpec);
-    console.log("dropped index:", result);
+  const collection = db.collection(colName);
+  const result = await collection.dropIndex(indexSpec);
+  console.log("dropped index:", result);
 };

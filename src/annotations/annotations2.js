@@ -50,9 +50,9 @@ const getAnnotationTarget = (annotation) => {
  */
 const makeAnnotationId = (annotation) => {
   const target = getAnnotationTarget(annotation),
-        targetArray = target.split("/"),
-        manifestId = targetArray.at(-3),
-        canvasId = targetArray.at(-1).replace(".json", "");
+    targetArray = target.split("/"),
+    manifestId = targetArray.at(-3),
+    canvasId = targetArray.at(-1).replace(".json", "");
 
   // follows the IIIF recommended URI pattern (got a doubt for the PREFIX part)
   return `${process.env.APP_HOST}/annotation/${manifestId}/annotation/${canvasId}_${getHash(target)}`;

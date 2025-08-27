@@ -1,4 +1,4 @@
-import fastifyPlugin from 'fastify-plugin'
+import fastifyPlugin from "fastify-plugin"
 
 import Annotations2 from "#annotations/annotations2.js";
 import routes from "#annotations/routes.js";

@@ -7,10 +7,10 @@
  */
 
 const collectionNames = [
-    "annotations3",
-    "annotations2",
-    "manifests3",
-    "manifests2"
+  "annotations3",
+  "annotations2",
+  "manifests3",
+  "manifests2"
 ];
 
 /**
@@ -19,10 +19,10 @@ const collectionNames = [
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
-    // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
-    collectionNames.forEach((colName) => {
-        db.createCollection(colName);
-    })
+  // See https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
+  collectionNames.forEach((colName) => {
+    db.createCollection(colName);
+  })
 };
 
 /**
@@ -31,11 +31,11 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-    // Example:
-    // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: false}});
-    collectionNames.forEach(async (colName) => {
-        const collection = db.collection(colName);
-        await collection.drop();
-    })
+  // Example:
+  // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: false}});
+  collectionNames.forEach(async (colName) => {
+    const collection = db.collection(colName);
+    await collection.drop();
+  })
 }
 
