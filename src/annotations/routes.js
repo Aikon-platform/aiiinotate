@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin"
 
 const IIIF_VERSION_SCHEMA = {
   type: "integer",
-  enum: [1, 2],
+  enum: [2, 3],
   description: "IIIF versions"
 };
 
@@ -21,28 +21,28 @@ async function routes (fastify, options) {
     "/annotations/:iiifVersion/search",
     {
       schema: {
-        querystring: {
-          type: "object",
-          properties: {
-            uri: { type: "string" },
-          }
-        },
         params: {
           type: "object",
           properties: {
             iiifVersion: IIIF_VERSION_SCHEMA
           }
-        }
+        },
+        querystring: {
+          type: "object",
+          properties: {
+            uri: { type: "string" },
+            "as-annotation-list": { type: "boolean" },
+          }
+        },
       },
     },
     async (request, reply) => {
       const { iiifVersion } = request.params;
-      const { uri } = request.query;
-
-      console.log(">>>>", iiifVersion, uri);
+      const uri = request.query.uri;
+      const asAnnotationList = request.query["as-annotation-list"] || false;
 
       if ( iiifVersion === 2 ) {
-        const res = annotations2.findFromCanvasUri(uri);
+        const res = annotations2.findFromCanvasUri(uri, asAnnotationList);
         return res;
       } else {
         annotations3.notImplementedError();

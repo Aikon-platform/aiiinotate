@@ -21,7 +21,7 @@ async function annotations(fastify, options) {
     db
   );
 
-  fastify.register(routes, { namespace, annotations2 });
+  fastify.register(routes, { namespace, annotations2, annotations3 });
   return
 }
 

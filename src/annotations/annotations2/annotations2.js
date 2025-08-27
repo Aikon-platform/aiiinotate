@@ -193,10 +193,10 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<object[]>}
    */
   async find(queryObj) {
-    const res = this.annotationsCollection
+    return this.annotationsCollection
       .find(queryObj)
-      .project({_id:0});  // .project removes the `_id` field from response
-    return res.toArray();
+      .project({_id:0})  // .project removes the `_id` field from response
+      .toArray();
   }
 
   /**
@@ -209,7 +209,7 @@ class Annnotations2 extends AnnotationsAbstract {
       "on.full": canvasUri
     })
     return asAnnotationList
-      ? toAnnotationList(annotations)
+      ? toAnnotationList(annotations, `annotations targeting canvas ${canvasUri}`)
       : annotations;
   }
 }
