@@ -5,7 +5,7 @@
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { objectHasKey, isNullish } from "#annotations/utils.js";
-import { annotationUri, CONTEXT, toAnnotationList } from "#annotations/annotations2/utils.js";
+import { CONTEXT, makeTarget, makeAnnotationId, toAnnotationList } from "#annotations/annotations2/utils.js";
 
 
 /**
@@ -22,66 +22,6 @@ import { annotationUri, CONTEXT, toAnnotationList } from "#annotations/annotatio
 // Range 	                   {scheme}://{host}/{prefix}/{identifier}/range/{name}
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
-
-/**
- * get the `on` of an annotation.
- * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L147
- * @param {object} annotation
- * @returns {string}
- */
-const getAnnotationTarget = (annotation) => {
-  const target = annotation.on;  // either string or SpecificResource
-
-  if ( typeof(target) === "string" ) {
-    // remove the fragment if necesary to get the full Canvas Id
-    const hashIdx = target.indexOf("#");
-    return hashIdx === -1
-      ? target
-      : target.substring(0, hashIdx);
-
-  } else {
-    // it's a SpecificResource => get the full image's id.
-    return target.get("full")["@id"];
-  }
-}
-
-/**
- * generate the annotation's ID from its `@id` key (if defined)
- * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
- */
-const makeAnnotationId = (annotation) => {
-  //NOTE this will work only if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
-  const
-    target = getAnnotationTarget(annotation),
-    targetArray = target.split("/"),
-    manifestId = targetArray.at(-3),
-    canvasId = targetArray.at(-1).replace(".json", "");
-  return annotationUri(manifestId, canvasId);
-}
-
-/**
- * convert the annotation's `on` to a SpecificResource
- * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
- */
-const makeTarget = (annotation) => {
-  const target = annotation.on;  // either string or SpecificResource
-  let specificResource;
-
-  // convert to SpecificResource if it's not aldready the case
-  if ( typeof(target) === "string" ) {
-    let [full, fragment] = target.split("#");
-    specificResource = {
-      full: full,
-      selector: {
-        type: "FragmentSelector",
-        value: fragment
-      }
-    }
-  }
-
-  return specificResource
-}
-
 
 /**
  * @extends {AnnotationsAbstract}
