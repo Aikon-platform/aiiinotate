@@ -4,8 +4,8 @@
  */
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, isNullish } from "#annotations/utils.js";
-import { CONTEXT, makeTarget, makeAnnotationId, toAnnotationList } from "#annotations/annotations2/utils.js";
+import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
+import { CONTEXT, makeTarget, makeAnnotationId, toAnnotationList, getManifestShortId } from "#annotations/annotations2/utils.js";
 
 
 /**
