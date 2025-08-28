@@ -2,14 +2,15 @@ import fastifyPlugin from "fastify-plugin"
 
 import Annotations2 from "#annotations/annotations2/annotations2.js";
 import Annotations3 from "#annotations/annotations3/annotations3.js";
-import routes from "#annotations/routes.js";
+import annotationRoutes from "#annotations/routes.js";
+
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-async function annotations(fastify, options) {
-  const namespace = "annotations";
+async function data(fastify, options) {
+
   const db = fastify.mongo.db;
 
   const annotations2 = new Annotations2(
@@ -21,8 +22,9 @@ async function annotations(fastify, options) {
     db
   );
 
-  fastify.register(routes, { namespace, annotations2, annotations3 });
+  fastify.register(annotationRoutes, { annotations2, annotations3 });
   return
+
 }
 
-export default fastifyPlugin(annotations)
+export default fastifyPlugin(data);

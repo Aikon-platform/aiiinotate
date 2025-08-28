@@ -11,36 +11,8 @@
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
 import { v4 as uuid4 } from "uuid";
-import { getHash } from "#annotations/utils.js";
-
-
-const IIIF_VERSION = 2;
-const CONTEXT = { "@context": "http://iiif.io/api/presentation/2/context.json" };
-
-/**
- * extract a manifest's short ID from an URI (not just a IIIF uri).
- * NOTE if the `iiifUri` doesn' follow IIIF  recommendations, the quality of geneated IDs is really degraded : 2 canvases URI from the same manifest will generate a different hash.
- * inspired by : https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/data/Manifest.java#L123C16-L123C26
- * @param {string} iiifUri
- * @returns {string}
- */
-const getManifestShortId = (iiifUri) => {
-  const keywords = ["manifest", "sequence", "canvas", "annotation", "list", "range", "layer", "res"]
-  let manifestShortId;
-
-  // if it follows the IIIF recommended URI patterns
-  for ( let i=0; i < keywords.length; i++ ) {
-    if ( iiifUri.includes(keywords[i]) ) {
-      const iiifUriArr = iiifUri.split("/");
-      manifestShortId = iiifUriArr.at( iiifUriArr.indexOf(keywords[i]) - 1 );
-      break;
-    }
-  }
-  // fallback if no manifestShortId was found
-  manifestShortId = manifestShortId || getHash(iiifUri);
-
-  return manifestShortId;
-}
+import { getHash } from "#data/utils.js";
+import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT, getManifestShortId } from "#data/iiifUtils.js";
 
 
 /**
@@ -121,7 +93,7 @@ const makeTarget = (annotation) => {
  * @returns {string}
  */
 const annotationUri = (manifestId, canvasId) =>
-  `${process.env.APP_BASE_URL}/data/${IIIF_VERSION}/${manifestId}/annotation/${canvasId}_${uuid4()}`;
+  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestId}/annotation/${canvasId}_${uuid4()}`;
 
 /**
  *
@@ -131,7 +103,7 @@ const annotationUri = (manifestId, canvasId) =>
  */
 const toAnnotationList = (resources, label) => {
   const annotationList = {
-    ...CONTEXT,
+    ...IIIF_PRESENTATION_2_CONTEXT,
     "@id": "",  // NOTE: this is invalid according to IIIF 2.1 specs, but SAS also does it
     resources: resources
   }
@@ -142,8 +114,6 @@ const toAnnotationList = (resources, label) => {
 }
 
 export {
-  IIIF_VERSION,
-  CONTEXT,
   makeTarget,
   makeAnnotationId,
   annotationUri,

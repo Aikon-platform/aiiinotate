@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 
-import loadEnv from "#config/config.js";
+import loadEnv from "#config/index.js";
 
 loadEnv();
 

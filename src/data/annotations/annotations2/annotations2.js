@@ -4,13 +4,10 @@
  */
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, isNullish, getHash } from "#annotations/utils.js";
-import { CONTEXT, makeTarget, makeAnnotationId, toAnnotationList, getManifestShortId } from "#annotations/annotations2/utils.js";
+import { objectHasKey, isNullish } from "#data/utils.js";
+import { makeTarget, makeAnnotationId, toAnnotationList } from "#annotations/annotations2/utils.js";
+import { getManifestShortId, IIIF_PRESENTATION_2_CONTEXT } from "#data/iiifUtils.js";
 
-
-/**
- *
- */
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
 // Collection 	             {scheme}://{host}/{prefix}/collection/{name}
@@ -61,7 +58,7 @@ class Annnotations2 extends AnnotationsAbstract {
       manifestShortId = getManifestShortId(annotationTarget.full);
 
     annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
-    annotation["@context"] = CONTEXT["@context"];
+    annotation["@context"] = IIIF_PRESENTATION_2_CONTEXT["@context"];
     annotation.on = annotationTarget;
     annotation.on.manifestShortId = manifestShortId;
 

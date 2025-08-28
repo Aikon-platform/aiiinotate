@@ -44,8 +44,9 @@
     "#views/*.js": "./src/views/*.js",
     "#utils/*.js": "./src/utils/*.js",
     "#config/*.js": "./src/config/*.js",
-    "#manifest/*.js": "./src/manifest/*.js",
-    "#annotations/*.js": "./src/annotations/*.js"
+    "#data/*.js": "./src/data/*.js",
+    "#manifests/*.js": "./src/data/manifests/*.js",
+    "#annotations/*.js": "./src/data/annotations/*.js"
   },
   "dependencies": {
     "@fastify/mongodb": "^9.0.2",

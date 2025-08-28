@@ -2,7 +2,7 @@
 
 // In this file you can configure migrate-mongo
 
-import loadEnv from "#config/config.js"
+import loadEnv from "#config/index.js"
 
 loadEnv();
 
