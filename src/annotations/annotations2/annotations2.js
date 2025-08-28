@@ -40,7 +40,14 @@ class Annnotations2 extends AnnotationsAbstract {
   // utils
 
   /**
-   * clean an annotation before saving it to database
+   * clean an annotation before saving it to database.
+   *
+   * the main transforms are:
+   * - transfrom `annotation.on` to a SpecificResource
+   * - extract the manifest's URI
+   * - generate a clean annotation ID from manifest ID and canvas number
+   * - remove body if it's empty
+   *
    * @param {object} annotation
    * @returns {object}
    */
@@ -49,11 +56,16 @@ class Annnotations2 extends AnnotationsAbstract {
     //TODO (maybe) process annotation.body["@id"]
     console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
 
-    annotation["@id"] = makeAnnotationId(annotation);
-    annotation["@context"] = CONTEXT["@context"];
-    annotation.on = makeTarget(annotation);
+    const
+      annotationTarget = makeTarget(annotation),
+      manifestShortId = getManifestShortId(annotationTarget.full);
 
-    const resource = annotation.resource || undefined;  // source
+    annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
+    annotation["@context"] = CONTEXT["@context"];
+    annotation.on = annotationTarget;
+    annotation.on.manifestShortId = manifestShortId;
+
+    const resource = annotation.resource || undefined;
     if ( resource ) {
       // remove body if it's empty. a body is empty if
       //  - it's got no `@id` and

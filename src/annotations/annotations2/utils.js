@@ -19,7 +19,7 @@ const CONTEXT = { "@context": "http://iiif.io/api/presentation/2/context.json" }
 
 /**
  * extract a manifest's short ID from an URI (not just a IIIF uri).
- * NOTE if the `iiifUri` doesn' follow IIIF  recommendations, the quality of geneated IDs is really degraded : 2 canvases from the same manifest will have different hash.
+ * NOTE if the `iiifUri` doesn' follow IIIF  recommendations, the quality of geneated IDs is really degraded : 2 canvases URI from the same manifest will generate a different hash.
  * inspired by : https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/data/Manifest.java#L123C16-L123C26
  * @param {string} iiifUri
  * @returns {string}
@@ -80,14 +80,15 @@ const getAnnotationTarget = (annotation) => {
 /**
  * generate the annotation's ID from its `@id` key (if defined)
  * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
+ * NOTE this should never fail, but results will only be reliable if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
  */
-const makeAnnotationId = (annotation) => {
-  //NOTE this will work only if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
+const makeAnnotationId = (annotation, manifestShortId) => {
+  // if manifestShortId hasn't aldready been extracted, re-extract it
+  manifestShortId = manifestShortId || getManifestShortId(target);
   const
     target = getAnnotationTarget(annotation),
-    manifestId = getManifestShortId(target),
     canvasId = getCanvasShortId(target);
-  return annotationUri(manifestId, canvasId);
+  return annotationUri(manifestShortId, canvasId);
 }
 
 /**
