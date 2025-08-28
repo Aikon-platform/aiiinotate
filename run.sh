@@ -8,4 +8,4 @@ if ! systemctl is-active --quiet mongod;
 then sudo systemctl start mongod;
 fi;
 
-npm run start -- #--env-file="$ENV_FILE";
+fastify start src/server.js;

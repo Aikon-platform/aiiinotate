@@ -31,15 +31,15 @@ async function routes (fastify, options) {
           type: "object",
           properties: {
             uri: { type: "string" },
-            "as-annotation-list": { type: "boolean" },
+            asAnnotationList: { type: "boolean" },
           }
         },
       },
     },
     async (request, reply) => {
-      const { iiifVersion } = request.params;
-      const uri = request.query.uri;
-      const asAnnotationList = request.query["as-annotation-list"] || false;
+      const
+        { iiifVersion } = request.params,
+        { uri, asAnnotationList } = request.query;
 
       if ( iiifVersion === 2 ) {
         const res = annotations2.findFromCanvasUri(uri, asAnnotationList);

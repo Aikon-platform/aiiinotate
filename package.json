@@ -8,7 +8,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "fastify start src/server.js",
+    "start": "bash run.sh",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint --fix",
     "cli": "node cli/index.js",
