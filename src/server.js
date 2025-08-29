@@ -1,16 +1,18 @@
+/**
+ * serve a fastify app
+ */
+
 import loadEnv from "#config/index.js";
-import app from "#src/app.js";
+import build from "#src/app.js";
 
 loadEnv();
 
 /**
- * https://github.com/fastify/fastify-cli?tab=readme-ov-file#start
- * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-export default async function start (fastify, options) {
+async function start (options) {
 
-  fastify = await app(fastify, { logger: true });
+  const fastify = await build({ logger: true });
 
   try {
     fastify.listen({ port: process.env.APP_PORT });
@@ -19,3 +21,5 @@ export default async function start (fastify, options) {
     process.exit(1);
   }
 };
+
+start();

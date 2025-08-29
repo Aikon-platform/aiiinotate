@@ -1,3 +1,9 @@
+/**
+ * build a fastify app
+ */
+
+import Fastify from "fastify";
+
 import dbConnector from "#db/index.js";
 import routes from "#src/routes.js";
 import data from "#data/index.js";
@@ -7,9 +13,9 @@ import schemas from "#src/schemas.js";
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-async function app(fastify, options) {
+async function build(options) {
 
-  Object.keys(options).forEach(k => fastify[k] = options[k]);
+  const fastify = Fastify(options);
 
   // load plugins
   // see:
@@ -25,5 +31,5 @@ async function app(fastify, options) {
   return fastify
 }
 
-export default app
+export default build;
 
