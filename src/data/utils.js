@@ -41,10 +41,14 @@ const getHash = (str, seed=0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
+const maybeToArray = (x) =>
+    Array.isArray(x) ? x : [x];
+
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`
 
 export {
+  maybeToArray,
   pathToUrl,
   getHash,
   isNullish,

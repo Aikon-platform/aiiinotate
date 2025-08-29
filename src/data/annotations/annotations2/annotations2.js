@@ -4,7 +4,7 @@
  */
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, isNullish } from "#data/utils.js";
+import { objectHasKey, isNullish, maybeToArray } from "#data/utils.js";
 import { makeTarget, makeAnnotationId, toAnnotationList } from "#annotations/annotations2/utils.js";
 import { getManifestShortId, IIIF_PRESENTATION_2_CONTEXT } from "#data/iiifUtils.js";
 
@@ -38,21 +38,22 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * clean an annotation before saving it to database.
-   *
-   * the main transforms are:
-   * - transfrom `annotation.on` to a SpecificResource
-   * - extract the manifest's URI
-   * - generate a clean annotation ID from manifest ID and canvas number
-   * - remove body if it's empty
+   * some of the work consists of translating what is defined by the OpenAnnotations standard to what is actually used by IIIF annotations.
    *
    * @param {object} annotation
    * @returns {object}
    */
   cleanAnnotation(annotation) {
+    // TODO required fields:
+    // - @id
+    // - motivation
+    // - on
+    // TODO testsssssss
 
     //TODO (maybe) process annotation.body["@id"]
     console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
 
+    // 1) extract ids and targets
     const
       annotationTarget = makeTarget(annotation),
       manifestShortId = getManifestShortId(annotationTarget.full);
@@ -62,20 +63,43 @@ class Annnotations2 extends AnnotationsAbstract {
     annotation.on = annotationTarget;
     annotation.on.manifestShortId = manifestShortId;
 
+    // 2) process motivations.
+    // - motivations are an array of strings
+    // - open annotation specifies that motivations should be described by the `oa:Motivation`, while IIIF 2.1 examples uses the `motivation` field => uniformizwe
+    // - all values must be `sc:painting` or prefixed by `oa:`: IIIF presentation API indicates that the only allowed values are open annotation values (prefixed by `oa:`) or `sc:painting`.
+    if ( annotation["oa:Motivation"] ) {
+      annotation.motivation = annotation["oa:Motivation"];
+      delete annotation["oa:motivation"];
+    }
+    annotation.motivation =
+      maybeToArray(annotation.motivation || [])
+      .map(String)
+      .map((motiv) =>
+        motiv.startsWith("oa:") || motiv.startsWith("sc:")
+        ? motiv
+        : `oa:${motiv}`
+      );
+
     const resource = annotation.resource || undefined;
     if ( resource ) {
-      // remove body if it's empty. a body is empty if
+      // 3) uniformize embedded textual body keys
+      // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
+      resource["@type"] =
+        resource["@type"] === "cnt:ContentAsText"
+        ? "dctypes:Text"
+        : resource["@type"];
+      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`
+      resource.chars = resource["cnt:chars"] || resource.chars;  // may be undefined
+
+      // 4) delete body if it's empty. a body is empty if
       //  - it's got no `@id` and
       //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
       // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
       const
-        hasTextualBody = objectHasKey(resource, "chars") || objectHasKey(resource, "cnt:chars"),
-        resourceChars = resource.chars || resource["cnt:chars"],
-        emptyBody = isNullish(resourceChars) || resourceChars === "<p></p>",
-        resourceId = resource["@id"];
-      if (
-        isNullish(resourceId) && (!hasTextualBody || emptyBody)
-      ) {
+        hasTextualBody = objectHasKey(resource, "chars"),
+        emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
+
+      if ( isNullish(resource["@id"]) && (!hasTextualBody || emptyBody) ) {
         delete(annotation.resource);
       }
     }
@@ -185,6 +209,8 @@ class Annnotations2 extends AnnotationsAbstract {
     //    - existnce of an ETB is specified by "resource.@type = "dctypes:Text":string,
     //    - "resource.chars" always contains the string content.
 
+    // TODO tests
+
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };
@@ -204,16 +230,16 @@ class Annnotations2 extends AnnotationsAbstract {
       console.log(this.funcName(this.search), "motivation", motivation);
       queryFilters.$and.push(
         motivation === "non-painting"
-        ? { motivation: { $ne: "sc:painting" } }
-        : motivation === "painting"
-        ? { motivation: "sc:painting" }
-        : { motivation: `oa:${motivation}` }
+          ? { motivation: { $ne: "sc:painting" } }
+          : motivation === "painting"
+            ? { motivation: "sc:painting" }
+            : { motivation: `oa:${motivation}` }
       );
     }
     const query =
       queryFilters.$and.length
-      ? { ...queryBase, ...queryFilters }
-      : queryBase;
+        ? { ...queryBase, ...queryFilters }
+        : queryBase;
 
     console.log(this.funcName(this.search), query);
 
