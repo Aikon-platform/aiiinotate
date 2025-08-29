@@ -20,6 +20,12 @@ Start the app in dev:
 npm start
 ```
 
+Start the app in prod:
+
+```bash
+npm prod
+```
+
 Test the app:
 
 ```bash
