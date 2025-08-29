@@ -1,6 +1,7 @@
 import routes from "#src/routes.js";
 import dbConnector from "#db/index.js";
 import data from "#data/index.js";
+import schemas from "#src/schemas.js";
 
 // import app from "#src/app.js";
 
@@ -24,14 +25,22 @@ export default async function start (fastify, options) {
   fastify.register(dbConnector);
   await fastify.after();  // `dbConnector` is async so we need to wait for completion
   fastify.register(routes);
+  fastify.register(schemas)
+  await fastify.after();
   fastify.register(data);
   await fastify.after();
 
   try {
-    fastify.listen({ port: process.env.APP_PORT })
-  } catch (err) {
-    console.log(">>> 5 hellllllllllllllllllllo")
-    fastify.log.error(err)
-    process.exit(1)
+    fastify.listen({ port: process.env.APP_PORT });
+  } catch(err) {
+    fastify.log.error(err);
+    process.exit(1);
   }
+
+  // try {
+  //   fastify.listen({ port: process.env.APP_PORT })
+  // } catch (err) {
+  //   fastify.log.error(err)
+  //   process.exit(1)
+  // }
 };

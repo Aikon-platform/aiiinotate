@@ -41,7 +41,11 @@ const getHash = (str, seed=0) => {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
+const pathToUrl = (path) =>
+  `${process.env.APP_BASE_URL}${path}`
+
 export {
+  pathToUrl,
   getHash,
   isNullish,
   objectHasKey,

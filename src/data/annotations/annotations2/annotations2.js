@@ -153,12 +153,12 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async findFromCanvasUri(canvasUri, asAnnotationList=false) {
+  async findFromCanvasUri(canvasUri, queryUrl, asAnnotationList=false) {
     const annotations = await this.find({
       "on.full": canvasUri
     })
     return asAnnotationList
-      ? toAnnotationList(annotations, `annotations targeting canvas ${canvasUri}`)
+      ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;
   }
 }

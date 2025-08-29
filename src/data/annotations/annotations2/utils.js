@@ -98,13 +98,14 @@ const annotationUri = (manifestId, canvasId) =>
 /**
  *
  * @param {object[]} resources: the annotatons
+ * @param {string?} annotationListId: the AnnotationList's '@id' key
  * @param {string?} label: optional description
  * @returns {object}
  */
-const toAnnotationList = (resources, label) => {
+const toAnnotationList = (resources, annotationListId, label) => {
   const annotationList = {
     ...IIIF_PRESENTATION_2_CONTEXT,
-    "@id": "",  // NOTE: this is invalid according to IIIF 2.1 specs, but SAS also does it
+    "@id": annotationListId || "",  // NOTE: MUST be defined according to IIIF presentation API (but not always defined in SAS)
     resources: resources
   }
   if ( label ) {
