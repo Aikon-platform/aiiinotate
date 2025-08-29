@@ -144,7 +144,7 @@ class Annnotations2 extends AnnotationsAbstract {
   async find(queryObj) {
     return this.annotationsCollection
       .find(queryObj)
-      .project({_id:0})  // .project removes the `_id` field from response
+      .project({ _id:0, "on.manifestShortId": 0 })  // .project 0 removes the fields from the response
       .toArray();
   }
 
