@@ -104,7 +104,7 @@ Special cases:
 ETBs are used to embed textual content directly in an annotation instead of referencing it by an `id`.
 - `a` (IIIF `@type`): `cnt:ContentAsText | dctypes:Text`
     - MUST be used to indicate that this is an ETB. MAY contain both values described above.
-- `cnt:chars` (SAS `chars`): `string`
+- `cnt:chars` (IIIF `chars`): `string`
     - MUST Be used to contain the contents of the ETB.
 - `dc:format` (SAS `format`): `mimetype`
     - SHOULD be used to describe the mimetype of the ETB
@@ -127,7 +127,7 @@ A tag is a specific type of `Body`: a keyword or label used to annotate a `Targe
 - `a` (IIIF `@type`): `oa:Tag | oa:SemanticTag`
     - `oa:Tag` describes a non-semantic tag. In that case, the tag functions like an ETB
     - `oa:SemanticTag` describes a semantic tag. Instead of containing the contents of the tag, the `Body` references an external URI.
-- `oa:Motivation`: `oa:tagging`
+- `oa:Motivation` (IIIF `motivation`): `oa:tagging`
     - `oa:tagging` should be added to the `oa:Motivation` of the annotation to indicate it's a tag
 
 ### Fragment URIs

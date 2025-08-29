@@ -15,13 +15,13 @@ async function annotationsRoutes (fastify, options) {
   const { iiifPresentationApiVersion } = fastify.getSchemas();
 
   fastify.get(
-    "/annotations/:iiifVersion/search",
+    "/annotations/:iiifPresentationVersion/search",
     {
       schema: {
         params: {
           type: "object",
           properties: {
-            iiifVersion: iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationApiVersion
           }
         },
         querystring: {
@@ -36,11 +36,11 @@ async function annotationsRoutes (fastify, options) {
     async (request, reply) => {
       const
         queryUrl = pathToUrl(request.url),
-        { iiifVersion } = request.params,
+        { iiifPresentationVersion } = request.params,
         { uri, asAnnotationList } = request.query;
 
-      if ( iiifVersion === 2 ) {
-        const res = annotations2.findFromCanvasUri(uri, queryUrl, asAnnotationList);
+      if ( iiifPresentationVersion === 2 ) {
+        const res = annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
         return res;
       } else {
         annotations3.notImplementedError();

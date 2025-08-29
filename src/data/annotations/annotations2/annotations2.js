@@ -102,21 +102,6 @@ class Annnotations2 extends AnnotationsAbstract {
     return annotationList.resources.map((ressource) => this.cleanAnnotation(ressource))
   }
 
-  /**
-   * project a cursor to return only certain fields.
-   * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
-   * @param {import("mongodb").FindCursor} cursor
-   * @param {object} extra: custom fields to add/remove to the projection.
-   */
-  projectFields(cursor, extra) {
-    // .project 0 removes the fields from the response
-    return cursor.project({
-      _id: 0,
-      "on.manifestShortId": 1,
-      ...extra
-    })
-  }
-
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -154,13 +139,86 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * @param {object} queryObj
+   * @param {object?} projectionObj: extra projection fields to tailor the reponse format
    * @returns {Promise<object[]>}
    */
-  async find(queryObj) {
-    return this.projectFields(
-      this.annotationsCollection
-      .find(queryObj)
-    ).toArray();
+  async find(queryObj, projectionObj) {
+    return this.annotationsCollection
+      .find(queryObj, {
+        // .project 0 removes the fields from the response, 1 incldes it (but exclude all others)
+        // see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
+        projection: {
+          _id: 0,
+          "on.manifestShortId": 0,
+          ...projectionObj
+        }
+      })
+      .toArray();
+  }
+
+  /**
+   * implementation of the IIIF Search API 1.0
+   *
+   * NOTE:
+   *  - only `motivation` and `q` search params are implemented
+   *  - to increase search execution, ONLY EXACT STRING MACHES are
+   *    implemented for `q` and `motivation` (in the IIIF specs, you can supply
+   *    multiple space-separated values and the server should return all partial
+   *    matches to any of those strings.)
+   *
+   * see:
+   *  https://iiif.io/api/search/1.0/
+   *  https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/4_search_api.md
+   *
+   * @param {string} queryUrl
+   * @param {string} manifestShortId
+   * @param {string} q
+   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"} motivation
+   * @returns
+   */
+  async search(queryUrl, manifestShortId, q, motivation) {
+    // TODO: update inserts so that our data format is more strict, for easier searches:
+    //  - motivations:
+    //    - "motivation" key is always named "motivation", not "oa:Motivation"
+    //    - "motivation" is always an array of `oa:...` fields.
+    //  - embedded textual bodies:
+    //    - existnce of an ETB is specified by "resource.@type = "dctypes:Text":string,
+    //    - "resource.chars" always contains the string content.
+
+    const
+      queryBase = { "on.manifestShortId": manifestShortId },
+      queryFilters = { $and: [] };
+
+    // expand query parameters
+    if ( q ) {
+      console.log(this.funcName(this.search), "q", q);
+      queryFilters.$and.push({
+        $or: [
+          { "@id": q },
+          { "resource.@id": q },
+          { "resource.chars": q }
+        ]
+      });
+    }
+    if ( motivation ) {
+      console.log(this.funcName(this.search), "motivation", motivation);
+      queryFilters.$and.push(
+        motivation === "non-painting"
+        ? { motivation: { $ne: "sc:painting" } }
+        : motivation === "painting"
+        ? { motivation: "sc:painting" }
+        : { motivation: `oa:${motivation}` }
+      );
+    }
+    const query =
+      queryFilters.$and.length
+      ? { ...queryBase, ...queryFilters }
+      : queryBase;
+
+    console.log(this.funcName(this.search), query);
+
+    const annotations = await this.find(query);
+    return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
   }
 
   /**
@@ -168,10 +226,10 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async findFromCanvasUri(canvasUri, queryUrl, asAnnotationList=false) {
+  async findFromCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
     const annotations = await this.find({
       "on.full": canvasUri
-    })
+    });
     return asAnnotationList
       ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;
