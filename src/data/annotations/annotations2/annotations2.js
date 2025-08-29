@@ -102,6 +102,21 @@ class Annnotations2 extends AnnotationsAbstract {
     return annotationList.resources.map((ressource) => this.cleanAnnotation(ressource))
   }
 
+  /**
+   * project a cursor to return only certain fields.
+   * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
+   * @param {import("mongodb").FindCursor} cursor
+   * @param {object} extra: custom fields to add/remove to the projection.
+   */
+  projectFields(cursor, extra) {
+    // .project 0 removes the fields from the response
+    return cursor.project({
+      _id: 0,
+      "on.manifestShortId": 1,
+      ...extra
+    })
+  }
+
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -142,10 +157,10 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<object[]>}
    */
   async find(queryObj) {
-    return this.annotationsCollection
+    return this.projectFields(
+      this.annotationsCollection
       .find(queryObj)
-      .project({ _id:0, "on.manifestShortId": 0 })  // .project 0 removes the fields from the response
-      .toArray();
+    ).toArray();
   }
 
   /**
