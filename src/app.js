@@ -1,14 +1,15 @@
+import dbConnector from "#db/index.js";
 import routes from "#src/routes.js";
-import dbConnector from "#db/connector.js";
-
-// import Fastify from "fastify";
+import data from "#data/index.js";
+import schemas from "#src/schemas.js";
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
+ * @param {object} options
  */
-async function app(fastify) {
-  // config
-  fastify.logger = true;
+async function app(fastify, options) {
+
+  Object.keys(options).forEach(k => fastify[k] = options[k]);
 
   // load plugins
   // see:
@@ -18,6 +19,8 @@ async function app(fastify) {
   fastify.register(dbConnector);
   await fastify.after();  // `dbConnector` is async so we need to wait for completion
   fastify.register(routes);
+  fastify.register(schemas)
+  fastify.register(data);
 
   return fastify
 }

@@ -73,12 +73,12 @@ class Annnotations2 extends AnnotationsAbstract {
     }
     annotation.motivation =
       maybeToArray(annotation.motivation || [])
-      .map(String)
-      .map((motiv) =>
-        motiv.startsWith("oa:") || motiv.startsWith("sc:")
-        ? motiv
-        : `oa:${motiv}`
-      );
+        .map(String)
+        .map((motiv) =>
+          motiv.startsWith("oa:") || motiv.startsWith("sc:")
+            ? motiv
+            : `oa:${motiv}`
+        );
 
     const resource = annotation.resource || undefined;
     if ( resource ) {
@@ -86,8 +86,8 @@ class Annnotations2 extends AnnotationsAbstract {
       // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
       resource["@type"] =
         resource["@type"] === "cnt:ContentAsText"
-        ? "dctypes:Text"
-        : resource["@type"];
+          ? "dctypes:Text"
+          : resource["@type"];
       // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`
       resource.chars = resource["cnt:chars"] || resource.chars;  // may be undefined
 

@@ -42,7 +42,7 @@ const getHash = (str, seed=0) => {
 };
 
 const maybeToArray = (x) =>
-    Array.isArray(x) ? x : [x];
+  Array.isArray(x) ? x : [x];
 
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`
