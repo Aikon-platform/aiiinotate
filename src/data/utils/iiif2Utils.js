@@ -1,4 +1,8 @@
-// RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
+import { v4 as uuid4 } from "uuid";
+import { getHash } from "#data/utils/utils.js";
+import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
+
+// IIIF PRESENTATION 2.1 RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
 // Collection 	             {scheme}://{host}/{prefix}/collection/{name}
 // Manifest 	               {scheme}://{host}/{prefix}/{identifier}/manifest
@@ -10,10 +14,30 @@
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
-import { v4 as uuid4 } from "uuid";
-import { getHash } from "#data/utils.js";
-import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT, getManifestShortId } from "#data/iiifUtils.js";
+/**
+ * extract a manifest's short ID from an URI (not just a IIIF uri).
+ * NOTE if the `iiifUri` doesn' follow IIIF 2.x  recommendations, the quality of geneated IDs is really degraded : 2 canvases URI from the same manifest will generate a different hash.
+ * inspired by : https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/data/Manifest.java#L123C16-L123C26
+ * @param {string} iiifUri
+ * @returns {string}
+ */
+const getManifestShortId = (iiifUri) => {
+  const keywords = ["manifest", "manifest.json", "sequence", "canvas", "annotation", "list", "range", "layer", "res"]
+  let manifestShortId;
 
+  const iiifUriArr = iiifUri.split("/");
+
+  // if it follows the IIIF recommended URI patterns
+  for ( let i=0; i < keywords.length; i++ ) {
+    if ( iiifUriArr.includes(keywords[i]) ) {
+      manifestShortId = iiifUriArr.at( iiifUriArr.indexOf(keywords[i]) - 1 );
+      break;
+    }
+  }
+  // fallback if no manifestShortId was found: return a string representation of the URI's hash.
+  manifestShortId = manifestShortId || getHash(iiifUri);
+  return manifestShortId;
+}
 
 /**
  * extract the ID of a canvas from a canvas' URI.
@@ -118,6 +142,6 @@ export {
   makeTarget,
   makeAnnotationId,
   annotationUri,
-  getManifestShortId,
-  toAnnotationList
+  toAnnotationList,
+  getManifestShortId
 }

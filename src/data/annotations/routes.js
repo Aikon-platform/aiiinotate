@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl } from "#data/utils.js";
+import { pathToUrl } from "#data/utils/utils.js";
 
 /**
  * Encapsulates the routes

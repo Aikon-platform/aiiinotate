@@ -4,9 +4,9 @@
  */
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-import { objectHasKey, isNullish, maybeToArray } from "#data/utils.js";
-import { makeTarget, makeAnnotationId, toAnnotationList } from "#annotations/annotations2/utils.js";
-import { getManifestShortId, IIIF_PRESENTATION_2_CONTEXT } from "#data/iiifUtils.js";
+import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
+import { objectHasKey, isNullish, maybeToArray } from "#data/utils/utils.js";
+import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#data/utils/iiif2Utils.js";
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //

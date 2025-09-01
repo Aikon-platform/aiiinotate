@@ -2,7 +2,7 @@ import test from "node:test";
 
 import { v4 as uuid4 } from "uuid";
 
-import { getManifestShortId } from "#data/iiifUtils.js";
+import { getManifestShortId } from "#data/utils/iiif2Utils.js";
 
 
 test("test 'getManifestShortId'", (t) => {
@@ -27,7 +27,7 @@ test("test 'getManifestShortId'", (t) => {
     urlHashArr = [
       `http://example.com/example/collection/${s2}`,
       `http://example.com/${s1}`
-    ]
+    ];
 
   urlOkArr.map((url) =>
     t.assert.strictEqual(getManifestShortId(url), s1)

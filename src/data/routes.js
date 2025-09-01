@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl } from "#data/utils.js";
+import { pathToUrl } from "#data/utils/utils.js";
 
 async function commonRoutes(fastify, options) {
   const { annotations2, annotations3 } = options;
