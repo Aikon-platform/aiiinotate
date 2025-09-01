@@ -1,0 +1,827 @@
+{
+  "startIndex" : 0,
+  "within" : {
+    "total" : 51,
+    "@type" : "sc:Layer"
+  },
+  "@type" : "sc:AnnotationList",
+  "resources" : [ {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c10_d47559c226ae4acaae2e50f5bbc6f4e8",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c10.json#xywh=5,0,1824,2161",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c11_403175bd3ee34e8bbc0df11e12c3c915",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c11.json#xywh=0,31,1529,1119",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c12_80a76d17911c4fdd9f6f14638e861305",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c12.json#xywh=4,0,1336,1432",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c13_ab273c69f957498f8400baeb9fd35359",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c13.json#xywh=0,0,1753,1058",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c14_13a2bf59e60641d5b3256b8f4a70ad95",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c14.json#xywh=0,0,1791,2055",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c15_a237f200e9d049b396b2c268e773ee52",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c15.json#xywh=0,2,2025,1760",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c16_5ebd8bc8044b45b58aae2a508ca75eed",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c16.json#xywh=0,31,1865,1670",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c17_e1eab0fff55e461583c1e29c500d3378",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c17.json#xywh=28,779,1428,968",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c17_e28dc4d0a25942bf8bd5a83a97b1355b",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c17.json#xywh=73,3,1344,849",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c18_d77d5850403c4efe9303b0f99b71f507",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c18.json#xywh=23,2,1786,1665",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c19_8e54bf1f3f6d4dc0ba53fc4972697ac8",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c19.json#xywh=0,0,1504,1104",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c1_549a9159642f45e89867c0978d0e1931",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:37",
+    "dcterms:modified" : "2025-03-19T14:38:37",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c1.json#xywh=0,43,2000,1544",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c20_10151c0a933745b1b33f83b8f001f59c",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c20.json#xywh=0,21,1999,1451",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c21_b0e262769a7d4300972aa7863651361d",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c21.json#xywh=0,21,1639,1237",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c22_1079ed08f39048bd982360ee320b1587",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c22.json#xywh=11,8,1908,1394",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c23_22ed4c0bb9524aeebd554d8e436a46c5",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c23.json#xywh=0,0,2114,2177",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c24_8677767a98b04f849cd129bf894f763a",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c24.json#xywh=0,0,1511,1742",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c25_0579c21a407a4893a33e301df7714054",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c25.json#xywh=14,401,1908,2075",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c25_801e99fa15cd41c7965efb8ff839e2a9",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c25.json#xywh=399,25,1358,465",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c26_cc53a43f00594212bb1cc91880e21460",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c26.json#xywh=9,0,1643,1440",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c27_d31b0608091b42e2aed8565474a87889",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c27.json#xywh=33,49,1475,1773",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c28_d3fb4ea8fbe2486fa328fe79b8741a40",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c28.json#xywh=0,30,1779,1592",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c29_32725c0308054f3ba4371f56502bd541",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c29.json#xywh=0,2,1449,1415",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c2_4309b526178942089ca3369f4fd006e5",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:37",
+    "dcterms:modified" : "2025-03-19T14:38:37",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c2.json#xywh=5,0,1626,2077",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c30_e951bbdef2c448bab8812db59d19929a",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c30.json#xywh=0,0,1839,1782",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c31_3d01cdcf205f456887b73ada51bdcaf3",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:39",
+    "dcterms:modified" : "2025-03-19T14:38:39",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c31.json#xywh=32,0,1927,1243",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c32_c3667899377e4db9900ac2b00485d210",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c32.json#xywh=0,0,1919,1857",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c33_1115392d46b2447b949bab3707c9aa73",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c33.json#xywh=10,0,1617,785",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c34_2941dc4465d3433b8c0b23716173d9d5",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c34.json#xywh=0,13,1503,1105",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c35_e38f925896964cd1ad039b80d0b992f6",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c35.json#xywh=0,0,1480,1176",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c36_f897edb611034450848c24cf62dff833",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c36.json#xywh=0,13,1879,1552",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c37_af9ef83ca3eb45f1b11d52c1c8eb32ae",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c37.json#xywh=0,32,2113,1684",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c38_f0b8c407ee524bb4af37de0b27bd4a88",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c38.json#xywh=21,7,1283,1081",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c39_82a908fcd44c4ea28d566c01839745b7",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c39.json#xywh=0,24,1885,1433",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c3_22c4f2847afe44d6bcfff907292a33fa",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:37",
+    "dcterms:modified" : "2025-03-19T14:38:37",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c3.json#xywh=0,30,2210,1962",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c40_9de024ae0835408c8695e468625802fc",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c40.json#xywh=15,0,1760,1997",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c41_583b1afd9dbb4829b333be2bf0576fe3",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c41.json#xywh=0,19,1714,1194",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c42_67139440307645d4986b96d83146a004",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c42.json#xywh=0,50,1856,1275",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c43_35c04da6d5454c649d6b81f38a264784",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:40",
+    "dcterms:modified" : "2025-03-19T14:38:40",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c43.json#xywh=24,0,1518,1767",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c44_ee1ee7cca4894e99b28f5a044cc48a7a",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c44.json#xywh=0,0,1066,1118",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c45_62505f95cc544f7b81b25b41e0bca715",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c45.json#xywh=0,30,1965,1590",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c46_ed71ca4acb924c69a2ad0e731af14f71",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c46.json#xywh=41,11,1818,2019",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c47_584e4c48ff194146b221797f71bce851",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c47.json#xywh=0,16,1769,1501",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c48_d5ff5cfd9d8148ebb079d10b6318d1b8",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c48.json#xywh=0,0,2185,2222",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c49_a2f8ea235d58430282763cc5a44d925d",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:41",
+    "dcterms:modified" : "2025-03-19T14:38:41",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c49.json#xywh=7,0,1347,1417",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c4_3b8d7b5e8cef4a54ab5ec335126cabb1",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:37",
+    "dcterms:modified" : "2025-03-19T14:38:37",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c4.json#xywh=0,22,1740,1272",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c5_3c95b6f220c2455886cd0081bf2f7f7a",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:37",
+    "dcterms:modified" : "2025-03-19T14:38:37",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c5.json#xywh=0,17,2040,1775",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c6_1a2a962b38e04d78a4fce334b60abb58",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c6.json#xywh=9,0,1360,1527",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c7_2cab0fb6342c4507ae20c36741a6f99d",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c7.json#xywh=0,8,1685,1240",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c8_155e288703b74e53890d7fe3696322fc",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c8.json#xywh=0,16,2135,1536",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  }, {
+    "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c9_cbf4a25c545a46688cc6f0f06ecc1a28",
+    "@type" : "oa:Annotation",
+    "dcterms:created" : "2025-03-19T14:38:38",
+    "dcterms:modified" : "2025-03-19T14:38:38",
+    "resource" : {
+      "@type" : "dctypes:Text",
+      "format" : "text/html",
+      "chars" : "<p></p>",
+      "https://aikon.enpc.fr/sas/full_text" : "",
+      "https://iscd.huma-num.fr/sas/full_text" : ""
+    },
+    "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c9.json#xywh=0,1,1784,1372",
+    "motivation" : [ "oa:tagging", "oa:commenting" ],
+    "@context" : "http://iiif.io/api/presentation/2/context.json",
+    "label" : ""
+  } ],
+  "@id" : "",
+  "@context" : "http://iiif.io/api/presentation/2/context.json"
+}

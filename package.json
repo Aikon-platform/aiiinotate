@@ -46,6 +46,8 @@
     "#utils/*.js": "./src/utils/*.js",
     "#config/*.js": "./src/config/*.js",
     "#data/*.js": "./src/data/*.js",
+    "#jsonData/*.js": "./jsonData/*.js",
+    "#testData/*.js": "./jsonData/tests/*.js",
     "#manifests/*.js": "./src/data/manifests/*.js",
     "#annotations/*.js": "./src/data/annotations/*.js"
   },

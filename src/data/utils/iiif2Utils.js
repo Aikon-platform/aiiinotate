@@ -1,5 +1,5 @@
 import { v4 as uuid4 } from "uuid";
-import { getHash } from "#data/utils/utils.js";
+import { getHash, isNullish, isObject } from "#data/utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
 // IIIF PRESENTATION 2.1 RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
@@ -59,18 +59,23 @@ const getCanvasShortId = (canvasUri) =>
  */
 const getAnnotationTarget = (annotation) => {
   const target = annotation.on;  // either string or SpecificResource
+  let targetOut;
 
   if ( typeof(target) === "string" ) {
     // remove the fragment if necesary to get the full Canvas Id
     const hashIdx = target.indexOf("#");
-    return hashIdx === -1
+    targetOut = hashIdx === -1
       ? target
       : target.substring(0, hashIdx);
 
   } else {
     // it's a SpecificResource => get the full image's id.
-    return target.get("full")["@id"];
+    targetOut = target["full"];
   }
+  if ( isNullish(targetOut) ) {
+    throw new Error(`${getAnnotationTarget.name}: 'annotation.on' is not a valid IIIF 2.1 annotation target (with annotation=${target})`)
+  }
+  return targetOut;
 }
 
 /**
@@ -84,6 +89,11 @@ const makeAnnotationId = (annotation, manifestShortId) => {
   const
     target = getAnnotationTarget(annotation),
     canvasId = getCanvasShortId(target);
+
+  if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
+    throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)
+  }
+
   return annotationUri(manifestShortId, canvasId);
 }
 
@@ -92,19 +102,34 @@ const makeAnnotationId = (annotation, manifestShortId) => {
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
  */
 const makeTarget = (annotation) => {
-  const target = annotation.on;  // either string or SpecificResource
+  const
+    // must be either string or SpecificResource
+    target = annotation.on,
+    // error that will raise is `target` can't be processed
+    err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI or an object with 'annotation.on.@type==="oa:SpecificResource"' and 'annotation.on.@id' must be a string URI (annotation=${annotation})`);
+
   let specificResource;
 
   // convert to SpecificResource if it's not aldready the case
-  if ( typeof(target) === "string" ) {
+  if ( typeof(target) === "string" && !isNullish(target) ) {
     let [full, fragment] = target.split("#");
     specificResource = {
+      "@type": "oa:SpecificResource",
       full: full,
       selector: {
-        type: "FragmentSelector",
+        type: "oa:FragmentSelector",
         value: fragment
       }
     }
+  } else if ( isObject(target) ) {
+    // if 'target' is an object but not a specificresource, raise.
+    if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
+      specificResource = target;
+    } else {
+      throw err
+    }
+  } else {
+    throw err
   }
 
   return specificResource
@@ -143,5 +168,7 @@ export {
   makeAnnotationId,
   annotationUri,
   toAnnotationList,
-  getManifestShortId
+  getManifestShortId,
+  getCanvasShortId,
+  getAnnotationTarget
 }

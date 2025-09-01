@@ -9,6 +9,7 @@ URL anatomy is a mix of [SAS endpoints](./specifications/4_sas.md) and IIIF spec
 - `data`: for all IIIF URIs: URIs of annotations and annotation lists
 - `annotations`: operations on annotations
 - `manifests`: operations on manifests
+- `search-api`: endpoint to access the IIIF search API
 
 In turn, URL anatomy is:
 
@@ -19,7 +20,9 @@ In turn, URL anatomy is:
 Where:
 - `host`: the host of your app
 - `prefix`: `data | annotations | manifests`
-- `iiif_version`: `2 | 3`, the IIIF version your data is in
+- `iiif_version`:
+    - if `prefix` is `search-api`, `1 | 2`: IIIF Search API version used
+    - otherwise, `2 | 3`, the IIIF Presentation API version your data is in
 - `slug`: the rest of the qurty URI
 
 --
