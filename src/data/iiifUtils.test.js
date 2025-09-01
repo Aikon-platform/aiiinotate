@@ -7,33 +7,32 @@ import { getManifestShortId } from "#data/iiifUtils.js";
 
 test("test 'getManifestShortId'", (t) => {
   const
-    testManifestName = `manifest_${uuid4()}`,
-    s = `extra_${uuid4()}`,
+    s1 = `manifest_${uuid4()}`,
+    s2 = `extra_${uuid4()}`,
     // regex matching hash string
     hashRgx = /^\d+$/,
-    // urls for which the function will manage to extract `testManifestName`
+    // urls for which the function will manage to extract `s1`
     urlOkArr = [
-      `http://www.example.com/examplePrefix/${testManifestName}/manifest`,
-      `http://www.example.com/examplePrefix/${testManifestName}/manifest.json`,
-      `http://www.example.com/examplePrefix/${testManifestName}/sequence/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/canvas/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/annotation/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/list/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/range/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/layer/${s}`,
-      `http://www.example.com/examplePrefix/${testManifestName}/res/${s}.png`,
+      `http://www.example.com/examplePrefix/${s1}/manifest`,
+      `http://www.example.com/examplePrefix/${s1}/manifest.json`,
+      `http://www.example.com/examplePrefix/${s1}/sequence/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/canvas/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/annotation/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/list/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/range/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/layer/${s2}`,
+      `http://www.example.com/examplePrefix/${s1}/res/${s2}.png`,
     ],
-    // urls for which `testManifestName` won't be returned, and instead a hash will be returned
+    // urls for which `s1` won't be returned, and instead a hash will be returned
     urlHashArr = [
-      `http://example.com/example/collection/${s}`,
-      `http://example.com/${testManifestName}`
+      `http://example.com/example/collection/${s2}`,
+      `http://example.com/${s1}`
     ]
 
   urlOkArr.map((url) =>
-    t.assert.strictEqual(getManifestShortId(url), testManifestName)
+    t.assert.strictEqual(getManifestShortId(url), s1)
   );
   urlHashArr.map((url) =>
     t.assert.strictEqual(hashRgx.test(getManifestShortId(url)), true)
-  )
-
+  );
 })
