@@ -25,15 +25,16 @@ start () {
     then sudo systemctl start mongod;
     fi;
 
-    if [ "$mode" = "dev" ]; then node "$SCRIPT_DIR/src/server.js";
-    elif [ "$mode" = "test" ]; then node "$SCRIPT_DIR/src/test.js";
-    else echo -e "\nERROR: unrecognized mode: '$mode'\n"; print_usage; exit 1;
+    if [ "$mode" = "dev" ]; then node --watch "$SCRIPT_DIR/src/server.js";
+    elif [ "$mode" = "test" ]; then node --test;
+    else echo -e "\nERROR: mode not implemented: '$mode'\n"; print_usage; exit 1;
     fi;
 }
 
-while getopts 'hdt' mode_flag; do
+while getopts 'hdpt' mode_flag; do
     case "${mode_flag}" in 
         d) MODE="dev";;
+        p) MOD="prod";;
         t) MODE="test";;
         h) print_usage
            exit 0;;

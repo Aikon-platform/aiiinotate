@@ -8,9 +8,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "node --watch src/server.js",
-    "prod": "node src/server.js",
-    "test": "node --test --watch src/app.test.js",
+    "start": "bash run.sh -d",
+    "prod": "bash run.sh -p",
+    "test": "bash run.sh -t",
     "lint": "npx eslint --fix",
     "cli": "node cli/index.js",
     "migrate-init": "npx migrate-mongo init",
