@@ -122,11 +122,11 @@ const makeTarget = (annotation) => {
  * NOTE this should never fail, but results will only be reliable if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
  */
 const makeAnnotationId = (annotation, manifestShortId) => {
-  // if manifestShortId hasn't aldready been extracted, re-extract it
-  manifestShortId = manifestShortId || getManifestShortId(target);
   const
     target = getAnnotationTarget(annotation),
     canvasId = getCanvasShortId(target);
+  // if manifestShortId hasn't aldready been extracted, re-extract it
+  manifestShortId = manifestShortId || getManifestShortId(target);
 
   if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
     throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)

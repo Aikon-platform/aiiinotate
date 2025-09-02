@@ -34,11 +34,9 @@ test("test 'getManifestShortId'", (t) => {
     ];
 
   urlOk.map((url) =>
-    t.assert.strictEqual(getManifestShortId(url), s1)
-  );
+    t.assert.strictEqual(getManifestShortId(url), s1));
   urlHash.map((url) =>
-    t.assert.strictEqual(hashRgx.test(getManifestShortId(url)), true)
-  );
+    t.assert.strictEqual(hashRgx.test(getManifestShortId(url)), true));
 })
 
 test("test 'getCanvasShortId'", (t) => {
@@ -55,11 +53,9 @@ test("test 'getCanvasShortId'", (t) => {
       `http://example.com/${s2}`
     ]
   urlOk.map((url) =>
-    t.assert.strictEqual(getCanvasShortId(url), s2)
-  );
+    t.assert.strictEqual(getCanvasShortId(url), s2));
   urlHash.map((url) =>
-    t.assert.strictEqual(hashRgx.test(getCanvasShortId(url)), true)
-  );
+    t.assert.strictEqual(hashRgx.test(getCanvasShortId(url)), true));
 
 })
 
@@ -71,11 +67,9 @@ test("test 'getAnnotationTarget' and 'makeTarget'", async (t) => {
         annotationsValid.map((annotation) =>
           // to test for an error, it's necessary to create a new function:
           // https://stackoverflow.com/a/6645586
-          t.assert.doesNotThrow(() => func(annotation))
-        );
+          t.assert.doesNotThrow(() => func(annotation)));
         annotationsInvalid.map((annotation) =>
-          t.assert.throws(() => func(annotation), Error)
-        )
+          t.assert.throws(() => func(annotation), Error));
       })
 
     )
@@ -87,10 +81,10 @@ test("test 'makeAnnotationId'", (t) => {
   const escapeRegExp = (string) =>
     string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 
-  console.log(">>>", process.env.APP_BASE_URL);
   const rgx = new RegExp(`^${escapeRegExp(process.env.APP_BASE_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
   annotationsValid.map((annotation) =>
-    t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true)
-  );
+    t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true));
+  annotationsInvalid.map((annotation) =>
+    t.assert.throws(() => makeAnnotationId(annotation)));
 })
 
