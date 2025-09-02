@@ -52,6 +52,7 @@
     "#annotations/*.js": "./src/data/annotations/*.js"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.49.0",
     "@fastify/mongodb": "^9.0.2",
     "commander": "^14.0.0",
     "dotenv": "^17.2.1",

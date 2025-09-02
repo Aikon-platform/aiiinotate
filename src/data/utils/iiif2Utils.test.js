@@ -1,10 +1,9 @@
 import test from "node:test";
-import fs from "fs";
 
 import annotationsValid from "#testData/annotations2Valid.js";
 import annotationsInvalid from "#testData/annotations2Invalid.js";
 import { v4 as uuid4 } from "uuid";
-import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget } from "#data/utils/iiif2Utils.js";
+import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#data/utils/iiif2Utils.js";
 
 
 const
@@ -55,39 +54,43 @@ test("test 'getCanvasShortId'", (t) => {
       `http://example.com/example/${s2}`,
       `http://example.com/${s2}`
     ]
-    urlOk.map((url) =>
-      t.assert.strictEqual(getCanvasShortId(url), s2)
-    );
-    urlHash.map((url) =>
-      t.assert.strictEqual(hashRgx.test(getCanvasShortId(url)), true)
-    );
+  urlOk.map((url) =>
+    t.assert.strictEqual(getCanvasShortId(url), s2)
+  );
+  urlHash.map((url) =>
+    t.assert.strictEqual(hashRgx.test(getCanvasShortId(url)), true)
+  );
 
 })
 
-test("test 'getAnnotationTarget'", (t) => {
-  annotationsValid.map((annotation) =>
-    t.assert.doesNotThrow(() => getAnnotationTarget(annotation))
-  );
-  annotationsInvalid.map((annotation) =>
-    // to test for an error, it's necessary to create a new function:
-    // https://stackoverflow.com/a/6645586
-    t.assert.throws(() => getAnnotationTarget(annotation), Error)
-  )
-})
+test("test 'getAnnotationTarget' and 'makeTarget'", async (t) => {
+  await Promise.all(
+    [getAnnotationTarget, makeTarget].map((func) =>
 
-test("test 'makeTarget'", (t) => {
+      t.test(`test '${func.name}'`, (t) => {
+        annotationsValid.map((annotation) =>
+          // to test for an error, it's necessary to create a new function:
+          // https://stackoverflow.com/a/6645586
+          t.assert.doesNotThrow(() => func(annotation))
+        );
+        annotationsInvalid.map((annotation) =>
+          t.assert.throws(() => func(annotation), Error)
+        )
+      })
 
-  annotationsValid.map((annotation) =>
-    t.assert.doesNotThrow(() => makeTarget(annotation))
-  );
-  annotationsInvalid.map((annotation) =>
-    // to test for an error, it's necessary to create a new function:
-    // https://stackoverflow.com/a/6645586
-    t.assert.throws(() => makeTarget(annotation), Error)
+    )
   )
 })
 
 test("test 'makeAnnotationId'", (t) => {
-  t.todo()
+  // https://stackoverflow.com/a/6969486
+  const escapeRegExp = (string) =>
+    string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+
+  console.log(">>>", process.env.APP_BASE_URL);
+  const rgx = new RegExp(`^${escapeRegExp(process.env.APP_BASE_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
+  annotationsValid.map((annotation) =>
+    t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true)
+  );
 })
 

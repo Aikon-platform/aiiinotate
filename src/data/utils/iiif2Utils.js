@@ -79,25 +79,6 @@ const getAnnotationTarget = (annotation) => {
 }
 
 /**
- * generate the annotation's ID from its `@id` key (if defined)
- * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
- * NOTE this should never fail, but results will only be reliable if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
- */
-const makeAnnotationId = (annotation, manifestShortId) => {
-  // if manifestShortId hasn't aldready been extracted, re-extract it
-  manifestShortId = manifestShortId || getManifestShortId(target);
-  const
-    target = getAnnotationTarget(annotation),
-    canvasId = getCanvasShortId(target);
-
-  if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
-    throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)
-  }
-
-  return annotationUri(manifestShortId, canvasId);
-}
-
-/**
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
  */
@@ -133,6 +114,25 @@ const makeTarget = (annotation) => {
   }
 
   return specificResource
+}
+
+/**
+ * generate the annotation's ID from its `@id` key (if defined)
+ * reimplementated from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L90-L97
+ * NOTE this should never fail, but results will only be reliable if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
+ */
+const makeAnnotationId = (annotation, manifestShortId) => {
+  // if manifestShortId hasn't aldready been extracted, re-extract it
+  manifestShortId = manifestShortId || getManifestShortId(target);
+  const
+    target = getAnnotationTarget(annotation),
+    canvasId = getCanvasShortId(target);
+
+  if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
+    throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)
+  }
+
+  return annotationUri(manifestShortId, canvasId);
 }
 
 /**
