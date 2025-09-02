@@ -1,10 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 import fastifyMongo from "@fastify/mongodb"
 
-import loadEnv from "#config/index.js";
-
-loadEnv();
-
 /** @typedef {import('fastify').FastifyInstance} FastifyInstance */
 
 /**

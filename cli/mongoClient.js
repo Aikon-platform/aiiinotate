@@ -1,11 +1,7 @@
 import { MongoClient } from "mongodb";
 
-import loadEnv from "#config/index.js";
-
-loadEnv();
-
 export default async function() {
-  const client = new MongoClient(process.env.MONGODB_CONNSTRING);// new MongoClient(config.mongodbConnString);
+  const client = new MongoClient(process.env.MONGODB_CONNSTRING);
   try {
     client.db(process.env.MONGODB_DB);  // client.db(config.mongodbName);
     return client;

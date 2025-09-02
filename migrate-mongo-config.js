@@ -2,10 +2,6 @@
 
 // In this file you can configure migrate-mongo
 
-import loadEnv from "#config/index.js"
-
-loadEnv();
-
 const config = {
   mongodb: {
     url: process.env.MONGODB_CONNSTRING,

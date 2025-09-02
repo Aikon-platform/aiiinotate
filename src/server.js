@@ -2,10 +2,7 @@
  * serve a fastify app
  */
 
-import loadEnv from "#config/index.js";
 import build from "#src/app.js";
-
-loadEnv();
 
 /**
  * @param {object} options
