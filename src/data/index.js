@@ -10,7 +10,7 @@ import commonRoutes from "#data/routes.js";
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
  */
-async function data(fastify, options) {
+function data(fastify, options, done) {
 
   const
     db = fastify.mongo.db,
@@ -21,6 +21,7 @@ async function data(fastify, options) {
   fastify.register(commonRoutes, { annotations2, annotations3 });
   fastify.register(annotationsRoutes, { annotations2, annotations3 });
 
+  done()
   return
 
 }

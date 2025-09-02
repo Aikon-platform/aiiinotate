@@ -12,7 +12,9 @@ async function annotationsRoutes (fastify, options) {
   const annotations2 = options.annotations2;
   const annotations3 = options.annotations3;
 
-  const { iiifPresentationApiVersion } = fastify.getSchemas();
+  // const { iiifPresentationApiVersion } = fastify.getSchemas();
+
+  const iiifPresentationApiVersion = fastify.schemasBase.getSchemaByUri("presentation");
 
   fastify.get(
     "/annotations/:iiifPresentationVersion/search",
@@ -21,7 +23,7 @@ async function annotationsRoutes (fastify, options) {
         params: {
           type: "object",
           properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationApiVersion// iiifPresentationApiVersion
           }
         },
         querystring: {

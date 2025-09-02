@@ -2,6 +2,7 @@ import { v4 as uuid4 } from "uuid";
 import { getHash, isNullish, isObject } from "#data/utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
+
 // IIIF PRESENTATION 2.1 RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
 // Collection 	             {scheme}://{host}/{prefix}/collection/{name}

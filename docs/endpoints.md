@@ -25,7 +25,9 @@ Where:
     - otherwise, `2 | 3`, the IIIF Presentation API version your data is in
 - `slug`: the rest of the qurty URI
 
---
+There is an extra URL prefix: `schemas`. It is only used internally (not accessible to clients or accessible through HTTP) to define the IDs of all JsonSchemas, so we won't talk about it here.
+
+---
 
 ## IIIF URIs
 
