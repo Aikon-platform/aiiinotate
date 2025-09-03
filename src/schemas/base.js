@@ -39,8 +39,6 @@ function addSchemas(fastify, options, done) {
     getSchemaByUri: (slug) => getSchemaByUri(fastify, slug)
   }) ;
 
-  console.log("src/schemas/base.js", fastify.getSchemas());
-
   done()
 }
 

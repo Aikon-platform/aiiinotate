@@ -26,11 +26,18 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 class Annnotations2 extends AnnotationsAbstract {
 
   /**
+   * @param {import("fastify").FastifyInstance} fastify
    * @param {import("mongodb").MongoClient} client
    * @param {import("mongodb").Db} db
    */
-  constructor(client, db) {
-    super(client, db, db.collection("annotations2"));
+  constructor(fastify, client, db) {
+
+    const
+      schemaAnnotation2 = fastify.schemasPresentation2.getSchemaByUri("annotation"),
+      collectionOptions = {
+        validator: { $jsonSchema: schemaAnnotation2 }
+      };
+    super(client, db, "annotations2", collectionOptions);
   }
 
   ////////////////////////////////////////////////////////////////

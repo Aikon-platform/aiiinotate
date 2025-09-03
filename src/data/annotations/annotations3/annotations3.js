@@ -5,11 +5,13 @@ import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
  */
 class Annnotations3 extends AnnotationsAbstract {
   /**
+   * @param {import("fastify").FastifyInstance} fastify
    * @param {import("mongodb").MongoClient} client
    * @param {import("mongodb").Db} db
    */
-  constructor(client, db) {
-    super(client, db, db.collection("annotations3"));
+  constructor(fastify, client, db) {
+    const collectionOptions = {};
+    super(client, db, "annotations3", collectionOptions);
   }
 
   notImplementedError() {

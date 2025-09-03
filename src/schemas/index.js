@@ -9,8 +9,6 @@ function schemas(fastify, options, done) {
   fastify.register(baseSchemas);
   fastify.register(presentation2Schemas);
 
-  console.log("src/schemas/index.js", fastify.getSchemas());
-
   done()
 }
 

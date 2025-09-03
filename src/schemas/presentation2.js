@@ -2,23 +2,6 @@ import fastifyPlugin from "fastify-plugin";
 
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
-// TODO: annotations
-// specificResource2Schema
-//
-// annotationTarget2Schema
-//
-// annotationBody2Schema
-//
-// annotation2Schema
-//
-// const annotationList2Schema = {
-//   type: "object",
-//   title: 'AnnotationList schema',
-//   required: ['@id', '@type', '@context', 'resources'],
-//   properties: {
-//     "@id": { type: "string" },
-//   }
-// }
 
 const oaSelectorTypes = [
   "oa:FragmentSelector",
@@ -119,18 +102,18 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("selector"),
     anyOf: [
-        { type: "string" },
-        { type: "array", items: { type: "string" } },
-        { $ref: makeSchemaUri("iiifImageApiSelector") },
-        { $ref: makeSchemaUri("iiifImageApiSelector") },
-        {
-          type: "array",
-          items: { $ref: makeSchemaUri("oaSelector") }
-        },
-        {
-          type: "array",
-          items: { $ref: makeSchemaUri("oaSelector") }
-        }
+      { type: "string" },
+      { type: "array", items: { type: "string" } },
+      { $ref: makeSchemaUri("iiifImageApiSelector") },
+      { $ref: makeSchemaUri("iiifImageApiSelector") },
+      {
+        type: "array",
+        items: { $ref: makeSchemaUri("oaSelector") }
+      },
+      {
+        type: "array",
+        items: { $ref: makeSchemaUri("oaSelector") }
+      }
     ]
   })
 
@@ -270,10 +253,17 @@ function addSchemas(fastify, options, done) {
     }
   });
 
+  // NOTE : not sure it's needed.
+  fastify.addSchema({
+    $id: makeSchemaUri("annotationArray"),
+    type: "array",
+    items: { $ref: makeSchemaUri("annotation") }
+  })
+
   fastify.decorate("schemasPresentation2", {
     makeSchemaUri: makeSchemaUri,
     getSchemaByUri: (slug) => getSchemaByUri(fastify, slug)
-  }) ;
+  })
 
   done();
 }

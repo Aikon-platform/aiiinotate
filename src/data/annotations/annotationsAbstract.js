@@ -9,10 +9,14 @@ class AnnotationsAbstract {
    * @param {import("mongodb").MongoClient} client
    * @param {import("mongodb").Collection} annotationsCollection
    */
-  constructor(client, db, annotationsCollection) {
+  constructor(client, db, annotationCollectionName, annotationCollectionOptions) {
+
     this.client = client;
     this.db = db;
-    this.annotationsCollection = annotationsCollection;
+    this.annotationsCollection = db.collection(
+      annotationCollectionName,
+      annotationCollectionOptions
+    );
   }
 
   /** @returns {string} */

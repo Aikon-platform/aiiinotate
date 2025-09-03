@@ -27,9 +27,6 @@ async function build(options) {
   await fastify.register(schemas);
   fastify.register(data);
 
-  console.log("src/app.js schemas", fastify.getSchemas());
-  console.log("src/app.js", fastify.schemasBase.makeSchemaUri);
-
   return fastify
 }
 

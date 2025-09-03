@@ -15,8 +15,8 @@ function data(fastify, options, done) {
   const
     db = fastify.mongo.db,
     client = fastify.mongo.client,
-    annotations2 = new Annotations2(client, db),
-    annotations3 = new Annotations3(client, db);
+    annotations2 = new Annotations2(fastify, client, db),
+    annotations3 = new Annotations3(fastify, client, db);
 
   fastify.register(commonRoutes, { annotations2, annotations3 });
   fastify.register(annotationsRoutes, { annotations2, annotations3 });
