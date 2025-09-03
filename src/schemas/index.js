@@ -6,12 +6,12 @@ import presentation2Schemas from "#src/schemas/presentation2.js";
 
 function schemas(fastify, options, done) {
 
-    fastify.register(baseSchemas);
-    fastify.register(presentation2Schemas);
+  fastify.register(baseSchemas);
+  fastify.register(presentation2Schemas);
 
-    console.log("src/schemas/index.js", fastify.getSchemas());
+  console.log("src/schemas/index.js", fastify.getSchemas());
 
-    done()
+  done()
 }
 
 export default fastifyPlugin(schemas);
