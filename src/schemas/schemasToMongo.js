@@ -19,8 +19,6 @@ import fastifyPlugin from "fastify-plugin";
 function schemasToMongo (fastify, schema) {
   const funcName = schemasToMongo.name;
 
-  // console.log("schemasToMongo schema:", schema, typeof schema);
-
   // no need to process integers to numbers
   if ( typeof schema === "string" || typeof schema === "number" ) {
     return schema
@@ -42,15 +40,17 @@ function schemasToMongo (fastify, schema) {
       if ( k==="$id" ) {
         continue
       }
-      // $refs must be resolved => replace the kv pair { $ref: schemaUri } with the corresponding schemas.
+      // $refs must be resolved => replace the kv pair { $ref: schemaUri } with the corresponding schemas and process convert those schemas to mongo.
       else if ( k==="$ref" ) {
-        return fastify.getSchema(v)
+        return schemasToMongo(fastify, fastify.getSchema(v))
       }
       // convert JsonSchema integer types to bsonType: int
       else if ( k==="type" && v==="integer" )
         out.bsonType = "int";
       // failsafe for other JsonSchema fields that are unimplemented by Mongo.
-      else if ( ["$schema", "$ref", "$default", "definitions", "format"].includes(k) ) {
+      // NOTE: "format" is also a JsonSchema keyword but we use it in our annotations.
+      // so this filter could be fine-tuned to work only at top-level of schemas. for now, we allow "format¨.
+      else if ( ["$schema", "$ref", "$default", "definitions"].includes(k) ) {
         throw new Error(`${funcName}: JSONSchema field '${k}' conversion to Mongo schema is not implemented ! in schema: ${schema}`);
       }
       // it's a "normal" value => process it.
