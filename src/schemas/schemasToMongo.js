@@ -32,10 +32,6 @@ function schemasToMongo (fastify, schema) {
     const out = {};
 
     for ( let [k,v] of Object.entries(schema) ) {
-
-      // le $id à la racine est supprimé, les autres sont maintenus...
-      console.log(`${funcName}`, k, k==="$id", v)
-
       // $id is not allowed => remove it
       if ( k==="$id" ) {
         continue

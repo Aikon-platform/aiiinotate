@@ -5,7 +5,7 @@ import util from "node:util";
 
 import build from "#src/app.js"
 
-const inspect = (theObj) => util.inspect(theObj, {showHidden: false, depth: null, colors: true});
+// const inspect = (theObj) => util.inspect(theObj, {showHidden: false, depth: null, colors: true});
 
 /**
  * @param db {import('mongodb').Db}
@@ -34,7 +34,11 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-  // TODO write the statements to rollback your migration (if possible)
-  // Example:
-  // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: false}});
+  const r = await db.command({
+    collMod: "annotations2",
+    validator: {}
+  });
+  if ( r.ok !== 1 ) {
+    throw new Error(`command failed with error: ${r}`);
+  }
 };
