@@ -42,7 +42,7 @@
     "#cli/*.js": "./cli/*.js",
     "#src/*.js": "./src/*.js",
     "#db/*.js": "./src/db/*.js",
-    "#views/*.js": "./src/views/*.js",
+    "#schemas/*.js": "./src/schemas/*.js",
     "#utils/*.js": "./src/utils/*.js",
     "#config/*.js": "./src/config/*.js",
     "#data/*.js": "./src/data/*.js",

@@ -7,11 +7,12 @@ import Fastify from "fastify";
 import dbConnector from "#db/index.js";
 import routes from "#src/routes.js";
 import data from "#data/index.js";
-import schemas from "#src/schemas/index.js";
+import schemas from "#schemas/index.js";
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {object} options
+ * @returns {import('fastify').FastifyInstance}
  */
 async function build(options) {
 
