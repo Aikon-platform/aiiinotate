@@ -9,7 +9,7 @@ import build from "#src/app.js";
  */
 async function start (options) {
 
-  const fastify = await build({ logger: true });
+  const fastify = await build();
 
   try {
     fastify.listen({ port: process.env.APP_PORT });

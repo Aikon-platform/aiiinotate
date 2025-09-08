@@ -9,7 +9,7 @@
  *
  * note that our conversion function DOES NOT DO ALL CONVERSIONS, only what we need.
  * for example, we suppose that our schemas are built using $ref's to
- * external schemas, not in schemas `definitions` fields.
+ * external schemas, and not defining sub-schemas in the `definitions` field.
  */
 
 import fastifyPlugin from "fastify-plugin";
@@ -44,8 +44,9 @@ function schemasToMongo (fastify, schema) {
       else if ( k==="type" && v==="integer" )
         out.bsonType = "int";
       // failsafe for other JsonSchema fields that are unimplemented by Mongo.
-      // NOTE: "format" is also a JsonSchema keyword but we use it in our annotations.
-      // so this filter could be fine-tuned to work only at top-level of schemas. for now, we allow "format¨.
+      // NOTE: "format" is also a JsonSchema keyword, but the "format" keyword
+      // is used in our annotations, so we don't raise if it is encounetered.
+      // this filter could be fine-tuned to work only at top-level of schemas. for now, we allow "format¨.
       else if ( ["$schema", "$ref", "$default", "definitions"].includes(k) ) {
         throw new Error(`${funcName}: JSONSchema field '${k}' conversion to Mongo schema is not implemented ! in schema: ${schema}`);
       }

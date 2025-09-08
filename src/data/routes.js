@@ -3,8 +3,9 @@ import fastifyPlugin from "fastify-plugin"
 import { pathToUrl } from "#data/utils/utils.js";
 
 async function commonRoutes(fastify, options) {
-  const { annotations2, annotations3 } = options;
-  const iiifSearchApiVersion = fastify.schemasBase.getSchemaByUri("search");
+  const
+    { annotations2, annotations3 } = options,
+    iiifSearchApiVersion = fastify.schemasBase.getSchemaByUri("search");
 
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
@@ -42,6 +43,7 @@ async function commonRoutes(fastify, options) {
       }
     }
   )
+
 }
 
 export default fastifyPlugin(commonRoutes);

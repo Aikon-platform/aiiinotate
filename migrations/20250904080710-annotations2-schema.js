@@ -14,7 +14,7 @@ import build from "#src/app.js"
  */
 export const up = async (db, client) => {
   const
-    fastify = await build({}),
+    fastify = await build(),
     fastifySchema = fastify.schemasPresentation2.getSchemaByUri("annotation"),
     schema = fastify.schemasToMongo(fastifySchema),
     commandDoc = {
