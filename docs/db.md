@@ -20,11 +20,11 @@ Where things get a bit complicated is that, while in use, our app uses a single 
 - a `main` database (default database that will be put in production)
 - a `test` database (empty database to run tests, add dummy data to and so on).
 
-For consistency, `test` must mirror the structure of `main`: same collections, indexes, validation rules etc. So, we must manage our migrations so that **all changes to the structure of `main` are reflected in the structure of `test`**. This is not possible natively through `migrate-mongo`.
+For consistency, `test` must mirror the structure of `main`: same collections, indexes, validation rules etc. So, we must manage our migrations so that **all changes to the structure of `main` are reflected in the structure of `test`**. This is not possible natively through `migrate-mongo`. Managing both databases in parrallel manually would risk a lot of inconsistencies.
 
 
-Our solution is:
-- to have **2 migration config files**, one for each database
+Our solution is to automate the management of both databases in parrallel:
+- there are **2 migration config files**, one for each database
 - both migration config files point to **the same migration scripts folder**, so that both database can apply the same migrations
 - execute all migrations by **wrapping `migrate-mongo` in a homemade script**: [`scripts/migrations.sh`](../scripts/migrations.sh).
 
