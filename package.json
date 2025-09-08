@@ -13,11 +13,10 @@
     "test": "bash run.sh -t",
     "cli": "dotenvx run -f ./src/config/.env -- node ./cli/index.js",
     "lint": "npx eslint --fix",
-    "migrate-init": "dotenvx run -f ./src/config/.env -- npx migrate-mongo init",
-    "migrate-make": "dotenvx run -f ./src/config/.env -- npx migrate-mongo create",
-    "migrate-apply": "dotenvx run -f ./src/config/.env -- npx migrate-mongo up",
-    "migrate-revert": "dotenvx run -f ./src/config/.env -- npx migrate-mongo down",
-    "migrate-revert-all": "for i in ./migrations/*; do dotenvx run -f ./src/config/.env -- npx migrate-mongo down; done"
+    "migrate-make": "bash ./scripts/migrations.sh make",
+    "migrate-apply": "bash ./scripts/migrations.sh apply",
+    "migrate-revert": "bash ./scripts/migrations.sh revert",
+    "migrate-revert-all": "bash ./scripts/migrations.sh revertAll"
   },
   "pre-commit": [
     "lint"

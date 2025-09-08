@@ -6,6 +6,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ROOT_DIR=$( dirname "$SCRIPT_DIR" )
 # src/ directory
 SRC_DIR="$ROOT_DIR/src"
+# migrations/ dir
+MIGRATIONS_DIR="$ROOT_DIR/migrations";
 # .env file
 ENV_FILE="$SRC_DIR/config/.env"
 
