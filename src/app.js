@@ -43,14 +43,14 @@ async function build(mode="default") {
   const
     mongoConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
     fastifyConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
-    fastify = Fastify(mongoConfig);
+    fastify = Fastify(fastifyConfig);
 
   // load plugins
   // see:
   //  load a plugin: https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
   //  guide to plugins: https://fastify.dev/docs/latest/Guides/Plugins-Guide/
   //  plugins encapsulation: https://fastify.dev/docs/latest/Guides/Plugins-Guide/#how-to-handle-encapsulation-and-distribution
-  await fastify.register(dbConnector, fastifyConfig);
+  await fastify.register(dbConnector, mongoConfig);
   fastify.register(routes);
   await fastify.register(schemas);
   fastify.register(data);

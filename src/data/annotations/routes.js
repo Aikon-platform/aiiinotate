@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl } from "#data/utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray } from "#data/utils/utils.js";
 
 /**
  * Encapsulates the routes
@@ -73,7 +73,7 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationUriArray",
               type: "array",
-              items: [ { $ref: "#annotationUri" } ]
+              items: [ { $ref: "annotationUri" } ]
             },
             // annotationList
             {
@@ -83,7 +83,7 @@ async function annotationsRoutes (fastify, options) {
               properties: {
                 "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
                 "@id": { type: "string" },
-                "@type": { type: "sc:AnnotationList" },
+                "@type": { type: "string", enum: ["sc:AnnotationList"] },
                 "resources": { type: "array", items: { type: "object" } }
               }
             },
@@ -95,7 +95,7 @@ async function annotationsRoutes (fastify, options) {
               properties: {
                 "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
                 "id": { type: "string" },
-                "type": { type: "AnnotationPage" },
+                "type": { type: "string", enum: ["AnnotationPage"] },
                 "items": { type: "array", items: { type: "object" } }
               }
             },
@@ -103,13 +103,13 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationListArray",
               type: "array",
-              items: [ { $ref: "#annotationList" } ]
+              items: [ { $ref: "annotationList" } ]
             },
             // array of annotationPages
             {
               $id: "annotationPageArray",
               type: "array",
-              items: [ { $ref: "#annotationPage" } ]
+              items: [ { $ref: "annotationPage" } ]
             }
           ]
         }
@@ -119,14 +119,32 @@ async function annotationsRoutes (fastify, options) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifPresentationVersion } = request.params,
-        body = request.body;
+        body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
+        mode = {
+          version: undefined,  // IIIF presentation version of the data (must match `:iiifPresentationVersion`)
+          asUri: undefined,  // data was passed as `annotationUri` or `annotationUriArray`
+        };
+
+      // data to actually insert (body with resolved URIs, if the body contains any.)
+      let annotationsArray = [];
 
       // 1. detect the type of body received.
+      mode.asUri = body.find(item => objectHasKey(item, "uri"));
+      console.log("xxxxxxxx", mode.asUri);
 
       // 2. fetch objects if we received `annotationUri` or `annotationUriArray`
-      // multiprocess ??
+      if ( mode.asUri ) {
+        annotationsArray = await Promise.all(
+          body.map(async (item) => {
+            await fetch(item.uri);
+          })
+        )
+      } else {
+        annotationsArray = body;
+      }
 
       // 3. validate (if it's an annotationList but `iiifPresentationVersion===3`, raise)
+      annotationsArray;
 
       // 4. insert
     }
