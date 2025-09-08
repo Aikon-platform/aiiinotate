@@ -28,9 +28,7 @@ start () {
     then echo -e "\nERROR: .env file not found at '$ENV_FILE'. exiting..." && exit 1;
     fi;
 
-    if ! systemctl is-active --quiet mongod;
-    then sudo systemctl start mongod;
-    fi;
+    start_mongod
 
     if [ "$mode" = "dev" ]; then
         dotenvx run -f "$ENV_FILE" -- \

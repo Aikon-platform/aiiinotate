@@ -36,13 +36,13 @@ const allowedModes = ["test", "default"]
  */
 async function build(mode="default") {
 
-  if ( allowedModes.includes(mode) ) {
+  if ( ! allowedModes.includes(mode) ) {
     throw new Error(`app.build: 'mode' param expected one of ${allowedModes}, got ${mode}`)
   }
 
   const
     mongoConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
-    fastifyConfig = mode==="test" ? fastifyConfig.mongo : fastifyConfig.mongo,
+    fastifyConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
     fastify = Fastify(mongoConfig);
 
   // load plugins

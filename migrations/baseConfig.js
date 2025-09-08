@@ -1,5 +1,6 @@
 import path from "path";
-
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * @typedef Config
@@ -9,7 +10,8 @@ import path from "path";
  * @property {migrationsDir} migrationsDir
  */
 
-console.log(">>>>", path.join(path.resolve(__dirname), "migrationScripts"));
+// path to dirctory of curent file
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * generate a migrate-mongo config file based on options defined in `mongoConfig`.

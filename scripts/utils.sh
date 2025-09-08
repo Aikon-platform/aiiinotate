@@ -184,3 +184,9 @@ run_script() {
     fi
     echo ""
 }
+
+start_mongod() {
+    if ! systemctl is-active --quiet mongod;
+    then sudo systemctl start mongod;
+    fi;
+}
