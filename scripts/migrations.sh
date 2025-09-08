@@ -6,15 +6,17 @@
 # on both the main database and the test database.
 #NOTE migrate-init is not implemented.
 
-source "./utils.js";
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+source "$SCRIPT_DIR/utils.sh" || exit 1;
 
 MIGRATIONS_DIR_MAIN="$MIGRATIONS_DIR/dbMain";
 MIGRATIONS_DIR_TEST="$MIGRATIONS_DIR/dbTest";
 
-MIGRATIONS_DIRS=("$MIGRATIONS_DIR_MAIN" "$MIGRATIONS_DIR_TEST")
+MIGRATIONS_DIRS=("$MIGRATIONS_DIR_MAIN" "$MIGRATIONS_DIR_TEST");
 
 ##################################################
-# cli
+# functions
 
 # create a migration
 migrate_make() {
@@ -25,23 +27,23 @@ migrate_make() {
     fi;
 
     echo ">>> $migration_name";
-    dotenvx run --f "$ENV_FILE" -- npx migrate-mongo create "$migration_name";
+    dotenvx run -f "$ENV_FILE" -- npx migrate-mongo create "$migration_name";
 }
 
 # apply migrations
 migrate_apply() {
-    dotenvx run --f "$ENV_FILE" -- npx migrate-mongo up;
+    dotenvx run -f "$ENV_FILE" -- npx migrate-mongo up;
 }
 
 # rvert the last migration
 migrate_revert() {
-    dotenvx run --f "$ENV_FILE" -- npx migrate-mongo down;
+    dotenvx run -f "$ENV_FILE" -- npx migrate-mongo down;
 }
 
 # undo all migrations
 migrate_revert_all() {
     for _ in "$MIGRATIONS_DIR"/migrationScripts/*;
-    do dotenvx run --f "$ENV_FILE" -- npx migrate-mongo down;
+    do dotenvx run -f "$ENV_FILE" -- npx migrate-mongo down;
     done;
 }
 
@@ -65,6 +67,7 @@ fi;
 
 for dir_ in "${MIGRATIONS_DIRS[@]}"; do
     cd "$dir_";
+    pwd;
     ls;
     $FUNC "$MIGRATION_NAME";
 done

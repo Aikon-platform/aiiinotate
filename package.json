@@ -40,6 +40,7 @@
   "imports": {
     "#cli/*.js": "./cli/*.js",
     "#src/*.js": "./src/*.js",
+    "#migrations/*.js": "./migrations/*.js",
     "#db/*.js": "./src/db/*.js",
     "#schemas/*.js": "./src/schemas/*.js",
     "#utils/*.js": "./src/utils/*.js",
