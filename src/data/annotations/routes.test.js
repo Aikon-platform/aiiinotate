@@ -1,23 +1,36 @@
 import test from "node:test";
 
 import build from "#src/app.js";
-import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
-
-
 
 test("test annotation Routes", async (t) => {
-  const fastify = await build("test");
 
-  // TODO empty the db after each test
-  // afterEach(() => console.log("finished running a test"));
+  const
+    fastify = await build("test"),
+    { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } = fastify.fileServer;
+
+  // `uriData` and `uriDataAray` reference data using URLs to the fastify app, so the app needs to be running.
+  await fastify.listen({ port: process.env.APP_PORT });
+
+  // close the app after running the tests
+  t.after(() => fastify.close());
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
-    const r = await fastify.inject({
-      method: "POST",
-      url: "/annotations/2/createMany",
-      payload: uriData,
-    })
-    t.assert.deepEqual(r.statusCode, 200)
+    // inserts that should work
+    await Promise.all(
+      [ uriData, uriDataArray, /* annotationList, annotationListArray */ ].map(async (payload) => {
+        const r = await fastify.inject({
+          method: "POST",
+          url: "/annotations/2/createMany",
+          payload: payload,
+        });
+        t.assert.deepEqual(r.statusCode, 200);
+      })
+    );
+
+    // inserts that should raise
+    // await Promise.all(
+    //   [ uriDataInvalid ].forEach()
+    // )
   })
 
   t.after(() => fastify.close());

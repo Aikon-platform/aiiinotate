@@ -3,6 +3,24 @@ import fastifyPlugin from "fastify-plugin"
 import { pathToUrl, objectHasKey, maybeToArray } from "#data/utils/utils.js";
 
 /**
+ * `annotationData` is an array of AnnotationLists or AnnotationPages, depending on the IIIF Presentaion API version.
+ * assert that it indeed the case, raise otherwise
+ * @param {2|3} iiifPresentationVersion
+ * @param {object[]} annotationData
+ * @returns {void}
+ */
+const validateAnnotationListOrPageArray = (iiifPresentationVersion, annotationData) => {
+  const { typeKey, typeVal } = {
+    2: [ "@type", "sc:AnnotationList"],
+    3: [ "type", "AnnotationPage"],
+  }[iiifPresentationVersion];
+  if ( annotationData.find((a) => a[typeKey] !== a[typeVal] ) ) {
+    throw new Error(`inconsistent data type for IIIF presentation version ${iiifPresentationVersion}. expected '${typeKey}=${typeVal}', got: ${[...new Set(annotationData.map((a) => a[typeKey]))]}`)
+  }
+}
+
+
+/**
  * Encapsulates the routes
  * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
@@ -48,7 +66,7 @@ async function annotationsRoutes(fastify, options) {
   );
 
   /**
-   * create many annotations from:
+   * create several annotations from:
    * - an annotationList (if iiifPresentationVersion === 2)
    * - an annotationPage (if iiifPresentationVersion === 3)
    * - an URI to an annotationList or annotationPage
@@ -125,37 +143,24 @@ async function annotationsRoutes(fastify, options) {
           asUri: undefined,  // data was passed as `annotationUri` or `annotationUriArray`
         };
 
-      // data to actually insert (body with resolved URIs, if the body contains any.)
+      // data to actually insert (body with resolved URIs, if the body is  `annotationUri` or `annotationUriArray`)
       let annotationsArray = [];
 
       // 1. detect the type of body received.
       mode.asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
-      console.log("xxxxxxxx", mode.asUri);
 
       // 2. fetch objects if we received `annotationUri` or `annotationUriArray`
       if (mode.asUri) {
-        console.log("hiiiiiiiiiiii");
-        // try {
-        console.log(body.map(x => x.uri));
         annotationsArray = await Promise.all(
           body.map(async (item) =>
-            fetch(item.uri)
-              .then(r => r.json())
-              .then(r => { console.log(r); return r })
-              .catch(e => { console.error(e); throw new Error(e)})
-          )
+            fetch(item.uri).then(r => r.json()))
         );
-        // } catch (e) {
-        //   console.error(e);
-        //   throw new Error(e);
-        // }
-        console.log(annotationsArray);
       } else {
         annotationsArray = body;
       }
 
       // 3. validate (if it's an annotationList but `iiifPresentationVersion===3`, raise)
-      annotationsArray;
+      validateAnnotationListOrPageArray(iiifPresentationVersion, annotationsArray);
 
       // 4. insert
     }
