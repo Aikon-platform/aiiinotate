@@ -4,10 +4,10 @@
 
 import Fastify from "fastify";
 
-import dbConnector from "#db/index.js";
-import routes from "#src/routes.js";
-import data from "#data/index.js";
+import fileServer from "#fileServer/index.js";
 import schemas from "#schemas/index.js";
+import data from "#data/index.js";
+import db from "#db/index.js";
 
 
 const testConfig = {
@@ -28,7 +28,6 @@ const defaultConfig = {
 
 const allowedModes = ["test", "default"]
 
-
 /**
  * @param {import('fastify').FastifyInstance} fastify
  * @param {"test"|"default"} mode
@@ -45,14 +44,9 @@ async function build(mode="default") {
     fastifyConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
     fastify = Fastify(fastifyConfig);
 
-  // load plugins
-  // see:
-  //  load a plugin: https://fastify.dev/docs/latest/Guides/Getting-Started/#loading-order-of-your-plugins
-  //  guide to plugins: https://fastify.dev/docs/latest/Guides/Plugins-Guide/
-  //  plugins encapsulation: https://fastify.dev/docs/latest/Guides/Plugins-Guide/#how-to-handle-encapsulation-and-distribution
-  await fastify.register(dbConnector, mongoConfig);
-  fastify.register(routes);
-  await fastify.register(schemas);
+  await fastify.register(db, mongoConfig);
+  await fastify.register(fileServer);
+  fastify.register(schemas);
   fastify.register(data);
 
   return fastify

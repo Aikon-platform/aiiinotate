@@ -1,6 +1,8 @@
 import test from "node:test";
 
 import build from "#src/app.js";
+import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
+
 
 
 test("test annotation Routes", async (t) => {
@@ -13,9 +15,7 @@ test("test annotation Routes", async (t) => {
     const r = await fastify.inject({
       method: "POST",
       url: "/annotations/2/createMany",
-      payload: {
-        uri: "testUri"
-      },
+      payload: uriData,
     })
     t.assert.deepEqual(r.statusCode, 200)
   })

@@ -7,7 +7,7 @@ import { pathToUrl, objectHasKey, maybeToArray } from "#data/utils/utils.js";
  * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
-async function annotationsRoutes (fastify, options) {
+async function annotationsRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
     iiifPresentationApiVersion = fastify.schemasBase.getSchemaByUri("presentation");
@@ -38,7 +38,7 @@ async function annotationsRoutes (fastify, options) {
         { iiifPresentationVersion } = request.params,
         { uri, asAnnotationList } = request.query;
 
-      if ( iiifPresentationVersion === 2 ) {
+      if (iiifPresentationVersion === 2) {
         const res = annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
         return res;
       } else {
@@ -64,7 +64,7 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationUri",
               type: "object",
-              required: [ "uri" ],
+              required: ["uri"],
               properties: {
                 "uri": { type: "string" },
               }
@@ -73,13 +73,13 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationUriArray",
               type: "array",
-              items: [ { $ref: "annotationUri" } ]
+              items: [{ $ref: "annotationUri" }]
             },
             // annotationList
             {
               $id: "annotationList",
               type: "object",
-              required: [ "@id", "@type", "resources" ],
+              required: ["@id", "@type", "resources"],
               properties: {
                 "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
                 "@id": { type: "string" },
@@ -91,7 +91,7 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationPage",
               type: "object",
-              required: [ "@id", "@type", "resources" ],
+              required: ["@id", "@type", "resources"],
               properties: {
                 "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
                 "id": { type: "string" },
@@ -103,13 +103,13 @@ async function annotationsRoutes (fastify, options) {
             {
               $id: "annotationListArray",
               type: "array",
-              items: [ { $ref: "annotationList" } ]
+              items: [{ $ref: "annotationList" }]
             },
             // array of annotationPages
             {
               $id: "annotationPageArray",
               type: "array",
-              items: [ { $ref: "annotationPage" } ]
+              items: [{ $ref: "annotationPage" }]
             }
           ]
         }
@@ -129,16 +129,27 @@ async function annotationsRoutes (fastify, options) {
       let annotationsArray = [];
 
       // 1. detect the type of body received.
-      mode.asUri = body.find(item => objectHasKey(item, "uri"));
+      mode.asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
       console.log("xxxxxxxx", mode.asUri);
 
       // 2. fetch objects if we received `annotationUri` or `annotationUriArray`
-      if ( mode.asUri ) {
+      if (mode.asUri) {
+        console.log("hiiiiiiiiiiii");
+        // try {
+        console.log(body.map(x => x.uri));
         annotationsArray = await Promise.all(
-          body.map(async (item) => {
-            await fetch(item.uri);
-          })
-        )
+          body.map(async (item) =>
+            fetch(item.uri)
+              .then(r => r.json())
+              .then(r => { console.log(r); return r })
+              .catch(e => { console.error(e); throw new Error(e)})
+          )
+        );
+        // } catch (e) {
+        //   console.error(e);
+        //   throw new Error(e);
+        // }
+        console.log(annotationsArray);
       } else {
         annotationsArray = body;
       }

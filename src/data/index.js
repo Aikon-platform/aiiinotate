@@ -21,9 +21,7 @@ function data(fastify, options, done) {
   fastify.register(commonRoutes, { annotations2, annotations3 });
   fastify.register(annotationsRoutes, { annotations2, annotations3 });
 
-  done()
-  return
-
+  done();
 }
 
 export default fastifyPlugin(data);
