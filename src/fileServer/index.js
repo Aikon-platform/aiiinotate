@@ -8,6 +8,9 @@ import fsPromises from "fs/promises";
 import fastifyPlugin from "fastify-plugin";
 
 import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
+import annotations2Invalid from "#fileServer/annotations2Invalid.js";
+import annotations2Valid from "#fileServer/annotations2Valid.js";
+
 
 // path to dirctory of curent file
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -53,7 +56,9 @@ async function fileServer(fastify, options) {
     uriDataArray: uriDataArray,
     annotationList: annotationList,
     annotationListArray: annotationListArray,
-    uriDataArrayInvalid: uriDataArrayInvalid
+    uriDataArrayInvalid: uriDataArrayInvalid,
+    annotations2Invalid: annotations2Invalid,
+    annotations2Valid: annotations2Valid,
   });
 }
 
