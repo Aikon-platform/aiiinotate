@@ -10,8 +10,8 @@ import fastifyMongo from "@fastify/mongodb"
 function dbConnector(fastify, options, done) {
   const connString =
     options.test
-    ? process.env.MONGODB_CONNSTRING_TEST
-    : process.env.MONGODB_CONNSTRING;
+      ? process.env.MONGODB_CONNSTRING_TEST
+      : process.env.MONGODB_CONNSTRING;
 
   fastify.register(fastifyMongo, {
     forceClose: true,
