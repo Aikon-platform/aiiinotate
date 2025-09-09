@@ -2,6 +2,7 @@
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
  * exposes an `Annnotations2` class that should contain everything you need
  */
+import util from "util";
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
@@ -51,15 +52,6 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {object}
    */
   cleanAnnotation(annotation) {
-    // TODO required fields:
-    // - @id
-    // - motivation
-    // - on
-    // TODO testsssssss
-
-    //TODO (maybe) process annotation.body["@id"]
-    console.log(`${this.funcName(this.cleanAnnotation)} : check TODOs !`);
-
     // 1) extract ids and targets
     const
       annotationTarget = makeTarget(annotation),
@@ -136,12 +128,16 @@ class Annnotations2 extends AnnotationsAbstract {
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
-  /** @param {object} annotation */
+  /**
+   * insert a single annotation
+   * @param {object} annotation
+   */
   async insertOne(annotation) {
     this.errorMessage(this.insertOne, "not implemented")
   }
 
   /**
+   * insert annotations from an array of annotations
    * @param {object[]} annotationArray
    * @return {Array}
    */
@@ -150,7 +146,7 @@ class Annnotations2 extends AnnotationsAbstract {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
       return resultCursor.insertedIds;
     } catch (e) {
-      console.log(e);
+      console.log(util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
       throw e;  // TODO polish, this is a bit brutal currently.
     }
   }

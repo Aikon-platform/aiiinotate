@@ -104,7 +104,7 @@ function addSchemas(fastify, options, done) {
     anyOf: [
       { type: "string" },
       { type: "array", items: { type: "string" } },
-      { $ref: makeSchemaUri("iiifImageApiSelector") },
+      { $ref: makeSchemaUri("oaSelector") },
       { $ref: makeSchemaUri("iiifImageApiSelector") },
       {
         type: "array",
@@ -112,7 +112,7 @@ function addSchemas(fastify, options, done) {
       },
       {
         type: "array",
-        items: { $ref: makeSchemaUri("oaSelector") }
+        items: { $ref: makeSchemaUri("iiifImageApiSelector") }
       }
     ]
   })

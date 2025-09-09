@@ -38,7 +38,7 @@ async function annotationsRoutes(fastify, options) {
         params: {
           type: "object",
           properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion// iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationApiVersion
           }
         },
         querystring: {
@@ -76,6 +76,12 @@ async function annotationsRoutes(fastify, options) {
     "/annotations/:iiifPresentationVersion/createMany",
     {
       schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationApiVersion
+          }
+        },
         body: {
           anyOf: [
             // URI
@@ -135,22 +141,15 @@ async function annotationsRoutes(fastify, options) {
     },
     async (request, reply) => {
       const
-        queryUrl = pathToUrl(request.url),
         { iiifPresentationVersion } = request.params,
-        body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
-        mode = {
-          version: undefined,  // IIIF presentation version of the data (must match `:iiifPresentationVersion`)
-          asUri: undefined,  // data was passed as `annotationUri` or `annotationUriArray`
-        };
+        body = maybeToArray(request.body);  // convert to an array to have a homogeneous data structure
 
       // data to actually insert (body with resolved URIs, if the body is  `annotationUri` or `annotationUriArray`)
       let annotationsArray = [];
 
-      // 1. detect the type of body received.
-      mode.asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
-
-      // 2. fetch objects if we received `annotationUri` or `annotationUriArray`
-      if (mode.asUri) {
+      // if we received `annotationUri` or `annotationUriArray`, fetch objects
+      const asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
+      if (asUri) {
         annotationsArray = await Promise.all(
           body.map(async (item) =>
             fetch(item.uri).then(r => r.json()))
@@ -159,10 +158,26 @@ async function annotationsRoutes(fastify, options) {
         annotationsArray = body;
       }
 
-      // 3. validate (if it's an annotationList but `iiifPresentationVersion===3`, raise)
+      // validate (i.e., if it's an annotationList but `iiifPresentationVersion===3`, raise)
       validateAnnotationListOrPageArray(iiifPresentationVersion, annotationsArray);
 
-      // 4. insert
+      // insert
+      if ( iiifPresentationVersion === 2 ) {
+        return Promise.all(annotationsArray.map(
+          async (annotationList) => {
+            try {
+              const r = await annotations2.insertAnnotationList(annotationList);
+              return r;
+            } catch (err) {
+              console.error(`failed inserting the annotationList`);
+              throw err;
+            }
+          })
+        )
+
+      } else {
+        annotations3.notImplementedError();
+      }
     }
   )
 

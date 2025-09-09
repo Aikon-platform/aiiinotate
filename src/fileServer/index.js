@@ -16,6 +16,11 @@ import annotations2Valid from "#fileServer/annotations2Valid.js";
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "data");
 
+/**
+ * NOTE: `done` musn't be used with async plugins. it raises an error `FST_ERR_PLUGIN_INVALID_ASYNC_HANDLER`
+ * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
+ * @param {object} options
+ */
 async function fileServer(fastify, options) {
 
   const availableFiles = await fsPromises.readdir(dataDir);
