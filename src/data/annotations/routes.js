@@ -3,21 +3,59 @@ import fastifyPlugin from "fastify-plugin"
 import { pathToUrl, objectHasKey, maybeToArray } from "#data/utils/utils.js";
 
 /**
- * `annotationData` is an array of AnnotationLists or AnnotationPages, depending on the IIIF Presentaion API version.
- * assert that it indeed the case, raise otherwise
+ * if obj_[typeKey] !== expectedTypeVal, throw
+ * @param {object} obj_
  * @param {2|3} iiifPresentationVersion
- * @param {object[]} annotationData
- * @returns {void}
+ * @param {string|number} typeKey
+ * @param {any} expectedTypeVal
  */
-const validateAnnotationListOrPageArray = (iiifPresentationVersion, annotationData) => {
-  const { typeKey, typeVal } = {
-    2: [ "@type", "sc:AnnotationList"],
-    3: [ "type", "AnnotationPage"],
-  }[iiifPresentationVersion];
-  if ( annotationData.find((a) => a[typeKey] !== a[typeVal] ) ) {
-    throw new Error(`inconsistent data type for IIIF presentation version ${iiifPresentationVersion}. expected '${typeKey}=${typeVal}', got: ${[...new Set(annotationData.map((a) => a[typeKey]))]}`)
+const throwIfValueError = (obj_, typeKey, expectedTypeVal) => {
+  if ( obj_[typeKey] !== expectedTypeVal ) {
+    throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj_[typeKey]}' in object ${obj_}`);
+  };
+}
+
+/**
+ * if obj_[key] is undefined, throw
+ * @param {object} obj_
+ * @param {string|number} key
+ */
+const throwIfKeyUndefined = (obj_, key) => {
+  if ( !objectHasKey(obj_, key) ) {
+    throw new Error(`key ${key} not found in object ${obj_}`);
   }
 }
+
+/**
+ * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
+ * @param {*} iiifPresentationVersion
+ * @param {*} annotationData
+ * @param {boolean} isListOrPage: it's an annotationList or annotationPage instead of a regular annotation.
+ */
+const validateAnnotationVersion = (iiifPresentationVersion, annotationData, isListOrPage=false) => {
+  const expectedTypeKeys = {
+    2: "@type",
+    3: "type"
+  };
+  throwIfKeyUndefined(expectedTypeKeys, iiifPresentationVersion);
+  const expectedTypeKey =  expectedTypeKeys[iiifPresentationVersion];
+  throwIfKeyUndefined(annotationData, expectedTypeKey);
+  const expectedTypeVal =
+    isListOrPage
+      ? { 2: "sc:AnnotationList", 3:"AnnotationPage"}
+      : { 2: "oa:Annotation", 3: "Annotation" };
+  throwIfValueError(annotationData, expectedTypeKey, expectedTypeVal);
+}
+
+/**
+ * `annotationArray` is an array of AnnotationLists or AnnotationPages, depending on the IIIF Presentaion API version.
+ * assert that it indeed the case, raise otherwise
+ * @param {2|3} iiifPresentationVersion
+ * @param {object[]} annotationArray
+ * @returns {void}
+ */
+const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray) =>
+  annotationArray.map(annotationData => validateAnnotationVersion(iiifPresentationVersion, annotationData, true));
 
 
 /**
@@ -159,7 +197,7 @@ async function annotationsRoutes(fastify, options) {
       }
 
       // validate (i.e., if it's an annotationList but `iiifPresentationVersion===3`, raise)
-      validateAnnotationListOrPageArray(iiifPresentationVersion, annotationsArray);
+      validateAnnotationArrayVersion(iiifPresentationVersion, annotationsArray);
 
       // insert
       if ( iiifPresentationVersion === 2 ) {
@@ -169,12 +207,11 @@ async function annotationsRoutes(fastify, options) {
               const r = await annotations2.insertAnnotationList(annotationList);
               return r;
             } catch (err) {
-              console.error(`failed inserting the annotationList`);
+              console.error("failed inserting the annotationList");
               throw err;
             }
           })
         )
-
       } else {
         annotations3.notImplementedError();
       }
@@ -186,15 +223,45 @@ async function annotationsRoutes(fastify, options) {
     "/annotations/:iiifPresentationVersion/create",
     {
       schema: {
-        // ...
+        type: "object",
+        properties: {
+          iiifPresentationVersion: iiifPresentationApiVersion
+        }
+      },
+      body: {
+        type: "object",
+        required: [ "@id", "@type", "motivation" ],
+        properties: {
+          "@id": { type: "string" },
+          "@type": { type: "string" },
+          "motivation": { anyOf: [
+            { type: "string", enum: [ "oa:Annotation" ] },
+            { type: "array", items: { type: "string" }}
+          ]}
+        }
       }
     },
     async (request, reply) => {
+      const
+        { iiifPresentationVersion } = request.params,
+        annotation = maybeToArray(request.body);  // convert to an array to have a homogeneous data structure
 
+      validateAnnotationVersion(iiifPresentationVersion, annotation);
+
+      // insert
+      if ( iiifPresentationVersion === 2 ) {
+        try {
+          const r = await annotations2.insertAnnotation(annotation);
+          return r;
+        } catch (err) {
+          console.error("failed inserting the annotationList");
+          throw err;
+        };
+      } else {
+        annotations3.notImplementedError();
+      }
     }
   )
-
-
 }
 
 export default fastifyPlugin(annotationsRoutes);

@@ -130,18 +130,27 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * insert a single annotation
+   * @private
    * @param {object} annotation
+   * @returns {string}: the inserted ID
    */
-  async insertOne(annotation) {
-    this.errorMessage(this.insertOne, "not implemented")
+  async #insertOne(annotation) {
+    try {
+      const resultCursor = await this.annotationsCollection.insertOne(annotation);
+      return resultCursor.insertedId;
+    } catch (e) {
+      console.log(util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
+      throw e;  // TODO polish, this is a bit brutal currently.
+    }
   }
 
   /**
    * insert annotations from an array of annotations
+   * @private
    * @param {object[]} annotationArray
-   * @return {Array}
+   * @returns {object}
    */
-  async insertMany(annotationArray) {
+  async #insertMany(annotationArray) {
     try {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
       return resultCursor.insertedIds;
@@ -152,13 +161,23 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   /**
-   * insert annotations from an annotation list.
+   * validate and insert a single annotation.
+   * @param {object} annotationArray
+   * @returns {Promise<object>}
+   */
+  async insertAnnotation(annotation) {
+    annotation = this.cleanAnnotation(annotation);
+    return this.#insertOne(annotation);
+  }
+
+  /**
+   * validate insert annotations from an annotation list.
    * @param {object} annotationArray
    * @returns {Promise<Array>}
    */
   async insertAnnotationList(annotationList) {
     const annotationArray = this.cleanAnnotationList(annotationList);
-    return this.insertMany(annotationArray);
+    return this.#insertMany(annotationArray);
   }
 
   ////////////////////////////////////////////////////////////////

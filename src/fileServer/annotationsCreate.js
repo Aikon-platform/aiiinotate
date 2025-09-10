@@ -1,6 +1,4 @@
 // test data for the annotations create and createMany functions.
-import url from "url";
-import path from "path";
 
 const toUrl = (fn) => `${process.env.APP_BASE_URL}/fileServer/${fn}`;
 

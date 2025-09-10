@@ -10,7 +10,6 @@ class AnnotationsAbstract {
    * @param {import("mongodb").Collection} annotationsCollection
    */
   constructor(client, db, annotationCollectionName, annotationCollectionOptions) {
-
     this.client = client;
     this.db = db;
     this.annotationsCollection = db.collection(
@@ -47,18 +46,6 @@ class AnnotationsAbstract {
       console.error(msg);
       return msg;
     }
-  }
-
-  async insertOne(annotation) {
-    this.errorMessage(this.insertOne, "not implemented")
-  }
-
-  async insertMany(annotationArray) {
-    this.errorMessage(this.insertOne, "not implemented")
-  }
-
-  async read(filter) {
-    this.errorMessage(this.insertOne, "not implemented")
   }
 }
 

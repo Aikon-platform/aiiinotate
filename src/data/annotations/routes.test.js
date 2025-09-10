@@ -38,5 +38,14 @@ test("test annotation Routes", async (t) => {
     // )
   })
 
+  await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
+    const r = await fastify.inject({
+      method: "POST",
+      url: "annotations/2/create",
+      payload: fastify.fileServer.annotations2Valid[0]
+    });
+    t.assert.deepEqual(r.statusCode, 200);
+  })
+
   return
 })
