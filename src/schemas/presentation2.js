@@ -12,7 +12,17 @@ const oaSelectorTypes = [
   "oa:DataPositionSelector",
   "oa:SvgSelector",
   "oa:RangeSelector",
-  "cnt:ContentAsText"  // this one is only described in IIIF Presentation API.
+  "cnt:ContentAsText",  // this one is only described in IIIF Presentation API.
+  // also allow values without extension
+  "FragmentSelector",
+  "CssSelector",
+  "XPathSelector",
+  "TextQuoteSelector",
+  "TextPositionSelector",
+  "DataPositionSelector",
+  "SvgSelector",
+  "RangeSelector",
+  "ContentAsText"
 ]
 
 const motivationValues = [
