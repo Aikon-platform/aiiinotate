@@ -1,50 +1,88 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray } from "#data/utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, inspectObj } from "#data/utils/utils.js";
 
 /**
- * if obj_[typeKey] !== expectedTypeVal, throw
- * @param {object} obj_
+ * if obj[typeKey] !== expectedTypeVal, throw
+ * @param {object} obj
  * @param {2|3} iiifPresentationVersion
  * @param {string|number} typeKey
  * @param {any} expectedTypeVal
  */
-const throwIfValueError = (obj_, typeKey, expectedTypeVal) => {
-  if ( obj_[typeKey] !== expectedTypeVal ) {
-    throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj_[typeKey]}' in object ${obj_}`);
+const throwIfValueError = (obj, typeKey, expectedTypeVal) => {
+  if ( obj[typeKey] !== expectedTypeVal ) {
+    throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj[typeKey]}' in object ${inspectObj(obj)}`);
   };
 }
 
 /**
- * if obj_[key] is undefined, throw
- * @param {object} obj_
+ * if obj[key] is undefined, throw
+ * @param {object} obj
  * @param {string|number} key
  */
-const throwIfKeyUndefined = (obj_, key) => {
-  if ( !objectHasKey(obj_, key) ) {
-    throw new Error(`key ${key} not found in object ${obj_}`);
+const throwIfKeyUndefined = (obj, key) => {
+  if ( !objectHasKey(obj, key) ) {
+    throw new Error(`key '${key}' not found in object ${inspectObj(obj)}`);
   }
 }
 
 /**
  * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
- * @param {*} iiifPresentationVersion
- * @param {*} annotationData
+ * @param {2|3} iiifPresentationVersion
+ * @param {object} annotationData
  * @param {boolean} isListOrPage: it's an annotationList or annotationPage instead of a regular annotation.
  */
 const validateAnnotationVersion = (iiifPresentationVersion, annotationData, isListOrPage=false) => {
+  // object keys are always strings, so we need to convert to string (https://stackoverflow.com/questions/3633362)
+  iiifPresentationVersion = iiifPresentationVersion.toString();
   const expectedTypeKeys = {
-    2: "@type",
-    3: "type"
+    "2": "@type",
+    "3": "type"
   };
   throwIfKeyUndefined(expectedTypeKeys, iiifPresentationVersion);
-  const expectedTypeKey =  expectedTypeKeys[iiifPresentationVersion];
+  const expectedTypeKey = expectedTypeKeys[iiifPresentationVersion];
   throwIfKeyUndefined(annotationData, expectedTypeKey);
-  const expectedTypeVal =
+  const expectedTypeVal = (
     isListOrPage
-      ? { 2: "sc:AnnotationList", 3:"AnnotationPage"}
-      : { 2: "oa:Annotation", 3: "Annotation" };
+      ? { "2": "sc:AnnotationList", "3":"AnnotationPage"}
+      : { "2": "oa:Annotation", "3": "Annotation" }
+  )[iiifPresentationVersion];
   throwIfValueError(annotationData, expectedTypeKey, expectedTypeVal);
+}
+
+/**
+ * return an error message for GET routes
+ * @param {import("fastify").FastifyReply} reply
+ * @param {any} data: the data on which the error occurred
+ * @param {Error} err
+ */
+const returnGetError = (reply, err) => reply.status(500).send({
+  errorMessage: `${err.toString()}`,
+});
+
+/**
+ * return an error message for POST routes
+ * @param {import("fastify").FastifyReply} reply
+ * @param {any} data: the data on which the error occurred
+ * @param {Error} err
+ */
+const returnPostError = (reply, data, err) => reply.status(500).send({
+  errorMessage: `failed inserting data because of error: ${err.toString()}`,
+  postData: data
+});
+
+/**
+ *
+ * @param {"GET"|"POST"} method
+ * @param {import("fastify").FastifyReply} reply
+ * @param {Error} err
+ * @param {any} data: the data on which the error occurred, for POST requests
+ */
+const returnError = (method, reply , err, data) => {
+  console.error(err.stack);
+  method==="GET"
+    ? returnGetError(reply, err)
+    : returnPostError(reply, err, data);
 }
 
 /**
@@ -94,11 +132,15 @@ async function annotationsRoutes(fastify, options) {
         { iiifPresentationVersion } = request.params,
         { uri, asAnnotationList } = request.query;
 
-      if (iiifPresentationVersion === 2) {
-        const res = annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
-        return res;
-      } else {
-        annotations3.notImplementedError();
+      try {
+        if (iiifPresentationVersion === 2) {
+          const res = annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
+          return res;
+        } else {
+          annotations3.notImplementedError();
+        }
+      } catch (err) {
+        returnError("GET", reply, err);
       }
     }
   );
@@ -185,35 +227,34 @@ async function annotationsRoutes(fastify, options) {
       // data to actually insert (body with resolved URIs, if the body is  `annotationUri` or `annotationUriArray`)
       let annotationsArray = [];
 
-      // if we received `annotationUri` or `annotationUriArray`, fetch objects
-      const asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
-      if (asUri) {
-        annotationsArray = await Promise.all(
-          body.map(async (item) =>
-            fetch(item.uri).then(r => r.json()))
-        );
-      } else {
-        annotationsArray = body;
-      }
+      try {
+        // if we received `annotationUri` or `annotationUriArray`, fetch objects
+        const asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
+        if (asUri) {
+          annotationsArray = await Promise.all(
+            body.map(async (item) =>
+              fetch(item.uri).then(r => r.json()))
+            );
+        } else {
+          annotationsArray = body;
+        }
 
-      // validate (i.e., if it's an annotationList but `iiifPresentationVersion===3`, raise)
-      validateAnnotationArrayVersion(iiifPresentationVersion, annotationsArray);
+        validateAnnotationArrayVersion(iiifPresentationVersion, annotationsArray);
 
-      // insert
-      if ( iiifPresentationVersion === 2 ) {
-        return Promise.all(annotationsArray.map(
-          async (annotationList) => {
-            try {
-              const r = await annotations2.insertAnnotationList(annotationList);
-              return r;
-            } catch (err) {
-              console.error("failed inserting the annotationList");
-              throw err;
-            }
-          })
-        )
-      } else {
-        annotations3.notImplementedError();
+        // insert
+        if ( iiifPresentationVersion === 2 ) {
+          return Promise.all(annotationsArray.map(
+            async (annotationList) => {
+                const r = await annotations2.insertAnnotationList(annotationList);
+                return r;
+            })
+          )
+        } else {
+          annotations3.notImplementedError();
+        }
+
+      } catch (err) {
+        returnError("GET", reply, err, request.body);
       }
     }
   )
@@ -223,42 +264,43 @@ async function annotationsRoutes(fastify, options) {
     "/annotations/:iiifPresentationVersion/create",
     {
       schema: {
-        type: "object",
-        properties: {
-          iiifPresentationVersion: iiifPresentationApiVersion
-        }
-      },
-      body: {
-        type: "object",
-        required: [ "@id", "@type", "motivation" ],
-        properties: {
-          "@id": { type: "string" },
-          "@type": { type: "string" },
-          "motivation": { anyOf: [
-            { type: "string", enum: [ "oa:Annotation" ] },
-            { type: "array", items: { type: "string" }}
-          ]}
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationApiVersion
+          }
+        },
+        body: {
+          type: "object",
+          required: [ "@id", "@type", "motivation" ],
+          properties: {
+            "@id": { type: "string" },
+            "@type": { type: "string" },
+            "motivation": { anyOf: [
+              { type: "string", enum: [ "oa:Annotation" ] },
+              { type: "array", items: { type: "string" }}
+            ]}
+          }
         }
       }
     },
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
-        annotation = maybeToArray(request.body);  // convert to an array to have a homogeneous data structure
+        annotation = request.body;
 
-      validateAnnotationVersion(iiifPresentationVersion, annotation);
-
-      // insert
-      if ( iiifPresentationVersion === 2 ) {
-        try {
+      try {
+        validateAnnotationVersion(iiifPresentationVersion, annotation);
+        // insert
+        if ( iiifPresentationVersion === 2 ) {
           const r = await annotations2.insertAnnotation(annotation);
           return r;
-        } catch (err) {
-          console.error("failed inserting the annotationList");
-          throw err;
-        };
-      } else {
-        annotations3.notImplementedError();
+        } else {
+          annotations3.notImplementedError();
+        }
+
+      } catch (err) {
+        returnError("GET", reply, err, request.body);
       }
     }
   )

@@ -1,3 +1,6 @@
+import util from "node:util";
+
+
 const objectHasKey = (obj, key) =>
   Object.keys(obj).includes(key);
 
@@ -53,6 +56,9 @@ const maybeToArray = (x) =>
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`
 
+const inspectObj = (obj) =>
+  util.inspect(obj, {showHidden: false, depth: null, colors: true});
+
 export {
   maybeToArray,
   pathToUrl,
@@ -61,4 +67,5 @@ export {
   isObject,
   objectHasKey,
   addKeyValueToObjIfHasKey,
+  inspectObj
 }

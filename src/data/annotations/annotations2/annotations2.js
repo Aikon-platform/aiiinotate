@@ -139,7 +139,7 @@ class Annnotations2 extends AnnotationsAbstract {
       const resultCursor = await this.annotationsCollection.insertOne(annotation);
       return resultCursor.insertedId;
     } catch (e) {
-      console.log(util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
+      console.error("#insertOne", util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
       throw e;  // TODO polish, this is a bit brutal currently.
     }
   }
@@ -155,7 +155,7 @@ class Annnotations2 extends AnnotationsAbstract {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
       return resultCursor.insertedIds;
     } catch (e) {
-      console.log(util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
+      console.error("#insertMany", util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
       throw e;  // TODO polish, this is a bit brutal currently.
     }
   }

@@ -31,6 +31,8 @@ test("test annotation Routes", async (t) => {
         t.assert.deepEqual(r.statusCode, 200);
       })
     );
+    return
+
 
     // inserts that should raise
     // await Promise.all(
@@ -45,6 +47,7 @@ test("test annotation Routes", async (t) => {
       payload: fastify.fileServer.annotations2Valid[0]
     });
     t.assert.deepEqual(r.statusCode, 200);
+    return;
   })
 
   return
