@@ -148,8 +148,8 @@ class Annnotations2 extends AnnotationsAbstract {
   #throwMongoError(err, op) {
     const errObj =
       op === "insert"
-      ? new Annotations2InsertError(err.message, err.errorResponse)
-      : new Annotations2ReadError(err.message, err.errorResponse);
+        ? new Annotations2InsertError(err.message, err.errorResponse)
+        : new Annotations2ReadError(err.message, err.errorResponse);
     throw errObj;
   }
 

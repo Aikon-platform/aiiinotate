@@ -77,7 +77,7 @@ const returnError = (method, reply , err, data) => {
   }
   reply
     .status(500)
-    .header('Content-Type', 'application/json; charset=utf-8')
+    .header("Content-Type", "application/json; charset=utf-8")
     .send(error);
 }
 
