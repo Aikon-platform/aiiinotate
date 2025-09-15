@@ -70,7 +70,9 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
 const returnError = (request, reply , err, data) => {
   const error = {
     errorMessage: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
-    errorInfo: err.info
+    errorInfo: err.info,
+    query: request.query,
+    method: request.method
   };
   if ( data !== undefined ) {
     error.inputData = data

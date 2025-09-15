@@ -21,26 +21,25 @@ test("test annotation Routes", async (t) => {
   // close the app after running the tests
   t.after(() => fastify.close());
 
-  // await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
-  //   // inserts that should work
-  //   await Promise.all(
-  //     [ uriData, uriDataArray /*, annotationList, annotationListArray */ ].map(async (payload) => {
-  //       const r = await fastify.inject({
-  //         method: "POST",
-  //         url: "/annotations/2/createMany",
-  //         payload: payload,
-  //       });
-  //       t.assert.deepEqual(r.statusCode, 200);
-  //     })
-  //   );
-  //   return
-  //
-  //
-  //   // inserts that should raise
-  //   // await Promise.all(
-  //   //   [ uriDataInvalid ].forEach()
-  //   // )
-  // })
+  await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
+    // inserts that should work
+    await Promise.all(
+      [ uriData, uriDataArray /*, annotationList, annotationListArray */ ].map(async (payload) => {
+        const r = await fastify.inject({
+          method: "POST",
+          url: "/annotations/2/createMany",
+          payload: payload,
+        });
+        t.assert.deepEqual(r.statusCode, 200);
+      })
+    );
+    return
+
+    // inserts that should raise
+    // await Promise.all(
+    //   [ uriDataInvalid ].forEach()
+    // )
+  })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     await Promise.all(

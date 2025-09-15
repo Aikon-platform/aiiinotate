@@ -29,8 +29,8 @@ class Annotations2ReadError extends Error {
 }
 
 class Annotations2InsertError extends Error {
-  constructor(mongoMessage, errInfo) {
-    super(`Annotations2InsertError: Mongo error when inserting data: ${mongoMessage}`);
+  constructor(message, errInfo) {
+    super(`Annotations2InsertError: error when inserting data: ${message}`);
     this.info = errInfo;
   }
 }
@@ -153,6 +153,28 @@ class Annnotations2 extends AnnotationsAbstract {
     throw errObj;
   }
 
+  /**
+   * make a uniform response format for #insertOne and #insertMany
+   * @param {import("mongodb").InsertManyResult | import("mongodb").InsertOneResult} mongoRes
+   */
+  #makeInsertResponse(mongoRes) {
+    // mongoRes is `InsertOneResult`
+    if ( objectHasKey(mongoRes, "insertedId") ) {
+      return {
+        insertCount: 1,
+        insertedIds: [ mongoRes.insertedId ]
+      }
+    // mongoRes is `insertManyResult`
+    } else if ( objectHasKey(mongoRes, "insertedIds") ) {
+      return {
+        insertedCount: mongoRes.insertedCount,
+        insertedIds: mongoRes.insertedIds
+      }
+    } else {
+      throw new Annotations2InsertError("unrecognized mongo response: expected one of 'InsertManyResult' or 'InsertOneResult'", mongoRes)
+    }
+  }
+
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -165,7 +187,7 @@ class Annnotations2 extends AnnotationsAbstract {
   async #insertOne(annotation) {
     try {
       const resultCursor = await this.annotationsCollection.insertOne(annotation);
-      return resultCursor.insertedId;
+      return this.#makeInsertResponse(resultCursor);
     } catch (err) {
       this.#throwMongoError("insert", err);
     }
@@ -180,7 +202,7 @@ class Annnotations2 extends AnnotationsAbstract {
   async #insertMany(annotationArray) {
     try {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
-      return resultCursor.insertedIds;
+      return this.#makeInsertResponse(resultCursor);
     } catch (err) {
       this.#throwMongoError("insert", err);
     }

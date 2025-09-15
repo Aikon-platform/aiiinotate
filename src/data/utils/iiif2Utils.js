@@ -107,7 +107,6 @@ const makeTarget = (annotation) => {
     // if 'target' is an object but not a specificresource, raise.
     if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
       specificResource = target;
-
       // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
       if ( isObject(target.selector) && Object.keys(target.selector).includes("type") ) {
         target.selector["@type"] = target.selector.type;
