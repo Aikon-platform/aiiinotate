@@ -19,7 +19,7 @@ import fastifyPlugin from "fastify-plugin";
 function schemasToMongo (fastify, schema) {
   const funcName = schemasToMongo.name;
 
-  // no need to process integers to numbers
+  // no need to process strings or numbers
   if ( typeof schema === "string" || typeof schema === "number" ) {
     return schema
   }
@@ -47,7 +47,7 @@ function schemasToMongo (fastify, schema) {
       // NOTE: "format" is also a JsonSchema keyword, but the "format" keyword
       // is used in our annotations, so we don't raise if it is encounetered.
       // this filter could be fine-tuned to work only at top-level of schemas. for now, we allow "format¨.
-      else if ( ["$schema", "$ref", "$default", "definitions"].includes(k) ) {
+      else if ( ["$schema", "$default", "definitions"].includes(k) ) {
         throw new Error(`${funcName}: JSONSchema field '${k}' conversion to Mongo schema is not implemented ! in schema: ${schema}`);
       }
       // it's a "normal" value => process it.

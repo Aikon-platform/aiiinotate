@@ -99,7 +99,7 @@ const makeTarget = (annotation) => {
       "@type": "oa:SpecificResource",
       full: full,
       selector: {
-        type: "oa:FragmentSelector",
+        "@type": "oa:FragmentSelector",
         value: fragment
       }
     }
@@ -107,6 +107,11 @@ const makeTarget = (annotation) => {
     // if 'target' is an object but not a specificresource, raise.
     if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
       specificResource = target;
+      if ( isObject(target.selector) && Object.keys(target.selector).includes("type") ) {
+        // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
+        target.selector["@type"] = target.selector.type;
+        delete target.selector.type;
+      }
     } else {
       throw err
     }
