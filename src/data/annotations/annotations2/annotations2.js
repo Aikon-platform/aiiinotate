@@ -143,9 +143,9 @@ class Annnotations2 extends AnnotationsAbstract {
    * throw an error with just the object describing the error data (and not the stack or anything else).
    * used to propagate write errors to routes.
    * @param {import("mongodb").MongoServerError} err: the mongo error
-   * @param {"read"|"insert"} op: is it a read or insert error
+   * @param {"read"|"insert"} op: describes the database operation: is it a read or insert error
    */
-  #throwMongoError(err, op) {
+  #throwMongoError(op, err) {
     const errObj =
       op === "insert"
         ? new Annotations2InsertError(err.message, err.errorResponse)
@@ -167,7 +167,7 @@ class Annnotations2 extends AnnotationsAbstract {
       const resultCursor = await this.annotationsCollection.insertOne(annotation);
       return resultCursor.insertedId;
     } catch (err) {
-      this.#throwMongoError(err);
+      this.#throwMongoError("insert", err);
     }
   }
 
@@ -182,7 +182,7 @@ class Annnotations2 extends AnnotationsAbstract {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
       return resultCursor.insertedIds;
     } catch (err) {
-      this.#throwMongoError(err);
+      this.#throwMongoError("insert", err);
     }
   }
 

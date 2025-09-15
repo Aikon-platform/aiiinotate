@@ -62,14 +62,14 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
 
 /**
  *
- * @param {"GET"|"POST"} method
+ * @param {import("fastify").FastifyRequest} request
  * @param {import("fastify").FastifyReply} reply
- * @param {Error} err
- * @param {any} data: the data on which the error occurred, for POST requests
+ * @param {Error} err: the error we're returning
+ * @param {any?} data: the data on which the error occurred, for POST requests
  */
-const returnError = (method, reply , err, data) => {
+const returnError = (request, reply , err, data) => {
   const error = {
-    errorMessage: `failed ${method} request because of error: ${err.message}`,
+    errorMessage: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
     errorInfo: err.info
   };
   if ( data !== undefined ) {
@@ -126,7 +126,7 @@ async function annotationsRoutes(fastify, options) {
           annotations3.notImplementedError();
         }
       } catch (err) {
-        returnError("GET", reply, err);
+        returnError(request, reply, err);
       }
     }
   );
@@ -240,7 +240,7 @@ async function annotationsRoutes(fastify, options) {
         }
 
       } catch (err) {
-        returnError("GET", reply, err, request.body);
+        returnError(request, reply, err, request.body);
       }
     }
   )
@@ -286,7 +286,7 @@ async function annotationsRoutes(fastify, options) {
         }
 
       } catch (err) {
-        returnError("GET", reply, err, request.body);
+        returnError(request, reply, err, request.body);
       }
     }
   )
