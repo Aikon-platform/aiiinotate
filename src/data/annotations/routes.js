@@ -51,25 +51,14 @@ const validateAnnotationVersion = (iiifPresentationVersion, annotationData, isLi
 }
 
 /**
- * return an error message for GET routes
- * @param {import("fastify").FastifyReply} reply
- * @param {any} data: the data on which the error occurred
- * @param {Error} err
+ * `annotationArray` is an array of AnnotationLists or AnnotationPages, depending on the IIIF Presentaion API version.
+ * assert that it indeed the case, raise otherwise
+ * @param {2|3} iiifPresentationVersion
+ * @param {object[]} annotationArray
+ * @returns {void}
  */
-const returnGetError = (reply, err) => reply.status(500).send({
-  errorMessage: `${err.toString()}`,
-});
-
-/**
- * return an error message for POST routes
- * @param {import("fastify").FastifyReply} reply
- * @param {any} data: the data on which the error occurred
- * @param {Error} err
- */
-const returnPostError = (reply, data, err) => reply.status(500).send({
-  errorMessage: `failed inserting data because of error: ${err.toString()}`,
-  postData: data
-});
+const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray) =>
+  annotationArray.map(annotationData => validateAnnotationVersion(iiifPresentationVersion, annotationData, true));
 
 /**
  *
@@ -79,21 +68,18 @@ const returnPostError = (reply, data, err) => reply.status(500).send({
  * @param {any} data: the data on which the error occurred, for POST requests
  */
 const returnError = (method, reply , err, data) => {
-  console.error(err.stack);
-  method==="GET"
-    ? returnGetError(reply, err)
-    : returnPostError(reply, err, data);
+  const error = {
+    errorMessage: `failed ${method} request because of error: ${err.message}`,
+    errorInfo: err.info
+  };
+  if ( data !== undefined ) {
+    error.inputData = data
+  }
+  reply
+    .status(500)
+    .header('Content-Type', 'application/json; charset=utf-8')
+    .send(error);
 }
-
-/**
- * `annotationArray` is an array of AnnotationLists or AnnotationPages, depending on the IIIF Presentaion API version.
- * assert that it indeed the case, raise otherwise
- * @param {2|3} iiifPresentationVersion
- * @param {object[]} annotationArray
- * @returns {void}
- */
-const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray) =>
-  annotationArray.map(annotationData => validateAnnotationVersion(iiifPresentationVersion, annotationData, true));
 
 
 /**
@@ -234,7 +220,7 @@ async function annotationsRoutes(fastify, options) {
           annotationsArray = await Promise.all(
             body.map(async (item) =>
               fetch(item.uri).then(r => r.json()))
-            );
+          );
         } else {
           annotationsArray = body;
         }
@@ -245,8 +231,8 @@ async function annotationsRoutes(fastify, options) {
         if ( iiifPresentationVersion === 2 ) {
           return Promise.all(annotationsArray.map(
             async (annotationList) => {
-                const r = await annotations2.insertAnnotationList(annotationList);
-                return r;
+              const r = await annotations2.insertAnnotationList(annotationList);
+              return r;
             })
           )
         } else {

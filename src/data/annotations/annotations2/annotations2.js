@@ -6,7 +6,7 @@ import util from "util";
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
-import { objectHasKey, isNullish, maybeToArray } from "#data/utils/utils.js";
+import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#data/utils/iiif2Utils.js";
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
@@ -20,6 +20,20 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 // Range 	                   {scheme}://{host}/{prefix}/{identifier}/range/{name}
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
+
+class Annotations2ReadError extends Error {
+  constructor(mongoMessage, errInfo) {
+    super(`Annotations2ReadError: Mongo error when reading data: ${mongoMessage}`);
+    this.info = errInfo;
+  }
+}
+
+class Annotations2InsertError extends Error {
+  constructor(mongoMessage, errInfo) {
+    super(`Annotations2InsertError: Mongo error when inserting data: ${mongoMessage}`);
+    this.info = errInfo;
+  }
+}
 
 /**
  * @extends {AnnotationsAbstract}
@@ -51,7 +65,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {object} annotation
    * @returns {object}
    */
-  cleanAnnotation(annotation) {
+  #cleanAnnotation(annotation) {
     // 1) extract ids and targets
     const
       annotationTarget = makeTarget(annotation),
@@ -112,17 +126,31 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {object} annotationList
    * @returns {object[]}
    */
-  cleanAnnotationList(annotationList) {
+  #cleanAnnotationList(annotationList) {
     if (
       annotationList["@type"] !== "sc:AnnotationList"
       || !objectHasKey(annotationList, "@id")
       || !Array.isArray(annotationList.resources)
     ) {
-      this.errorMessage(this.cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
+      this.errorMessage(this.#cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`.
-    // otherwise, `this` is undefined in `cleanAnnotation`.
-    return annotationList.resources.map((ressource) => this.cleanAnnotation(ressource))
+    // otherwise, `this` is undefined in `#cleanAnnotation`.
+    return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
+  }
+
+  /**
+   * throw an error with just the object describing the error data (and not the stack or anything else).
+   * used to propagate write errors to routes.
+   * @param {import("mongodb").MongoServerError} err: the mongo error
+   * @param {"read"|"insert"} op: is it a read or insert error
+   */
+  #throwMongoError(err, op) {
+    const errObj =
+      op === "insert"
+      ? new Annotations2InsertError(err.message, err.errorResponse)
+      : new Annotations2ReadError(err.message, err.errorResponse);
+    throw errObj;
   }
 
   ////////////////////////////////////////////////////////////////
@@ -138,9 +166,8 @@ class Annnotations2 extends AnnotationsAbstract {
     try {
       const resultCursor = await this.annotationsCollection.insertOne(annotation);
       return resultCursor.insertedId;
-    } catch (e) {
-      console.error("#insertOne", util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
-      throw e;  // TODO polish, this is a bit brutal currently.
+    } catch (err) {
+      this.#throwMongoError(err);
     }
   }
 
@@ -154,9 +181,8 @@ class Annnotations2 extends AnnotationsAbstract {
     try {
       const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
       return resultCursor.insertedIds;
-    } catch (e) {
-      console.error("#insertMany", util.inspect(e.writeErrors, {showHidden: false, depth: null, colors: true}));
-      throw e;  // TODO polish, this is a bit brutal currently.
+    } catch (err) {
+      this.#throwMongoError(err);
     }
   }
 
@@ -166,7 +192,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<object>}
    */
   async insertAnnotation(annotation) {
-    annotation = this.cleanAnnotation(annotation);
+    annotation = this.#cleanAnnotation(annotation);
     return this.#insertOne(annotation);
   }
 
@@ -176,7 +202,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<Array>}
    */
   async insertAnnotationList(annotationList) {
-    const annotationArray = this.cleanAnnotationList(annotationList);
+    const annotationArray = this.#cleanAnnotationList(annotationList);
     return this.#insertMany(annotationArray);
   }
 
