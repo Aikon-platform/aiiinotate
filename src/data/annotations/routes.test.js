@@ -4,6 +4,32 @@ import build from "#src/app.js";
 
 import { inspectObj, arrayEqualsShallow } from "#data/utils/utils.js"
 
+/**
+ * @param {import("node:test")} t
+ * @param {import("fastify").FastifyReply} r
+ * @returns {void}
+ */
+const assertCreateValidResponse = (t, r) => {
+  t.assert.deepStrictEqual(r.statusCode, 200);
+  t.assert.deepStrictEqual(
+    Object.keys(JSON.parse(r.body)).sort(),
+    ["insertedCount", "insertedIds"].sort()
+  );
+}
+
+/**
+ * @param {import("node:test")} t
+ * @param {import("fastify").FastifyReply} r
+ * @returns {void}
+ */
+const assertCreateInvalidResponse = (t, r) => {
+  t.assert.deepStrictEqual(r.statusCode, 500);
+  t.assert.deepStrictEqual(
+    Object.keys(JSON.parse(r.body)).sort(),
+    ["errorMessage", "errorInfo", "query", "method", "inputData"].sort(),
+  );
+}
+
 test("test annotation Routes", async (t) => {
 
   const
@@ -27,13 +53,13 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // inserts that should work
     await Promise.all(
-      [ uriData, uriDataArray /*, annotationList, annotationListArray */ ].map(async (payload) => {
+      [ uriData, uriDataArray/*, annotationList, annotationListArray*/ ].map(async (payload) => {
         const r = await fastify.inject({
           method: "POST",
           url: "/annotations/2/createMany",
           payload: payload,
         });
-        t.assert.deepEqual(r.statusCode, 200);
+        assertCreateValidResponse(t, r);
       })
     );
     return
@@ -54,7 +80,7 @@ test("test annotation Routes", async (t) => {
           payload: annotation
         });
         console.log("TEST RESPONSE BODY:", inspectObj(JSON.parse(r.body)));
-        t.assert.deepEqual(r.statusCode, 200);
+        assertCreateValidResponse(t, r);
       })
     )
 
@@ -66,15 +92,7 @@ test("test annotation Routes", async (t) => {
           url: "annotations/2/create",
           payload: annotation
         });
-        t.assert.deepEqual(r.statusCode, 500);
-        t.assert.deepEqual(
-          arrayEqualsShallow(
-            Object.keys(JSON.parse(r.body)),
-            ["errorMessage", "errorInfo", "query", "method", "inputData"],
-            true
-          ),
-          true
-        )
+        assertCreateInvalidResponse(t, r);
       })
     )
   })

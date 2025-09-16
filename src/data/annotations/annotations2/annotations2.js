@@ -156,19 +156,20 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * make a uniform response format for #insertOne and #insertMany
    * @param {import("mongodb").InsertManyResult | import("mongodb").InsertOneResult} mongoRes
+   * @returns {import("#data/types.js").InsertResponseType}
    */
   #makeInsertResponse(mongoRes) {
     // mongoRes is `InsertOneResult`
     if ( objectHasKey(mongoRes, "insertedId") ) {
       return {
-        insertCount: 1,
+        insertedCount: 1,
         insertedIds: [ mongoRes.insertedId ]
       }
     // mongoRes is `insertManyResult`
     } else if ( objectHasKey(mongoRes, "insertedIds") ) {
       return {
         insertedCount: mongoRes.insertedCount,
-        insertedIds: mongoRes.insertedIds
+        insertedIds: Object.values(mongoRes.insertedIds)
       }
     } else {
       throw new Annotations2InsertError("unrecognized mongo response: expected one of 'InsertManyResult' or 'InsertOneResult'", mongoRes)
@@ -219,8 +220,8 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   /**
-   * validate insert annotations from an annotation list.
-   * @param {object} annotationArray
+   * validate and insert annotations from an annotation list.
+   * @param {object} annotationList
    * @returns {Promise<Array>}
    */
   async insertAnnotationList(annotationList) {

@@ -83,6 +83,14 @@ const returnError = (request, reply , err, data) => {
     .send(error);
 }
 
+/**
+ * @param {import("#data/types.js").InsertResponseArrayType} insertResponseArray
+ * @returns {import("#data/types.js").InsertResponseType}
+ */
+const reduceinsertResponseArray = (insertResponseArray) => ({
+  insertedCount: insertResponseArray.reduce((acc, r) => acc+r.insertedCount, 0),
+  insertedIds: insertResponseArray.reduce((acc, r) => acc.concat(r.insertedIds), [])
+})
 
 /**
  * Encapsulates the routes
@@ -210,7 +218,8 @@ async function annotationsRoutes(fastify, options) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
-        body = maybeToArray(request.body);  // convert to an array to have a homogeneous data structure
+        body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
+        insertResponseArray = [];
 
       // data to actually insert (body with resolved URIs, if the body is  `annotationUri` or `annotationUriArray`)
       let annotationsArray = [];
@@ -231,12 +240,13 @@ async function annotationsRoutes(fastify, options) {
 
         // insert
         if ( iiifPresentationVersion === 2 ) {
-          return Promise.all(annotationsArray.map(
+          await Promise.all(annotationsArray.map(
             async (annotationList) => {
               const r = await annotations2.insertAnnotationList(annotationList);
-              return r;
-            })
-          )
+              insertResponseArray.push(r);
+            }
+          ));
+          return reduceinsertResponseArray(insertResponseArray);
         } else {
           annotations3.notImplementedError();
         }
