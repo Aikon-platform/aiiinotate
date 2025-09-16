@@ -5,7 +5,7 @@ import fsPromises from "fs/promises";
 
 import fastifyPlugin from "fastify-plugin";
 
-import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
+import { annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#fileServer/annotationsCreate.js";
 import { readFileToObject } from "#fileServer/utils.js";
 import { annotations2Invalid, annotations2Valid }  from "#src/fileServer/annotations2.js";
 
@@ -46,11 +46,12 @@ async function fileServer(fastify, options) {
   )
 
   fastify.decorate("fileServer", {
-    uriData: uriData,
-    uriDataArray: uriDataArray,
+    annotationListUri: annotationListUri,
+    annotationListUriArray: annotationListUriArray,
     annotationList: annotationList,
     annotationListArray: annotationListArray,
-    uriDataArrayInvalid: uriDataArrayInvalid,
+    annotationListUriArrayInvalid: annotationListUriArrayInvalid,
+    annotationListUriInvalid: annotationListUriInvalid,
     annotations2Invalid: annotations2Invalid,
     annotations2Valid: annotations2Valid,
   });

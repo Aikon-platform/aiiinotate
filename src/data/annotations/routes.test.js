@@ -30,13 +30,37 @@ const assertCreateInvalidResponse = (t, r) => {
   );
 }
 
+/** @param {import("fastify").FastifyInstance} fastify */
+const testPostRouteCurry = (fastify) =>
+  /** @param {boolean} success: if `true` test that the query succeeds. else, test that it fails */
+  (success) =>
+    /**
+     * @param {import("node:test")} t
+     * @param {string} route: example: /annotations/2/createMany
+     * @param {object} payload
+     */
+    async (t, route, payload) => {
+        const r = await fastify.inject({
+          method: "POST",
+          url: route,
+          payload: payload,
+        });
+        success
+          ? assertCreateValidResponse(t, r)
+          : assertCreateInvalidResponse(t, r);
+        return;
+    }
+
 test("test annotation Routes", async (t) => {
 
   const
     fastify = await build("test"),
-    { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } = fastify.fileServer;
+    { annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } = fastify.fileServer,
+    testPostRoute = testPostRouteCurry(fastify),
+    testPostRouteSuccess = testPostRoute(true),
+    testPostRouteFailure = testPostRoute(false);
 
-  // `uriData` and `uriDataArray` reference data using URLs to the fastify app, so the app needs to be running.
+  // `annotationListUri` and `annotationListUriArray` reference data using URLs to the fastify app, so the app needs to be running.
   try {
     await fastify.listen({ port: process.env.APP_PORT });
   } catch (err) {
@@ -51,59 +75,41 @@ test("test annotation Routes", async (t) => {
   t.afterEach(fastify.emptyCollections);
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
-    // inserts that should work
-
     // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error
     // `https://fastify.dev/docs/latest/Reference/Errors/#fst_err_ctp_body_too_large`
     const annotationListArrayLimit = annotationListArray.map(a => {
       a.resources = a.resources.length > 500 ? a.resources.slice(0,500) : a.resources
       return a;
     });
+
+    // inserts that should work
     await Promise.all(
-      [ uriData, uriDataArray, annotationList, annotationListArrayLimit ].map(async (payload) => {
-        const r = await fastify.inject({
-          method: "POST",
-          url: "/annotations/2/createMany",
-          payload: payload,
-        });
-        if ( r.statusCode !== 200 ) {
-          console.log(JSON.parse(r.body));
-          console.log("ON::::::::::::::::::::::", payload)
-        }
-        assertCreateValidResponse(t, r);
-      })
+      [ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ].map(async (payload) =>
+        await testPostRouteSuccess(t, "/annotations/2/createMany", payload)
+      )
     );
-    return
 
     // inserts that should raise
-    // await Promise.all(
-    //   [ uriDataInvalid ].forEach()
-    // )
+    await Promise.all(
+      [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
+        await testPostRouteFailure(t, "annotations/2/createMany", payload)
+      )
+    )
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     // inserts that shouldn't raise
     await Promise.all(
-      fastify.fileServer.annotations2Valid.map(async (annotation) => {
-        const r = await fastify.inject({
-          method: "POST",
-          url: "annotations/2/create",
-          payload: annotation
-        });
-        assertCreateValidResponse(t, r);
-      })
+      fastify.fileServer.annotations2Valid.map(async (payload) =>
+        await testPostRouteSuccess(t, "annotations/2/create", payload)
+      )
     )
 
     // inserts that should raise
     await Promise.all(
-      fastify.fileServer.annotations2Invalid.map(async (annotation) => {
-        const r = await fastify.inject({
-          method: "POST",
-          url: "annotations/2/create",
-          payload: annotation
-        });
-        assertCreateInvalidResponse(t, r);
-      })
+      fastify.fileServer.annotations2Invalid.map(async (payload) =>
+        await testPostRouteFailure(t, "annotations/2/create", payload)
+      )
     )
   })
 
