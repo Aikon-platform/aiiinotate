@@ -2,8 +2,6 @@
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
  * exposes an `Annnotations2` class that should contain everything you need
  */
-import util from "util";
-
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
@@ -20,6 +18,10 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 // Range 	                   {scheme}://{host}/{prefix}/{identifier}/range/{name}
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
+
+/**
+ * @typedef {import("#data/types.js").InsertResponseType} InsertResponseType
+ */
 
 class Annotations2ReadError extends Error {
   constructor(mongoMessage, errInfo) {
@@ -156,7 +158,7 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * make a uniform response format for #insertOne and #insertMany
    * @param {import("mongodb").InsertManyResult | import("mongodb").InsertOneResult} mongoRes
-   * @returns {import("#data/types.js").InsertResponseType}
+   * @returns {InsertResponseType}
    */
   #makeInsertResponse(mongoRes) {
     // mongoRes is `InsertOneResult`
@@ -183,7 +185,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * insert a single annotation
    * @private
    * @param {object} annotation
-   * @returns {string}: the inserted ID
+   * @returns {InsertResponseType}
    */
   async #insertOne(annotation) {
     try {
@@ -198,7 +200,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * insert annotations from an array of annotations
    * @private
    * @param {object[]} annotationArray
-   * @returns {object}
+   * @returns {InsertResponseType}
    */
   async #insertMany(annotationArray) {
     try {
@@ -212,7 +214,7 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * validate and insert a single annotation.
    * @param {object} annotationArray
-   * @returns {Promise<object>}
+   * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotation(annotation) {
     annotation = this.#cleanAnnotation(annotation);
@@ -222,7 +224,7 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * validate and insert annotations from an annotation list.
    * @param {object} annotationList
-   * @returns {Promise<Array>}
+   * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotationList(annotationList) {
     const annotationArray = this.#cleanAnnotationList(annotationList);

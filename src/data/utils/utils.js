@@ -54,18 +54,18 @@ const getHash = (str, seed=0) => {
  * shallow-compare 2 arrays.
  * @param {Array} a1
  * @param {Array} a2
- * @param {boolean} sorted: if `true`, sort before comparing
+ * @param {boolean} sort: if `true`, sort before comparing
  * @returns {boolean}
  */
-const arrayEqualsShallow = (a1, a2, sorted=false) => {
+const arrayEqualsShallow = (a1, a2, sort=false) => {
   if ( !Array.isArray(a1) || !Array.isArray(a2) ) {
     throw new Error(`Incorrect type: 'a1', 'a2' must be arrays, got '${typeof a1}' and '${typeof a2}' on a1='${a1}' and a2='${a2}'`)
   }
-  if ( sorted ) {
+  if ( sort ) {
     a1 = a1.sort();
     a2 = a2.sort();
   }
-  if ( ! a1.length===a2.length ) {
+  if ( a1.length!==a2.length ) {
     return false;
   }
   return a1.every((el, i) => a2[i]===el);

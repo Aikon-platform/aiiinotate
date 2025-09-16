@@ -69,10 +69,10 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
  */
 const returnError = (request, reply , err, data) => {
   const error = {
-    errorMessage: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
-    errorInfo: err.info || {},
-    query: request.query,
-    method: request.method
+    message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
+    info: err.info || {},
+    method: request.method,
+    url: request.url
   };
   if ( data !== undefined ) {
     error.inputData = data
@@ -147,6 +147,12 @@ async function annotationsRoutes(fastify, options) {
    * - an annotationPage (if iiifPresentationVersion === 3)
    * - an URI to an annotationList or annotationPage
    * - or an Array of any of the previous
+   *
+   * note that POST body size is limited to 1MB, so your query might be rejected. body size is limited by:
+   * - fastify's `bodyLimit` (https://fastify.dev/docs/latest/Reference/Server/#bodylimit)
+   * - nginx's `client_max_body_size` (https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size)
+   * - any other server's max body size.
+   * both fastify and nginx limit body size defaults to to 1MB.
    */
   fastify.post(
     "/annotations/:iiifPresentationVersion/createMany",

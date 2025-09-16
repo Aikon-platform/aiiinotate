@@ -1,20 +1,15 @@
 /**
  * the `fileServer` plugin makes test files available to the entire fastify app, mostly for testing purposes.
  */
-import url from "url";
-import path from "path";
 import fsPromises from "fs/promises";
 
 import fastifyPlugin from "fastify-plugin";
 
 import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
+import { readFile } from "#fileServer/utils.js";
 import annotations2Invalid from "#fileServer/annotations2Invalid.js";
 import annotations2Valid from "#fileServer/annotations2Valid.js";
 
-
-// path to dirctory of curent file
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, "data");
 
 /**
  * NOTE: `done` musn't be used with async plugins. it raises an error `FST_ERR_PLUGIN_INVALID_ASYNC_HANDLER`
@@ -22,8 +17,6 @@ const dataDir = path.join(__dirname, "data");
  * @param {object} options
  */
 async function fileServer(fastify, options) {
-
-  const availableFiles = await fsPromises.readdir(dataDir);
 
   /** route to return a file in `dataDir` */
   fastify.get(
@@ -47,12 +40,9 @@ async function fileServer(fastify, options) {
         }
       }
     },
-    async (request, reply) => {
+    (request, reply) => {
       const { fileName } = request.params;
-      if ( !availableFiles.includes(fileName) ) {
-        throw new Error(`file not found: ${fileName}`);
-      }
-      return await fsPromises.readFile(path.join(dataDir, fileName), { encoding: "utf8" })
+      return readFile(fileName);
     }
   )
 

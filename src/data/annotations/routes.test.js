@@ -2,7 +2,7 @@ import test from "node:test";
 
 import build from "#src/app.js";
 
-import { inspectObj, arrayEqualsShallow } from "#data/utils/utils.js"
+import { inspectObj, isObject } from "#data/utils/utils.js"
 
 /**
  * @param {import("node:test")} t
@@ -26,7 +26,7 @@ const assertCreateInvalidResponse = (t, r) => {
   t.assert.deepStrictEqual(r.statusCode, 500);
   t.assert.deepStrictEqual(
     Object.keys(JSON.parse(r.body)).sort(),
-    ["errorMessage", "errorInfo", "query", "method", "inputData"].sort(),
+    ["message", "info", "method", "url", "inputData"].sort(),
   );
 }
 
@@ -52,13 +52,24 @@ test("test annotation Routes", async (t) => {
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // inserts that should work
+
+    // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error
+    // `https://fastify.dev/docs/latest/Reference/Errors/#fst_err_ctp_body_too_large`
+    const annotationListArrayLimit = annotationListArray.map(a => {
+      a.resources = a.resources.length > 500 ? a.resources.slice(0,500) : a.resources
+      return a;
+    });
     await Promise.all(
-      [ uriData, uriDataArray/*, annotationList, annotationListArray*/ ].map(async (payload) => {
+      [ uriData, uriDataArray, annotationList, annotationListArrayLimit ].map(async (payload) => {
         const r = await fastify.inject({
           method: "POST",
           url: "/annotations/2/createMany",
           payload: payload,
         });
+        if ( r.statusCode !== 200 ) {
+          console.log(JSON.parse(r.body));
+          console.log("ON::::::::::::::::::::::", payload)
+        }
         assertCreateValidResponse(t, r);
       })
     );
@@ -79,7 +90,6 @@ test("test annotation Routes", async (t) => {
           url: "annotations/2/create",
           payload: annotation
         });
-        console.log("TEST RESPONSE BODY:", inspectObj(JSON.parse(r.body)));
         assertCreateValidResponse(t, r);
       })
     )
