@@ -41,7 +41,7 @@ async function build(mode="default") {
 
   const
     mongoConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
-    fastifyConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
+    fastifyConfig = mode==="test" ? testConfig.fastify : defaultConfig.fastify,
     fastify = Fastify(fastifyConfig);
 
   await fastify.register(db, mongoConfig);

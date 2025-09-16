@@ -21,6 +21,9 @@ test("test annotation Routes", async (t) => {
   // close the app after running the tests
   t.after(() => fastify.close());
 
+  // after each subtest has run, delete all database records
+  t.afterEach(fastify.emptyCollections);
+
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // inserts that should work
     await Promise.all(
