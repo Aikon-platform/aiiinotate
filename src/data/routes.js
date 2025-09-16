@@ -5,7 +5,8 @@ import { pathToUrl } from "#data/utils/utils.js";
 async function commonRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
-    iiifSearchApiVersion = fastify.schemasBase.getSchemaByUri("search");
+    iiifSearchApiVersion = fastify.schemasBase.getSchema("search"),
+    iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList");
 
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
@@ -27,6 +28,9 @@ async function commonRoutes(fastify, options) {
               enum: ["painting", "non-painting", "commenting", "describing", "tagging", "linking"]
             }
           }
+        },
+        response: {
+          200: iiifAnnotationList
         }
       }
     },

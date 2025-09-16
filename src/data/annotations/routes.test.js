@@ -40,15 +40,15 @@ const testPostRouteCurry = (fastify) =>
      * @param {object} payload
      */
     async (t, route, payload) => {
-        const r = await fastify.inject({
-          method: "POST",
-          url: route,
-          payload: payload,
-        });
-        success
-          ? assertCreateValidResponse(t, r)
-          : assertCreateInvalidResponse(t, r);
-        return;
+      const r = await fastify.inject({
+        method: "POST",
+        url: route,
+        payload: payload,
+      });
+      success
+        ? assertCreateValidResponse(t, r)
+        : assertCreateInvalidResponse(t, r);
+      return;
     }
 
 test("test annotation Routes", async (t) => {

@@ -87,7 +87,7 @@ const returnError = (request, reply , err, data) => {
  * @param {import("#data/types.js").InsertResponseArrayType} insertResponseArray
  * @returns {import("#data/types.js").InsertResponseType}
  */
-const reduceinsertResponseArray = (insertResponseArray) => ({
+const reduceInsertResponseArray = (insertResponseArray) => ({
   insertedCount: insertResponseArray.reduce((acc, r) => acc+r.insertedCount, 0),
   insertedIds: insertResponseArray.reduce((acc, r) => acc.concat(r.insertedIds), [])
 })
@@ -100,7 +100,10 @@ const reduceinsertResponseArray = (insertResponseArray) => ({
 async function annotationsRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
-    iiifPresentationApiVersion = fastify.schemasBase.getSchemaByUri("presentation");
+    insertResponse = fastify.schemasBase.getSchema("insertResponse"),
+    iiifPresentationApiVersion = fastify.schemasBase.getSchema("presentation"),
+    iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList"),
+    iiifAnnotation2Array = fastify.schemasPresentation2.getSchema("annotationArray");
 
   /** get all annotations by a canvas URI */
   fastify.get(
@@ -120,6 +123,11 @@ async function annotationsRoutes(fastify, options) {
             asAnnotationList: { type: "boolean" },
           }
         },
+        response: {
+          200: {
+            anyOf: [ iiifAnnotationList, iiifAnnotation2Array ]
+          }
+        }
       },
     },
     async (request, reply) => {
@@ -140,6 +148,56 @@ async function annotationsRoutes(fastify, options) {
       }
     }
   );
+
+  /** create a single annotation from an annotation object */
+  fastify.post(
+    "/annotations/:iiifPresentationVersion/create",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationApiVersion
+          }
+        },
+        body: {
+          type: "object",
+          required: [ "@id", "@type", "motivation" ],
+          properties: {
+            "@id": { type: "string" },
+            "@type": { type: "string" },
+            "motivation": { anyOf: [
+              { type: "string", enum: [ "oa:Annotation" ] },
+              { type: "array", items: { type: "string" }}
+            ]}
+          }
+        },
+        response: {
+          200: insertResponse,
+          default: { type: "object" }
+        }
+      }
+    },
+    async (request, reply) => {
+      const
+        { iiifPresentationVersion } = request.params,
+        annotation = request.body;
+
+      try {
+        validateAnnotationVersion(iiifPresentationVersion, annotation);
+        // insert
+        if ( iiifPresentationVersion === 2 ) {
+          const r = await annotations2.insertAnnotation(annotation);
+          return r;
+        } else {
+          annotations3.notImplementedError();
+        }
+
+      } catch (err) {
+        returnError(request, reply, err, request.body);
+      }
+    }
+  )
 
   /**
    * create several annotations from:
@@ -218,6 +276,10 @@ async function annotationsRoutes(fastify, options) {
               items: [{ $ref: "annotationPage" }]
             }
           ]
+        },
+        response: {
+          200: insertResponse,
+          default: { type: "object" }
         }
       }
     },
@@ -252,53 +314,7 @@ async function annotationsRoutes(fastify, options) {
               insertResponseArray.push(r);
             }
           ));
-          return reduceinsertResponseArray(insertResponseArray);
-        } else {
-          annotations3.notImplementedError();
-        }
-
-      } catch (err) {
-        returnError(request, reply, err, request.body);
-      }
-    }
-  )
-
-  /** create a single annotation from an annotation object */
-  fastify.post(
-    "/annotations/:iiifPresentationVersion/create",
-    {
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion
-          }
-        },
-        body: {
-          type: "object",
-          required: [ "@id", "@type", "motivation" ],
-          properties: {
-            "@id": { type: "string" },
-            "@type": { type: "string" },
-            "motivation": { anyOf: [
-              { type: "string", enum: [ "oa:Annotation" ] },
-              { type: "array", items: { type: "string" }}
-            ]}
-          }
-        }
-      }
-    },
-    async (request, reply) => {
-      const
-        { iiifPresentationVersion } = request.params,
-        annotation = request.body;
-
-      try {
-        validateAnnotationVersion(iiifPresentationVersion, annotation);
-        // insert
-        if ( iiifPresentationVersion === 2 ) {
-          const r = await annotations2.insertAnnotation(annotation);
-          return r;
+          return reduceInsertResponseArray(insertResponseArray);
         } else {
           annotations3.notImplementedError();
         }

@@ -41,7 +41,7 @@ const makeSchemaUri = (slug) =>
  * @param {import("fastify").FastifyInstance} fastify
  * @param {"search"|"presentation"} slug
  */
-const getSchemaByUri = (fastify, slug) =>
+const getSchema = (fastify, slug) =>
   fastify.getSchema(makeSchemaUri(slug))
 
 
@@ -272,7 +272,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.decorate("schemasPresentation2", {
     makeSchemaUri: makeSchemaUri,
-    getSchemaByUri: (slug) => getSchemaByUri(fastify, slug)
+    getSchema: (slug) => getSchema(fastify, slug)
   })
 
   done();

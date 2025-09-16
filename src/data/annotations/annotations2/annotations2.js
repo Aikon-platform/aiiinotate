@@ -50,7 +50,7 @@ class Annnotations2 extends AnnotationsAbstract {
   constructor(fastify, client, db) {
 
     const
-      schemaAnnotation2 = fastify.schemasPresentation2.getSchemaByUri("annotation"),
+      schemaAnnotation2 = fastify.schemasPresentation2.getSchema("annotation"),
       collectionOptions = {
         validator: { $jsonSchema: schemaAnnotation2 }
       };
@@ -271,7 +271,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {string} manifestShortId
    * @param {string} q
    * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"} motivation
-   * @returns
+   * @returns {object} annotationList containing results
    */
   async search(queryUrl, manifestShortId, q, motivation) {
     // TODO: update inserts so that our data format is more strict, for easier searches:
