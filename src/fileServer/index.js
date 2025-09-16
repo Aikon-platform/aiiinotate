@@ -6,9 +6,8 @@ import fsPromises from "fs/promises";
 import fastifyPlugin from "fastify-plugin";
 
 import { uriData, uriDataArray, annotationList, annotationListArray, uriDataArrayInvalid } from "#fileServer/annotationsCreate.js";
-import { readFile } from "#fileServer/utils.js";
-import annotations2Invalid from "#fileServer/annotations2Invalid.js";
-import annotations2Valid from "#fileServer/annotations2Valid.js";
+import { readFileToObject } from "#fileServer/utils.js";
+import { annotations2Invalid, annotations2Valid }  from "#src/fileServer/annotations2.js";
 
 
 /**
@@ -42,7 +41,7 @@ async function fileServer(fastify, options) {
     },
     (request, reply) => {
       const { fileName } = request.params;
-      return readFile(fileName);
+      return readFileToObject(fileName);
     }
   )
 

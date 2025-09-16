@@ -1,4 +1,4 @@
-export default [
+[
   {
     "@id" : "http://aikon.enpc.fr/sas/annotation/wit9_man11_anno165_c12_80a76d17911c4fdd9f6f14638e861305",
     "@type" : "oa:Annotation",
