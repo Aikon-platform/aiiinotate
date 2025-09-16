@@ -26,7 +26,7 @@ const assertCreateInvalidResponse = (t, r) => {
   t.assert.deepStrictEqual(r.statusCode, 500);
   t.assert.deepStrictEqual(
     Object.keys(JSON.parse(r.body)).sort(),
-    ["message", "info", "method", "url", "inputData"].sort(),
+    ["message", "info", "method", "url", "postBody"].sort(),
   );
 }
 

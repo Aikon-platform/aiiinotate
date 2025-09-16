@@ -51,6 +51,30 @@ const getHash = (str, seed=0) => {
 };
 
 /**
+ * if obj[typeKey] !== expectedTypeVal, throw
+ * @param {object} obj
+ * @param {2|3} iiifPresentationVersion
+ * @param {string|number} typeKey
+ * @param {any} expectedTypeVal
+ */
+const throwIfValueError = (obj, typeKey, expectedTypeVal) => {
+  if ( obj[typeKey] !== expectedTypeVal ) {
+    throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj[typeKey]}' in object ${inspectObj(obj)}`);
+  };
+}
+
+/**
+ * if obj[key] is undefined, throw
+ * @param {object} obj
+ * @param {string|number} key
+ */
+const throwIfKeyUndefined = (obj, key) => {
+  if ( !objectHasKey(obj, key) ) {
+    throw new Error(`key '${key}' not found in object ${inspectObj(obj)}`);
+  }
+}
+
+/**
  * shallow-compare 2 arrays.
  * @param {Array} a1
  * @param {Array} a2
@@ -89,5 +113,7 @@ export {
   objectHasKey,
   addKeyValueToObjIfHasKey,
   inspectObj,
-  arrayEqualsShallow
+  arrayEqualsShallow,
+  throwIfKeyUndefined,
+  throwIfValueError
 }

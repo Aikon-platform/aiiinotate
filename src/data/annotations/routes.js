@@ -1,30 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj } from "#data/utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#data/utils/utils.js";
 
-/**
- * if obj[typeKey] !== expectedTypeVal, throw
- * @param {object} obj
- * @param {2|3} iiifPresentationVersion
- * @param {string|number} typeKey
- * @param {any} expectedTypeVal
- */
-const throwIfValueError = (obj, typeKey, expectedTypeVal) => {
-  if ( obj[typeKey] !== expectedTypeVal ) {
-    throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj[typeKey]}' in object ${inspectObj(obj)}`);
-  };
-}
-
-/**
- * if obj[key] is undefined, throw
- * @param {object} obj
- * @param {string|number} key
- */
-const throwIfKeyUndefined = (obj, key) => {
-  if ( !objectHasKey(obj, key) ) {
-    throw new Error(`key '${key}' not found in object ${inspectObj(obj)}`);
-  }
-}
 
 /**
  * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
@@ -75,7 +52,7 @@ const returnError = (request, reply , err, data) => {
     url: request.url
   };
   if ( data !== undefined ) {
-    error.inputData = data
+    error.postBody = data
   }
   reply
     .status(500)
@@ -100,7 +77,8 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
 async function annotationsRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
-    insertResponse = fastify.schemasBase.getSchema("insertResponse"),
+    responseError = fastify.schemasBase.getSchema("responseError"),
+    responseInsert = fastify.schemasBase.getSchema("responseInsert"),
     iiifPresentationApiVersion = fastify.schemasBase.getSchema("presentation"),
     iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2Array = fastify.schemasPresentation2.getSchema("annotationArray");
@@ -173,8 +151,8 @@ async function annotationsRoutes(fastify, options) {
           }
         },
         response: {
-          200: insertResponse,
-          default: { type: "object" }
+          200: responseInsert,
+          500: responseError,
         }
       }
     },
@@ -278,8 +256,8 @@ async function annotationsRoutes(fastify, options) {
           ]
         },
         response: {
-          200: insertResponse,
-          default: { type: "object" }
+          200: responseInsert,
+          500: responseError,
         }
       }
     },

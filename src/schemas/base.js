@@ -29,8 +29,9 @@ function addSchemas(fastify, options, done) {
     enum: [1, 2],
     description: "IIIF search API versions"
   });
+
   fastify.addSchema({
-    $id: makeSchemaUri("insertResponse"),
+    $id: makeSchemaUri("responseInsert"),
     type: "object",
     required: [ "insertedCount", "insertedIds" ],
     properties: {
@@ -41,6 +42,18 @@ function addSchemas(fastify, options, done) {
       }
     }
   });
+  fastify.addSchema({
+    $id: makeSchemaUri("responseError"),
+    type: "object",
+    required: [ "message", "info", "method", "url" ],
+    properties: {
+      message: { type: "string" },
+      info: {},  // only using `{}` equates to JS "Any" type
+      method: { type: "string" },
+      url: { type: "string" },
+      postBody: {}
+    }
+  })
 
   // functions `makeSchemaUri` and `getSchema`
   // are defined in an object that is used to decorate the global `fastify` instance,
