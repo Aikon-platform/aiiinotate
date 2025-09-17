@@ -28,28 +28,30 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotation2"),
     type: "object",
-    required: [ "@id", "@type", "motivation" ],
+    required: [ "@id", "@type", "motivation", "on" ],
     properties: {
       "@id": { type: "string" },
       "@type": { type: "string" },
-      "motivation": { anyOf: [
+      motivation: { anyOf: [
         { type: "string", enum: [ "oa:Annotation" ] },
         { type: "array", items: { type: "string" }}
-      ]}
+      ]},
+      on: { anyOf: [{ type: "string" }, { type: "object" }]}
     }
   });
 
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotation3"),
     type: "object",
-    required: [ "id", "type", "motivation" ],
+    required: [ "id", "type", "motivation", "target" ],
     properties: {
       id: { type: "string" },
-      type: { type: "string" },
+      type: { type: "string", enum: "Annotation" },
       motivation: { anyOf: [
-        { type: "string", enum: [ "Annotation" ] },
+        { type: "string" },
         { type: "array", items: { type: "string" } },
-      ]}
+      ]},
+      target: { anyOf: [{ type: "string" }, { type: "object" }]}
     }
   })
 
@@ -94,7 +96,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationPage"),
     type: "object",
-    required: ["@id", "@type", "resources"],
+    required: ["@id", "@type", "items"],
     properties: {
       "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
       "id": { type: "string" },
