@@ -30,31 +30,6 @@ function addSchemas(fastify, options, done) {
     description: "IIIF search API versions"
   });
 
-  fastify.addSchema({
-    $id: makeSchemaUri("responseInsert"),
-    type: "object",
-    required: [ "insertedCount", "insertedIds" ],
-    properties: {
-      insertedCount: { type: "integer", minimum: 0 },
-      insertedIds: {
-        type: "array",
-        items: { type: "string" }
-      }
-    }
-  });
-  fastify.addSchema({
-    $id: makeSchemaUri("responseError"),
-    type: "object",
-    required: [ "message", "info", "method", "url" ],
-    properties: {
-      message: { type: "string" },
-      info: {},  // only using `{}` equates to JS "Any" type
-      method: { type: "string" },
-      url: { type: "string" },
-      postBody: {}
-    }
-  })
-
   // functions `makeSchemaUri` and `getSchema`
   // are defined in an object that is used to decorate the global `fastify` instance,
   // this namespacing the functions and allowing each plugin

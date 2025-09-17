@@ -78,13 +78,30 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
 async function annotationsRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
-    responseErrorSchema = fastify.schemasBase.getSchema("responseError"),
-    responseInsertSchema = fastify.schemasBase.getSchema("responseInsert"),
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routesAnnotations2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");
+
+  const responsePostSchema = {
+    200: { $ref: fastify.schemasRoutes.makeSchemaUri("routeResponseInsert") },
+    500: { $ref: fastify.schemasRoutes.makeSchemaUri("routeResponseError") },
+  };
+
+  const createOrUpdateOneSchema = {
+    params: {
+      type: "object",
+      properties: {
+        iiifPresentationVersion: iiifPresentationVersionSchema
+      }
+    },
+    body: routeAnnotations2Or3Schema,
+    response: responsePostSchema
+  };
+
+  /////////////////////////////////////////////////////////
+  // get routes
 
   /** get all annotations by a canvas URI */
   fastify.get(
@@ -133,21 +150,7 @@ async function annotationsRoutes(fastify, options) {
   /** create a single annotation from an annotation object */
   fastify.post(
     "/annotations/:iiifPresentationVersion/create",
-    {
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            iiifPresentationVersion: iiifPresentationVersionSchema
-          }
-        },
-        body: routeAnnotations2Or3Schema,
-        response: {
-          200: responseInsertSchema,
-          500: responseErrorSchema,
-        }
-      }
-    },
+    { schema: createOrUpdateOneSchema },
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
@@ -193,10 +196,7 @@ async function annotationsRoutes(fastify, options) {
           }
         },
         body: routeAnnotationCreateManySchema,
-        response: {
-          200: responseInsertSchema,
-          500: responseErrorSchema,
-        }
+        response: responsePostSchema
       }
     },
     async (request, reply) => {
@@ -240,6 +240,12 @@ async function annotationsRoutes(fastify, options) {
       }
     }
   )
+
+  // fastify.post()
+
+  /////////////////////////////////////////////////////////
+  // delete routes
+
 }
 
 export default fastifyPlugin(annotationsRoutes);

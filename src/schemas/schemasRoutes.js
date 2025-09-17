@@ -26,6 +26,32 @@ const getSchema = (fastify, slug) =>
 function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
+    $id: makeSchemaUri("routeResponseInsert"),
+    type: "object",
+    required: [ "insertedCount", "insertedIds" ],
+    properties: {
+      insertedCount: { type: "integer", minimum: 0 },
+      insertedIds: {
+        type: "array",
+        items: { type: "string" }
+      }
+    }
+  });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseError"),
+    type: "object",
+    required: [ "message", "info", "method", "url" ],
+    properties: {
+      message: { type: "string" },
+      info: {},  // only using `{}` equates to JS "Any" type
+      method: { type: "string" },
+      url: { type: "string" },
+      postBody: {}
+    }
+  })
+
+  fastify.addSchema({
     $id: makeSchemaUri("routeAnnotation2"),
     type: "object",
     required: [ "@id", "@type", "motivation", "on" ],
@@ -131,7 +157,6 @@ function addSchemas(fastify, options, done) {
       { $ref: makeSchemaUri("routeAnnotationListOrPageUriArray") },
     ]
   })
-
 
   fastify.decorate("schemasRoutes", {
     makeSchemaUri: makeSchemaUri,
