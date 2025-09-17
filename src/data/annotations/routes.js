@@ -69,6 +69,7 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
   insertedIds: insertResponseArray.reduce((acc, r) => acc.concat(r.insertedIds), [])
 })
 
+
 /**
  * Encapsulates the routes
  * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -77,11 +78,13 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
 async function annotationsRoutes(fastify, options) {
   const
     { annotations2, annotations3 } = options,
-    responseError = fastify.schemasBase.getSchema("responseError"),
-    responseInsert = fastify.schemasBase.getSchema("responseInsert"),
-    iiifPresentationApiVersion = fastify.schemasBase.getSchema("presentation"),
-    iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList"),
-    iiifAnnotation2Array = fastify.schemasPresentation2.getSchema("annotationArray");
+    responseErrorSchema = fastify.schemasBase.getSchema("responseError"),
+    responseInsertSchema = fastify.schemasBase.getSchema("responseInsert"),
+    iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
+    routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routesAnnotations2Or3"),
+    routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
+    iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
+    iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");
 
   /** get all annotations by a canvas URI */
   fastify.get(
@@ -91,7 +94,7 @@ async function annotationsRoutes(fastify, options) {
         params: {
           type: "object",
           properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
         querystring: {
@@ -103,7 +106,7 @@ async function annotationsRoutes(fastify, options) {
         },
         response: {
           200: {
-            anyOf: [ iiifAnnotationList, iiifAnnotation2Array ]
+            anyOf: [ iiifAnnotationListSchema, iiifAnnotation2ArraySchema ]
           }
         }
       },
@@ -135,24 +138,13 @@ async function annotationsRoutes(fastify, options) {
         params: {
           type: "object",
           properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
-        body: {
-          type: "object",
-          required: [ "@id", "@type", "motivation" ],
-          properties: {
-            "@id": { type: "string" },
-            "@type": { type: "string" },
-            "motivation": { anyOf: [
-              { type: "string", enum: [ "oa:Annotation" ] },
-              { type: "array", items: { type: "string" }}
-            ]}
-          }
-        },
+        body: routeAnnotations2Or3Schema,
         response: {
-          200: responseInsert,
-          500: responseError,
+          200: responseInsertSchema,
+          500: responseErrorSchema,
         }
       }
     },
@@ -197,67 +189,13 @@ async function annotationsRoutes(fastify, options) {
         params: {
           type: "object",
           properties: {
-            iiifPresentationVersion: iiifPresentationApiVersion
+            iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
-        body: {
-          anyOf: [
-            // URI
-            {
-              $id: "annotationUri",
-              type: "object",
-              required: ["uri"],
-              properties: {
-                "uri": { type: "string" },
-              }
-            },
-            // array of URIs
-            {
-              $id: "annotationUriArray",
-              type: "array",
-              items: [{ $ref: "annotationUri" }]
-            },
-            // annotationList
-            {
-              $id: "annotationList",
-              type: "object",
-              required: ["@id", "@type", "resources"],
-              properties: {
-                "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
-                "@id": { type: "string" },
-                "@type": { type: "string", enum: ["sc:AnnotationList"] },
-                "resources": { type: "array", items: { type: "object" } }
-              }
-            },
-            // annotationPage
-            {
-              $id: "annotationPage",
-              type: "object",
-              required: ["@id", "@type", "resources"],
-              properties: {
-                "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
-                "id": { type: "string" },
-                "type": { type: "string", enum: ["AnnotationPage"] },
-                "items": { type: "array", items: { type: "object" } }
-              }
-            },
-            // array of anotationLists
-            {
-              $id: "annotationListArray",
-              type: "array",
-              items: [{ $ref: "annotationList" }]
-            },
-            // array of annotationPages
-            {
-              $id: "annotationPageArray",
-              type: "array",
-              items: [{ $ref: "annotationPage" }]
-            }
-          ]
-        },
+        body: routeAnnotationCreateManySchema,
         response: {
-          200: responseInsert,
-          500: responseError,
+          200: responseInsertSchema,
+          500: responseErrorSchema,
         }
       }
     },
@@ -267,11 +205,11 @@ async function annotationsRoutes(fastify, options) {
         body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
         insertResponseArray = [];
 
-      // data to actually insert (body with resolved URIs, if the body is  `annotationUri` or `annotationUriArray`)
+      // data to actually insert (body with resolved URIs, if the body is  `annotationListOrPageUri` or `annotationListOrPageUriArray`)
       let annotationsArray = [];
 
       try {
-        // if we received `annotationUri` or `annotationUriArray`, fetch objects
+        // if we received `annotationListOrPageUri` or `annotationListOrPageUriArray`, fetch objects
         const asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
         if (asUri) {
           annotationsArray = await Promise.all(
