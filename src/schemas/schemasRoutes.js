@@ -46,7 +46,7 @@ function addSchemas(fastify, options, done) {
     required: [ "id", "type", "motivation", "target" ],
     properties: {
       id: { type: "string" },
-      type: { type: "string", enum: "Annotation" },
+      type: { type: "string", enum: ["Annotation"] },
       motivation: { anyOf: [
         { type: "string" },
         { type: "array", items: { type: "string" } },
