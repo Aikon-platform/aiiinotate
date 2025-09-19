@@ -192,7 +192,7 @@ function addSchemas(fastify, options, done) {
       "@id": { type: "string" },
       "@type": { type: "string" },  // should match `dctypes:[a-zA-Z]+`. regex is disabled for performance reasons.
       "format": { type: "string" }  // should be a MimeType.
-    }
+    },
   })
 
   // embedded textual body

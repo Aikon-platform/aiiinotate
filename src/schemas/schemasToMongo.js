@@ -19,8 +19,8 @@ import fastifyPlugin from "fastify-plugin";
 function schemasToMongo (fastify, schema) {
   const funcName = schemasToMongo.name;
 
-  // no need to process strings or numbers
-  if ( typeof schema === "string" || typeof schema === "number" ) {
+  // no need to process strings, booleans or numbers
+  if ( typeof schema==="string" || typeof schema==="number" || typeof schema==="boolean" ) {
     return schema
   }
   // convert each item in arrays

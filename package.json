@@ -16,7 +16,8 @@
     "migrate-make": "bash ./scripts/migrations.sh make",
     "migrate-apply": "bash ./scripts/migrations.sh apply",
     "migrate-revert": "bash ./scripts/migrations.sh revert",
-    "migrate-revert-all": "bash ./scripts/migrations.sh revertAll"
+    "migrate-revert-all": "bash ./scripts/migrations.sh revertAll",
+    "migrate-reapply": "bash ./scripts/migrations.sh revertAll && bash ./scripts/migrations.sh apply"
   },
   "pre-commit": [
     "lint"

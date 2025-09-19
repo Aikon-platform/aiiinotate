@@ -35,6 +35,7 @@ const injectPost = (fastify, route, payload) =>
  * @returns {void}
  */
 const assertPostInvalidResponse = (t, r) => {
+  console.log(JSON.parse(r.body));
   assertStatusCode(t, r, 500);
   assertResponseKeys(t, r, ["message", "info", "method", "url", "postBody"].sort());
 }
@@ -165,10 +166,29 @@ test("test annotation Routes", async (t) => {
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {
+    const updatePipeline = async (annotation, success) => {
+      // update the annotation
+      const
+        newLabel = `label-${uuid4()}`,
+        newBody = {
+          "@type": "cnt:ContentAsText",
+          format: "text/html",
+          value: "<p>What a grand pleasure it is to have updated this annotation !</p>"
+        };
+      annotation.label = newLabel;
+      annotation.resource = newBody;
+      if (!success) {
+        annotation.motivation = { "invalidMotivation": "should be an array or a dict." }
+      }
+      success
+        ? await testPostRouteUpdateSuccess(t, "annotations/2/update", annotation)
+        : await testPostRouteUpdateFailure(t, "annotations/2/update", annotation);
+    }
+
     // insert valid documents and retrieve an annotation to update.
     const
-      r1 = await injectPost(fastify, "/annotations/2/createMany", annotationList),
-      rBody = JSON.parse(r1.body),
+      r = await injectPost(fastify, "/annotations/2/createMany", annotationList),
+      rBody = JSON.parse(r.body),
       expectedInsertedCount = annotationList.resources.length,
       insertedCount = rBody.insertedCount,
       insertedIds = rBody.insertedIds,
@@ -181,17 +201,9 @@ test("test annotation Routes", async (t) => {
     // just to be sure
     t.assert.equal(insertedCount, expectedInsertedCount);
 
-    // update the annotation
-    const
-      newLabel = `label-${uuid4()}`,
-      newBody = {
-        "@type": "cnt:ContentAsText",
-        format: "text/html",
-        value: "<p>What a grand pleasure it is to have updated this annotation !</p>"
-      };
-    annotation.label = newLabel;
-    annotation.resource = newBody;
-    await testPostRouteUpdateSuccess(t, "annotations/2/update", annotation);
+    await updatePipeline(annotation, true);
+    await updatePipeline(annotation, false);
+
   })
 
   return

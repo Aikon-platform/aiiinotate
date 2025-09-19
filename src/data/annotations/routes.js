@@ -86,7 +86,7 @@ async function annotationsRoutes(fastify, options) {
 
   const responsePostSchema = {
     200: {
-  // type: "object",
+      // type: "object",
       anyOf: [
         fastify.schemasRoutes.getSchema("routeResponseInsert"),
         fastify.schemasRoutes.getSchema("routeResponseUpdate"),

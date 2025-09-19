@@ -307,8 +307,8 @@ class Annnotations2 extends AnnotationsAbstract {
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
       Object.entries(projectionObj)
-      .filter(([k,v]) => k !== "_id")
-      .map(([k,v]) => v);
+        .filter(([k,v]) => k !== "_id")
+        .map(([k,v]) => v);
 
     if ( projectionValues.find((x) => ![0,1].includes(x)) ) {
       throw new Annotations2Error("read", `Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
