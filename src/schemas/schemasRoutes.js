@@ -39,9 +39,21 @@ function addSchemas(fastify, options, done) {
   });
 
   fastify.addSchema({
+    $id: makeSchemaUri("routeResponseUpdate"),
+    type: "object",
+    required: ["matchedCount", "modifiedCount", "upsertedCount"],
+    properties: {
+      matchedCount: { type: "integer" },
+      modifiedCount: { type: "integer" },
+      upsertedCount: { type: "integer" },
+      upsertedId: { type: [ "string", "null" ] }  // string|null => the field is nullable !
+    }
+  })
+
+  fastify.addSchema({
     $id: makeSchemaUri("routeResponseError"),
     type: "object",
-    required: [ "message", "info", "method", "url" ],
+    required: [],// [ "message", "info", "method", "url" ],
     properties: {
       message: { type: "string" },
       info: {},  // only using `{}` equates to JS "Any" type

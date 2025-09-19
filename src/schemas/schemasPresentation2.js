@@ -199,25 +199,25 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("embeddedBody"),
     type: "object",
-    required: [ "@type", "value" ],
+    required: [ "@type", "chars" ],
     properties: {
       "@type": {
         anyOf: [
           {
             type: "string",
-            enum: [ "oa:TextualBody", "cnt:ContentAsText" ]
+            enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
           },
           {
             type: "array",
             items: {
               type: "string",
-              enum: [ "oa:TextualBody", "cnt:ContentAsText" ]
+              enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
             }
           },
         ]
       },
       "format": { type: "string" },  // should be a MimeType
-      "value": { type: "string" }
+      "chars": { type: "string" }
     }
   })
 

@@ -19,20 +19,22 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
-/**
- * @typedef {import("#data/types.js").InsertResponseType} InsertResponseType
- */
+/** @typedef {import("mongodb").ObjectId } MongoObjectId */
+/** @typedef {import("mongodb").InsertManyResult} InsertManyResultType */
+/** @typedef {import("mongodb").InsertOneResult} InsertOneResultType */
+/** @typedef {import("mongodb").UpdateResult} UpdateResultType */
+/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
+/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
+/** @typedef {import("#data/types.js").MongoOperationsType } MongoOperationsType */
 
-class Annotations2ReadError extends Error {
-  constructor(mongoMessage, errInfo) {
-    super(`Annotations2ReadError: Mongo error when reading data: ${mongoMessage}`);
-    this.info = errInfo;
-  }
-}
-
-class Annotations2InsertError extends Error {
-  constructor(message, errInfo) {
-    super(`Annotations2InsertError: error when inserting data: ${message}`);
+class Annotations2Error extends Error {
+  /**
+   * @param {MongoOperations} action
+   * @param {string} message: error message
+   * @param {object?} errInfo: extra data
+   */
+  constructor(action, message, errInfo) {
+    super(`Annotations2Error: error when performing operation ${action.toLocaleLowerCase()}: ${message}`);
     this.info = errInfo;
   }
 }
@@ -48,7 +50,6 @@ class Annnotations2 extends AnnotationsAbstract {
    * @param {import("mongodb").Db} db
    */
   constructor(fastify, client, db) {
-
     const
       schemaAnnotation2 = fastify.schemasPresentation2.getSchema("annotation"),
       collectionOptions = {
@@ -63,17 +64,22 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * clean an annotation before saving it to database.
    * some of the work consists of translating what is defined by the OpenAnnotations standard to what is actually used by IIIF annotations.
+   * if `update`, some cleaning will be skipped (especially the redefinition of "@id"), otherwise updates would fail.
    *
    * @param {object} annotation
+   * @param {boolean} update: set to `true` if performing an update instead of an insert.
    * @returns {object}
    */
-  #cleanAnnotation(annotation) {
+  #cleanAnnotation(annotation, update=false) {
     // 1) extract ids and targets
     const
       annotationTarget = makeTarget(annotation),
       manifestShortId = getManifestShortId(annotationTarget.full);
 
-    annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
+    // in updates, "@id" has aldready been extracted
+    if ( !update ) {
+      annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
+    }
     annotation["@context"] = IIIF_PRESENTATION_2_CONTEXT["@context"];
     annotation.on = annotationTarget;
     annotation.on.manifestShortId = manifestShortId;
@@ -82,7 +88,7 @@ class Annnotations2 extends AnnotationsAbstract {
     // - motivations are an array of strings
     // - open annotation specifies that motivations should be described by the `oa:Motivation`, while IIIF 2.1 examples uses the `motivation` field => uniformizwe
     // - all values must be `sc:painting` or prefixed by `oa:`: IIIF presentation API indicates that the only allowed values are open annotation values (prefixed by `oa:`) or `sc:painting`.
-    if ( annotation["oa:Motivation"] ) {
+    if ( objectHasKey(annotation, "oa:Motivation") ) {
       annotation.motivation = annotation["oa:Motivation"];
       delete annotation["oa:motivation"];
     }
@@ -103,8 +109,14 @@ class Annnotations2 extends AnnotationsAbstract {
         resource["@type"] === "cnt:ContentAsText"
           ? "dctypes:Text"
           : resource["@type"];
-      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`
-      resource.chars = resource["cnt:chars"] || resource.chars;  // may be undefined
+      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
+      resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
+
+      [ "value", "cnt:chars" ].map((k) => {
+        if ( Object.keys(resource).includes(k) ) {
+          delete resource[k];
+        }
+      })
 
       // 4) delete body if it's empty. a body is empty if
       //  - it's got no `@id` and
@@ -114,7 +126,7 @@ class Annnotations2 extends AnnotationsAbstract {
         hasTextualBody = objectHasKey(resource, "chars"),
         emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
 
-      if ( isNullish(resource["@id"]) && (!hasTextualBody || emptyBody) ) {
+      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
         delete(annotation.resource);
       }
     }
@@ -144,38 +156,51 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * throw an error with just the object describing the error data (and not the stack or anything else).
    * used to propagate write errors to routes.
+   * @param {MongoOperations} operation: describes the database operation
    * @param {import("mongodb").MongoServerError} err: the mongo error
-   * @param {"read"|"insert"} op: describes the database operation: is it a read or insert error
    */
-  #throwMongoError(op, err) {
-    const errObj =
-      op === "insert"
-        ? new Annotations2InsertError(err.message, err.errorResponse)
-        : new Annotations2ReadError(err.message, err.errorResponse);
-    throw errObj;
+  #throwMongoError(operation, err) {
+    throw new Annotations2Error(operation, err.message, err.errorResponse)
   }
 
   /**
    * make a uniform response format for #insertOne and #insertMany
-   * @param {import("mongodb").InsertManyResult | import("mongodb").InsertOneResult} mongoRes
-   * @returns {InsertResponseType}
+   * @param {InsertManyResultType | InsertOneResultType} mongoRes
+   * @returns {Promise<InsertResponseType>}
    */
-  #makeInsertResponse(mongoRes) {
+  async #makeInsertResponse(mongoRes) {
+    // retrieve the "@id"s
+    const insertedIds = await this.#annotationIdFromMongoId(
+      mongoRes.insertedId || Object.values(mongoRes.insertedIds)
+    );
     // mongoRes is `InsertOneResult`
     if ( objectHasKey(mongoRes, "insertedId") ) {
       return {
         insertedCount: 1,
-        insertedIds: [ mongoRes.insertedId ]
+        insertedIds: insertedIds
       }
     // mongoRes is `insertManyResult`
     } else if ( objectHasKey(mongoRes, "insertedIds") ) {
       return {
         insertedCount: mongoRes.insertedCount,
-        insertedIds: Object.values(mongoRes.insertedIds)
+        insertedIds: insertedIds
       }
     } else {
-      throw new Annotations2InsertError("unrecognized mongo response: expected one of 'InsertManyResult' or 'InsertOneResult'", mongoRes)
+      throw new Annotations2Error("insert", "unrecognized mongo response: expected one of 'InsertManyResult' or 'InsertOneResult'", mongoRes)
     }
+  }
+
+  /**
+   * @param {UpdateResultType} mongoRes
+   * @returns {UpdateResponseType}
+   */
+  #makeUpdateResponse(mongoRes) {
+    return {
+      matchedCount: mongoRes.matchedCount,
+      modifiedCount: mongoRes.modifiedCount,
+      upsertedCount: mongoRes.upsertedCount,
+      upsertedId: mongoRes.upsertedId
+    };
   }
 
   ////////////////////////////////////////////////////////////////
@@ -185,12 +210,12 @@ class Annnotations2 extends AnnotationsAbstract {
    * insert a single annotation
    * @private
    * @param {object} annotation
-   * @returns {InsertResponseType}
+   * @returns {Promise<InsertResponseType>}
    */
   async #insertOne(annotation) {
     try {
-      const resultCursor = await this.annotationsCollection.insertOne(annotation);
-      return this.#makeInsertResponse(resultCursor);
+      const result = await this.annotationsCollection.insertOne(annotation);
+      return this.#makeInsertResponse(result);
     } catch (err) {
       this.#throwMongoError("insert", err);
     }
@@ -200,25 +225,48 @@ class Annnotations2 extends AnnotationsAbstract {
    * insert annotations from an array of annotations
    * @private
    * @param {object[]} annotationArray
-   * @returns {InsertResponseType}
+   * @returns {Promise<InsertResponseType>}
    */
   async #insertMany(annotationArray) {
     try {
-      const resultCursor = await this.annotationsCollection.insertMany(annotationArray);
-      return this.#makeInsertResponse(resultCursor);
+      const result = await this.annotationsCollection.insertMany(annotationArray);
+      return this.#makeInsertResponse(result);
     } catch (err) {
       this.#throwMongoError("insert", err);
     }
   }
 
   /**
+   * update a single annotation, targeted by its "@id"
+   * @param {object} annotation
+   */
+  async #updateOne(annotation){
+    try {
+      const
+        query = { "@id": annotation["@id"] },
+        update = { $set: annotation },
+        result = await this.annotationsCollection.updateOne(query, update);
+      return this.#makeUpdateResponse(result);
+    } catch (err) {annotation["@id"]
+      this.#throwMongoError("update", err)
+    }
+  }
+
+  /**
+   *
    * validate and insert a single annotation.
    * @param {object} annotationArray
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotation(annotation) {
     annotation = this.#cleanAnnotation(annotation);
-    return this.#insertOne(annotation);
+    return await this.#insertOne(annotation);
+  }
+
+  async updateAnnotation(annotation) {
+    // necessary, even if no insert is done: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
+    annotation = this.#cleanAnnotation(annotation, true);
+    return await this.#updateOne(annotation);
   }
 
   /**
@@ -228,29 +276,74 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async insertAnnotationList(annotationList) {
     const annotationArray = this.#cleanAnnotationList(annotationList);
-    return this.#insertMany(annotationArray);
+    return await this.#insertMany(annotationArray);
   }
 
   ////////////////////////////////////////////////////////////////
   // get
 
   /**
+   * true if `queryObj` matches at least 1 annotation, false otherwise.
+   * @param {object} queryObj
+   * @returns {Promise<boolean>}
+   */
+  async exists(queryObj) {
+    const r = await this.annotationsCollection.countDocuments(queryObj, { limit: 1 });
+    return r === 1;
+  }
+
+  /**
+   * find documents based on a `queryObj` and project them to `projectionObj`.
+   *
+   * about projection: 0 removes the fields from the response, 1 incldes it (but exclude all others)
+   * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
+   *      https://stackoverflow.com/questions/74447979/mongoservererror-cannot-do-exclusion-on-field-date-in-inclusion-projection
    * @param {object} queryObj
    * @param {object?} projectionObj: extra projection fields to tailor the reponse format
    * @returns {Promise<object[]>}
    */
   async find(queryObj, projectionObj) {
+    // 1. construct the final projection object, knowing that we can't mix exclusive and inclusive projectin.
+    // presence of `_id` will not cause projections to fail => remove it from values.
+    const projectionValues =
+      Object.entries(projectionObj)
+      .filter(([k,v]) => k !== "_id")
+      .map(([k,v]) => v);
+
+    if ( projectionValues.find((x) => ![0,1].includes(x)) ) {
+      throw new Annotations2Error("read", `Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
+    }
+    const distinctProjectionValues = [...new Set(projectionValues)]
+    if ( distinctProjectionValues.length !== 1 ) {
+      throw new Annotations2Error("read", `Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
+    }
+    // negative projection: all fields will be included except for those specified.
+    // in this case, negate other fields that we don't ant exposed.
+    // in case of positive projection, no specific processing is required: only the explicitly required fields are included.
+    // in all cases, `_id` should not be included unless we explicitly ask for it.
+    projectionObj._id = projectionObj._id || 0;
+    if ( distinctProjectionValues[0] === 0 ) {
+      projectionObj["on.manifestShortId"] = projectionObj["on.manifestShortId"] || 0;
+    }
+
+    // 2. find, project and return
     return this.annotationsCollection
-      .find(queryObj, {
-        // .project 0 removes the fields from the response, 1 incldes it (but exclude all others)
-        // see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
-        projection: {
-          _id: 0,
-          "on.manifestShortId": 0,
-          ...projectionObj
-        }
-      })
+      .find(queryObj, { projection: projectionObj })
       .toArray();
+  }
+
+  /**
+   * from an array of Mongo "_id", return the corresponding "@id" fields
+   * @param {MongoObjectId | MongoObjectId[]} mongoIds
+   * @returns {Promise<string[]>}
+   */
+  async #annotationIdFromMongoId(mongoIds) {
+    mongoIds = maybeToArray(mongoIds);
+    const annotationIds = await this.find(
+      { _id: { $in: mongoIds } },
+      { "@id": 1 }
+    )
+    return annotationIds.map(a => a["@id"]);
   }
 
   /**
@@ -282,15 +375,12 @@ class Annnotations2 extends AnnotationsAbstract {
     //    - existnce of an ETB is specified by "resource.@type = "dctypes:Text":string,
     //    - "resource.chars" always contains the string content.
 
-    // TODO tests
-
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };
 
     // expand query parameters
     if ( q ) {
-      console.log(this.funcName(this.search), "q", q);
       queryFilters.$and.push({
         $or: [
           { "@id": q },
@@ -300,7 +390,6 @@ class Annnotations2 extends AnnotationsAbstract {
       });
     }
     if ( motivation ) {
-      console.log(this.funcName(this.search), "motivation", motivation);
       queryFilters.$and.push(
         motivation === "non-painting"
           ? { motivation: { $ne: "sc:painting" } }
@@ -313,8 +402,6 @@ class Annnotations2 extends AnnotationsAbstract {
       queryFilters.$and.length
         ? { ...queryBase, ...queryFilters }
         : queryBase;
-
-    console.log(this.funcName(this.search), query);
 
     const annotations = await this.find(query);
     return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
@@ -333,6 +420,7 @@ class Annnotations2 extends AnnotationsAbstract {
       ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;
   }
+
 }
 
 export default Annnotations2;

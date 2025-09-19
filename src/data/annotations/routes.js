@@ -44,7 +44,7 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
  * @param {Error} err: the error we're returning
  * @param {any?} data: the data on which the error occurred, for POST requests
  */
-const returnError = (request, reply , err, data) => {
+const returnError = (request, reply, err, data) => {
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
     info: err.info || {},
@@ -85,19 +85,14 @@ async function annotationsRoutes(fastify, options) {
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");
 
   const responsePostSchema = {
-    200: { $ref: fastify.schemasRoutes.makeSchemaUri("routeResponseInsert") },
-    500: { $ref: fastify.schemasRoutes.makeSchemaUri("routeResponseError") },
-  };
-
-  const createOrUpdateOneSchema = {
-    params: {
-      type: "object",
-      properties: {
-        iiifPresentationVersion: iiifPresentationVersionSchema
-      }
+    200: {
+  // type: "object",
+      anyOf: [
+        fastify.schemasRoutes.getSchema("routeResponseInsert"),
+        fastify.schemasRoutes.getSchema("routeResponseUpdate"),
+      ]
     },
-    body: routeAnnotations2Or3Schema,
-    response: responsePostSchema
+    500: fastify.schemasRoutes.getSchema("routeResponseError")
   };
 
   /////////////////////////////////////////////////////////
@@ -147,21 +142,37 @@ async function annotationsRoutes(fastify, options) {
     }
   );
 
-  /** create a single annotation from an annotation object */
+  /////////////////////////////////////////////////////////
+  // create/update routes
+
+  /** create or update a single annotation from an annotation object */
   fastify.post(
-    "/annotations/:iiifPresentationVersion/create",
-    { schema: createOrUpdateOneSchema },
+    "/annotations/:iiifPresentationVersion/:action",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema,
+            action: { type: "string", enum: [ "create", "update" ] }
+          }
+        },
+        body: routeAnnotations2Or3Schema,
+        response: responsePostSchema
+      },
+    },
     async (request, reply) => {
       const
-        { iiifPresentationVersion } = request.params,
+        { iiifPresentationVersion, action } = request.params,
         annotation = request.body;
 
       try {
         validateAnnotationVersion(iiifPresentationVersion, annotation);
-        // insert
+        // insert or update
         if ( iiifPresentationVersion === 2 ) {
-          const r = await annotations2.insertAnnotation(annotation);
-          return r;
+          return action==="create"
+            ? await annotations2.insertAnnotation(annotation)
+            : await annotations2.updateAnnotation(annotation);
         } else {
           annotations3.notImplementedError();
         }
