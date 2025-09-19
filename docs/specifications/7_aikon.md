@@ -56,7 +56,7 @@ Hre we desribe the functionnalities our annotation server should implement, and 
     - this behaviour is implemented by SAS but results are paginated which requires to run several queries
 - get the total number of annotations in a single manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L648))
 - get all annotations for a specific canvas
-- get all annotations for a range of canvased
+- get all annotations for a range of canvases
 - have several "export format" for an annotation:
     - IIIF annotation of course
       ```
@@ -125,5 +125,6 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 - annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
 - store rectangular annotations (bounding boxes) as well as polygonal annotations
 - annotation should have their canvas number as standard metdata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
+- make annotations ordered not alphabetically (137 arriving before 14) but by canvas order
 
 
