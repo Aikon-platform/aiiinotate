@@ -124,7 +124,13 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 
 - annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
 - store rectangular annotations (bounding boxes) as well as polygonal annotations
-- annotation should have their canvas number as standard metdata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
-- make annotations ordered not alphabetically (137 arriving before 14) but by canvas order
+- canvas number management:
+    - annotation should have their canvas number as standard metdata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
+    - make annotations ordered not alphabetically (137 arriving before 14) but by canvas order
+    - technically, this means that, when saving an annotation, you need to:
+        - fetch the manifest of the `annotation.on`
+        - index it (minimally, as a manifest URL + ordered array of canvases)
+        - extract the proper canvas number for the current annotation
+        - save in the annotation the canvas number
 
 
