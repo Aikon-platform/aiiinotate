@@ -10,4 +10,6 @@ Routes are only implemented with IIIF Presentation API 2.x, not with the 3.0 ver
 - `GET /annotations/:iiifPresentationVersion/search`: get all annotations for a canvas URI
 - `POST /annotations/:iiifPresentationVersion/create`: create 1 annotation
 - `POST /annotations/:iiifPresentationVersion/createMany`: create several annotations
+- `POST /annotations/:iiifPresentationVersion/update`: update 1 annotation 
 
+=> all create/update annotation routes are done !

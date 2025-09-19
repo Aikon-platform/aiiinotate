@@ -35,7 +35,6 @@ const injectPost = (fastify, route, payload) =>
  * @returns {void}
  */
 const assertPostInvalidResponse = (t, r) => {
-  console.log(JSON.parse(r.body));
   assertStatusCode(t, r, 500);
   assertResponseKeys(t, r, ["message", "info", "method", "url", "postBody"].sort());
 }
@@ -56,7 +55,6 @@ const assertCreateValidResponse = (t, r) => {
  * @returns {void}
  */
 const assertUpdateValidResponse = (t,r) => {
-  console.log("assertUpdateValidResponse", r.statusCode, inspectObj(JSON.parse(r.body)));
   assertStatusCode(t, r, 200);
   assertResponseKeys(t, r, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
 }
@@ -144,7 +142,7 @@ test("test annotation Routes", async (t) => {
     // inserts that should raise
     await Promise.all(
       [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
-        await testPostRouteCreateFailure(t, "annotations/2/createMany", payload)
+        await testPostRouteCreateFailure(t, "/annotations/2/createMany", payload)
       )
     )
   })
@@ -153,14 +151,14 @@ test("test annotation Routes", async (t) => {
     // inserts that shouldn't raise
     await Promise.all(
       fastify.fileServer.annotations2Valid.map(async (payload) =>
-        await testPostRouteCreateSuccess(t, "annotations/2/create", payload)
+        await testPostRouteCreateSuccess(t, "/annotations/2/create", payload)
       )
     )
 
     // inserts that should raise
     await Promise.all(
       fastify.fileServer.annotations2Invalid.map(async (payload) =>
-        await testPostRouteCreateFailure(t, "annotations/2/create", payload)
+        await testPostRouteCreateFailure(t, "/annotations/2/create", payload)
       )
     )
   })
@@ -181,8 +179,8 @@ test("test annotation Routes", async (t) => {
         annotation.motivation = { "invalidMotivation": "should be an array or a dict." }
       }
       success
-        ? await testPostRouteUpdateSuccess(t, "annotations/2/update", annotation)
-        : await testPostRouteUpdateFailure(t, "annotations/2/update", annotation);
+        ? await testPostRouteUpdateSuccess(t, "/annotations/2/update", annotation)
+        : await testPostRouteUpdateFailure(t, "/annotations/2/update", annotation);
     }
 
     // insert valid documents and retrieve an annotation to update.
@@ -203,6 +201,15 @@ test("test annotation Routes", async (t) => {
 
     await updatePipeline(annotation, true);
     await updatePipeline(annotation, false);
+
+  })
+
+  await t.test("test route /annotations/:iiifPresentationVersion/delete", async (t) => {
+    const r = await fastify.inject({
+      method: "DELETE",
+      url: "/annotations/2/delete?manifestShortId=blabla"
+    })
+    console.log("RESULT:::", r.body);
 
   })
 

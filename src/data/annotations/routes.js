@@ -84,6 +84,8 @@ async function annotationsRoutes(fastify, options) {
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");
 
+  //NOTE: fastify only implements top-level `$ref` in responses, so doing `anyOf: [ { $ref: ... } ]` is not allowed.
+  // in turn, we can't use `{ $ref: makeSchemaUri }` and must resolve schemas instead.
   const responsePostSchema = {
     200: {
       // type: "object",
@@ -252,10 +254,62 @@ async function annotationsRoutes(fastify, options) {
     }
   )
 
-  // fastify.post()
-
   /////////////////////////////////////////////////////////
   // delete routes
+
+  /**
+   * delete an annotation, all annotations for a canvas or all annotations for a manifest
+   */
+  fastify.delete(
+    "/annotations/:iiifPresentationVersion/delete",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema,
+          }
+        },
+        querystring: {
+          oneOf: [
+            {
+              type: "object",
+              required: ["uri"],
+              properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } }
+            },
+            {
+              type: "object",
+              required: ["manifestShortId"],
+              properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } }
+            },
+            {
+              type: "object",
+              required: ["canvasUri"],
+              properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } }
+            }
+          ]
+        },
+        response: responsePostSchema
+      },
+    },
+    async (request, reply) => {
+      const
+        { iiifPresentationVersion } = request.params,
+        // ctx is "uri|manifestShortId|canvasUri", `toDelete` is the key to use for deletion.
+        [ ctx, toDelete ] = Object.entries(request.query).find(([k,v]) => v != null)//
+
+      try {
+        if ( iiifPresentationVersion === 2 ) {
+          //TODO: une fonction dans annotations2 qui gere tous les cas de figure !
+        } else {
+          annotations3.notImplementedError();
+        }
+      } catch (err) {
+        returnError(request, reply, err, request.body);
+      }
+    }
+  )
+
 
 }
 
