@@ -45,6 +45,8 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
  * @param {any?} data: the data on which the error occurred, for POST requests
  */
 const returnError = (request, reply, err, data) => {
+  console.error(err);
+
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
     info: err.info || {},
@@ -92,6 +94,7 @@ async function annotationsRoutes(fastify, options) {
       anyOf: [
         fastify.schemasRoutes.getSchema("routeResponseInsert"),
         fastify.schemasRoutes.getSchema("routeResponseUpdate"),
+        fastify.schemasRoutes.getSchema("routeResponseDelete"),
       ]
     },
     500: fastify.schemasRoutes.getSchema("routeResponseError")
@@ -295,12 +298,13 @@ async function annotationsRoutes(fastify, options) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
-        // ctx is "uri|manifestShortId|canvasUri", `toDelete` is the key to use for deletion.
-        [ ctx, toDelete ] = Object.entries(request.query).find(([k,v]) => v != null)//
+        // 'deleteBy' is the type of id ("uri|manifestShortId|canvasUri"), `deleteId` is the id to use for deletion.
+        [ deleteBy, deleteId ] = Object.entries(request.query).find(([k,v]) => v != null);
 
       try {
         if ( iiifPresentationVersion === 2 ) {
-          //TODO: une fonction dans annotations2 qui gere tous les cas de figure !
+          const r = await annotations2.deleteAnnotations(deleteId, deleteBy);
+          return await r;
         } else {
           annotations3.notImplementedError();
         }

@@ -104,6 +104,14 @@ const pathToUrl = (path) =>
 const inspectObj = (obj) =>
   util.inspect(obj, {showHidden: false, depth: null, colors: true});
 
+/**
+ * return a random item from an array.
+ * @param {any[]} arr
+ * @returns {any}
+ */
+const getRandomItem = (arr) =>
+  arr.at(Math.floor(Math.random() * arr.length));
+
 export {
   maybeToArray,
   pathToUrl,
@@ -113,6 +121,7 @@ export {
   objectHasKey,
   addKeyValueToObjIfHasKey,
   inspectObj,
+  getRandomItem,
   arrayEqualsShallow,
   throwIfKeyUndefined,
   throwIfValueError

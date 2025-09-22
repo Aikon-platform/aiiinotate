@@ -21,9 +21,18 @@
  */
 
 /**
- * @typedef {"read"|"insert"|"update"|"delete"} MongoOperationsType
+ * @typedef DeleteResponseType
+ * @type {object}
+ * @property {number} deletedCount
+ */
+
+/**
+ * @typedef {"read"|"insert"|"update"|"delete"} DataOperationsType
  *   the allowed mongo operations.
  */
 
+/**
+ * @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType
+ */
 
 export {}

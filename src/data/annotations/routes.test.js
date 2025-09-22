@@ -4,7 +4,7 @@ import build from "#src/app.js";
 
 import { v4 as uuid4 } from "uuid";
 
-import { inspectObj, isObject } from "#data/utils/utils.js"
+import { inspectObj, isObject, getRandomItem } from "#data/utils/utils.js"
 
 
 const assertStatusCode = (t, r, expectedStatusCode) =>
@@ -59,9 +59,14 @@ const assertUpdateValidResponse = (t,r) => {
   assertResponseKeys(t, r, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
 }
 
+const assertDeleteValidResponse = (t,r) => {
+  assertStatusCode(t, r, 200);
+  assertResponseKeys(t, r, ["deletedCount"]);
+}
+
 /** @param {import("fastify").FastifyInstance} fastify */
 const testPostRouteCurry = (fastify) =>
-  /** @param {import("#data/types.js").MongoOperationsType} op */
+  /** @param {import("#data/types.js").DataOperationsType} op */
   (op) =>
     /** @param {boolean} success: if `true` test that the query succeeds. else, test that it fails */
     (success) =>
@@ -89,6 +94,24 @@ const testPostRouteCurry = (fastify) =>
           : funcInvalid(t, r);
         return;
       }
+
+/**
+ * inject an annotationList into the database for test purposes
+ * @param {import("fastify").FastifyInstance} fastify
+ * @param {import("node:test")} t
+ * @param {object} annotationList
+ * @returns {Array<number, Array<string>>}
+ */
+const injectDummyData = async (fastify, t, annotationList) => {
+  const
+    r = await injectPost(fastify, "/annotations/2/createMany", annotationList),
+    rBody = JSON.parse(r.body),
+    expectedInsertedCount = annotationList.resources.length,
+    { insertedCount, insertedIds } = rBody;
+  t.assert.deepStrictEqual(insertedCount, expectedInsertedCount);
+  return [insertedCount, insertedIds]
+}
+
 
 test("test annotation Routes", async (t) => {
 
@@ -138,7 +161,6 @@ test("test annotation Routes", async (t) => {
         await testPostRouteCreateSuccess(t, "/annotations/2/createMany", payload)
       )
     );
-
     // inserts that should raise
     await Promise.all(
       [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
@@ -154,7 +176,6 @@ test("test annotation Routes", async (t) => {
         await testPostRouteCreateSuccess(t, "/annotations/2/create", payload)
       )
     )
-
     // inserts that should raise
     await Promise.all(
       fastify.fileServer.annotations2Invalid.map(async (payload) =>
@@ -185,32 +206,53 @@ test("test annotation Routes", async (t) => {
 
     // insert valid documents and retrieve an annotation to update.
     const
-      r = await injectPost(fastify, "/annotations/2/createMany", annotationList),
-      rBody = JSON.parse(r.body),
-      expectedInsertedCount = annotationList.resources.length,
-      insertedCount = rBody.insertedCount,
-      insertedIds = rBody.insertedIds,
-      idToUpdate = insertedIds.at(Math.floor(Math.random() * insertedIds.length)),  // get a random item
+      [ insertedCount, insertedIds ] = await injectDummyData(fastify, t, annotationList),
+      idToUpdate = getRandomItem(insertedIds),  // get a random item
       annotation = await fastify.mongo.db.collection("annotations2").findOne(
         { "@id": idToUpdate },
         { projection: { _id: 0 }}
       );
 
-    // just to be sure
-    t.assert.equal(insertedCount, expectedInsertedCount);
-
     await updatePipeline(annotation, true);
     await updatePipeline(annotation, false);
-
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/delete", async (t) => {
-    const r = await fastify.inject({
-      method: "DELETE",
-      url: "/annotations/2/delete?manifestShortId=blabla"
-    })
-    console.log("RESULT:::", r.body);
 
+    await Promise.all(
+      ["manifestShortId", "canvasUri", "uri"].map(
+        async (deleteBy) =>
+          await t.test(`deleteBy: ${deleteBy}`, async (t) => {
+
+            await injectDummyData(fastify, t, annotationList);
+            const
+              annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
+              deleteKey =
+                deleteBy==="uri"
+                ? getRandomItem(annotations.map((a) => a["@id"]))
+                : deleteBy==="canvasUri"
+                ? getRandomItem(annotations.map((a) => a.on.full))
+                : getRandomItem(annotations.map((a) => a.on.manifestShortId)),
+              expectedDeletedCount =
+                deleteBy==="uri"
+                ? annotations.filter((a) => a["@id"]===deleteKey).length
+                : deleteBy==="canvasUri"
+                ? annotations.filter((a) => a.on.full===deleteKey).length
+                : annotations.filter((a) => a.on.manifestShortId===deleteKey).length;
+
+            console.log(deleteBy, deleteKey, expectedDeletedCount);
+
+            const r = await fastify.inject({
+              method: "DELETE",
+              url: `/annotations/2/delete?${deleteBy}=${deleteKey}`
+            })
+            console.log("RESULT:::", r.body);
+
+            assertDeleteValidResponse(t, r);
+            t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
+          })
+      )
+    )
   })
 
   return

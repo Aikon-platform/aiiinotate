@@ -25,7 +25,9 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 /** @typedef {import("mongodb").UpdateResult} UpdateResultType */
 /** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
 /** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
-/** @typedef {import("#data/types.js").MongoOperationsType } MongoOperationsType */
+/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
+/** @typedef {import("#data/types.js").DataOperationsType } DataOperationsType */
+/** @typedef {import("#data/types.js").DeleteByType } DeleteByType */
 
 class Annotations2Error extends Error {
   /**
@@ -277,6 +279,44 @@ class Annnotations2 extends AnnotationsAbstract {
   async insertAnnotationList(annotationList) {
     const annotationArray = this.#cleanAnnotationList(annotationList);
     return await this.#insertMany(annotationArray);
+  }
+
+  ////////////////////////////////////////////////////////////////
+  // delete
+
+  /**
+   * @param {object} queryObj
+   * @returns {Promise<DeleteResponseType>}
+   */
+  async #delete(queryObj) {
+    try {
+      //NOTE: should we raise if nothing is deleted ? currently, we will only return { deletedCount: 0 }
+      const deleteResult = await this.annotationsCollection.deleteMany(queryObj);
+      return { deletedCount: deleteResult.deletedCount };
+    } catch (err) {
+      this.#throwMongoError("delete", err);
+    }
+  }
+
+  /**
+   * @param {string} deleteId
+   * @param {Promise<DeleteByType>} deleteBy
+   */
+  async deleteAnnotations(deleteId, deleteBy) {
+
+    const allowedDeleteBy = [ "uri", "manifestShortId", "canvasUri" ];
+    if ( !allowedDeleteBy.includes(deleteBy) ) {
+      throw new Annotations2Error("delete", `${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteBy} for param 'deleteBy', got '${deleteBy}'`)
+    }
+
+    const deleteFilter =
+      deleteBy==="uri"
+      ? { "@id": deleteId }
+      : deleteBy==="canvasUri"
+      ? { "on.full": deleteId }
+      : { "on.manifestShortId": deleteId };
+
+    return this.#delete(deleteFilter);
   }
 
   ////////////////////////////////////////////////////////////////

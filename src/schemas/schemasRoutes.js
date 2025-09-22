@@ -51,6 +51,15 @@ function addSchemas(fastify, options, done) {
   })
 
   fastify.addSchema({
+    $id: makeSchemaUri("routeResponseDelete"),
+    type: "object",
+    required: [ "deletedCount" ],
+    properties: {
+      deletedCount: { type: "integer", minimum: 0 }
+    }
+  });
+
+  fastify.addSchema({
     $id: makeSchemaUri("routeResponseError"),
     type: "object",
     required: [],// [ "message", "info", "method", "url" ],
