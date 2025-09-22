@@ -231,7 +231,7 @@ test("test annotation Routes", async (t) => {
           async (deleteBy) =>
             await t.test(`validFilter: ${validFilter}, deleteBy: ${deleteBy}`, async (t) => {
 
-              await injectDummyData(fastify, t, annotationListUriArray);
+              await injectDummyData(fastify, t, annotationList);
               const
                 annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
                 deleteKey =

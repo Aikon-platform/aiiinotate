@@ -270,7 +270,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<UpdateResponseType}
    */
   async updateAnnotation(annotation) {
-    // necessary, even if no insert is done: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
+    // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
     annotation = this.#cleanAnnotation(annotation, true);
     return this.#updateOne(annotation);
   }
