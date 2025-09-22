@@ -220,39 +220,50 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/delete", async (t) => {
 
     await Promise.all(
-      ["manifestShortId", "canvasUri", "uri"].map(
-        async (deleteBy) =>
-          await t.test(`deleteBy: ${deleteBy}`, async (t) => {
+      // true => delete data that exists in the db (test that deletions are done correctly),
+      // false => delete data that doesn't exist (test that nothing is deleted by accident)
+      [true, false].map(
+        async (validFilter) => await Promise.all(
+          // all 3 possible ways to delete data
+          ["manifestShortId", "canvasUri", "uri"].map(
+            async (deleteBy) =>
+              await t.test(`deleteBy: ${deleteBy}`, async (t) => {
 
-            await injectDummyData(fastify, t, annotationList);
-            const
-              annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
-              deleteKey =
-                deleteBy==="uri"
-                  ? getRandomItem(annotations.map((a) => a["@id"]))
-                  : deleteBy==="canvasUri"
-                    ? getRandomItem(annotations.map((a) => a.on.full))
-                    : getRandomItem(annotations.map((a) => a.on.manifestShortId)),
-              expectedDeletedCount =
-                deleteBy==="uri"
-                  ? annotations.filter((a) => a["@id"]===deleteKey).length
-                  : deleteBy==="canvasUri"
-                    ? annotations.filter((a) => a.on.full===deleteKey).length
-                    : annotations.filter((a) => a.on.manifestShortId===deleteKey).length;
+                await injectDummyData(fastify, t, annotationList);
+                const
+                  annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
+                  deleteKey =
+                    validFilter
+                    ? deleteBy==="uri"
+                      ? getRandomItem(annotations.map((a) => a["@id"]))
+                      : deleteBy==="canvasUri"
+                        ? getRandomItem(annotations.map((a) => a.on.full))
+                        : getRandomItem(annotations.map((a) => a.on.manifestShortId))
+                    : `invalid-filter-${uuid4()}`,
+                  expectedDeletedCount =
+                    validFilter
+                    ? deleteBy==="uri"
+                      ? annotations.filter((a) => a["@id"]===deleteKey).length
+                      : deleteBy==="canvasUri"
+                        ? annotations.filter((a) => a.on.full===deleteKey).length
+                        : annotations.filter((a) => a.on.manifestShortId===deleteKey).length
+                    : 0;
 
-            console.log(deleteBy, deleteKey, expectedDeletedCount);
+                const r = await fastify.inject({
+                  method: "DELETE",
+                  url: `/annotations/2/delete?${deleteBy}=${deleteKey}`
+                })
 
-            const r = await fastify.inject({
-              method: "DELETE",
-              url: `/annotations/2/delete?${deleteBy}=${deleteKey}`
-            })
-            console.log("RESULT:::", r.body);
-
-            assertDeleteValidResponse(t, r);
-            t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
-          })
+                assertDeleteValidResponse(t, r);
+                t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
+              })
+          )
+        )
       )
     )
+
+
+
   })
 
   return
