@@ -229,9 +229,9 @@ test("test annotation Routes", async (t) => {
         // all 3 possible ways to delete data
         ["manifestShortId", "canvasUri", "uri"].map(
           async (deleteBy) =>
-            await t.test(`deleteBy: ${deleteBy}`, async (t) => {
+            await t.test(`validFilter: ${validFilter}, deleteBy: ${deleteBy}`, async (t) => {
 
-              await injectDummyData(fastify, t, annotationList);
+              await injectDummyData(fastify, t, annotationListUriArray);
               const
                 annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
                 deleteKey =
