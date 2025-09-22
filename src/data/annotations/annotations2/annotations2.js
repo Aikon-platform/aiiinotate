@@ -241,6 +241,7 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * update a single annotation, targeted by its "@id"
    * @param {object} annotation
+   * @returns {Promise<UpdateResponseType>}
    */
   async #updateOne(annotation){
     try {
@@ -255,20 +256,23 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   /**
-   *
    * validate and insert a single annotation.
    * @param {object} annotationArray
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotation(annotation) {
     annotation = this.#cleanAnnotation(annotation);
-    return await this.#insertOne(annotation);
+    return this.#insertOne(annotation);
   }
 
+  /**
+   * @param {object} annotation
+   * @returns {Promise<UpdateResponseType}
+   */
   async updateAnnotation(annotation) {
     // necessary, even if no insert is done: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
     annotation = this.#cleanAnnotation(annotation, true);
-    return await this.#updateOne(annotation);
+    return this.#updateOne(annotation);
   }
 
   /**
@@ -278,7 +282,7 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async insertAnnotationList(annotationList) {
     const annotationArray = this.#cleanAnnotationList(annotationList);
-    return await this.#insertMany(annotationArray);
+    return this.#insertMany(annotationArray);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -311,10 +315,10 @@ class Annnotations2 extends AnnotationsAbstract {
 
     const deleteFilter =
       deleteBy==="uri"
-      ? { "@id": deleteId }
-      : deleteBy==="canvasUri"
-      ? { "on.full": deleteId }
-      : { "on.manifestShortId": deleteId };
+        ? { "@id": deleteId }
+        : deleteBy==="canvasUri"
+          ? { "on.full": deleteId }
+          : { "on.manifestShortId": deleteId };
 
     return this.#delete(deleteFilter);
   }

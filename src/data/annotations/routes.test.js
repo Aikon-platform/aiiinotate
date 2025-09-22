@@ -229,16 +229,16 @@ test("test annotation Routes", async (t) => {
               annotations = await fastify.mongo.db.collection("annotations2").find({}).toArray(),
               deleteKey =
                 deleteBy==="uri"
-                ? getRandomItem(annotations.map((a) => a["@id"]))
-                : deleteBy==="canvasUri"
-                ? getRandomItem(annotations.map((a) => a.on.full))
-                : getRandomItem(annotations.map((a) => a.on.manifestShortId)),
+                  ? getRandomItem(annotations.map((a) => a["@id"]))
+                  : deleteBy==="canvasUri"
+                    ? getRandomItem(annotations.map((a) => a.on.full))
+                    : getRandomItem(annotations.map((a) => a.on.manifestShortId)),
               expectedDeletedCount =
                 deleteBy==="uri"
-                ? annotations.filter((a) => a["@id"]===deleteKey).length
-                : deleteBy==="canvasUri"
-                ? annotations.filter((a) => a.on.full===deleteKey).length
-                : annotations.filter((a) => a.on.manifestShortId===deleteKey).length;
+                  ? annotations.filter((a) => a["@id"]===deleteKey).length
+                  : deleteBy==="canvasUri"
+                    ? annotations.filter((a) => a.on.full===deleteKey).length
+                    : annotations.filter((a) => a.on.manifestShortId===deleteKey).length;
 
             console.log(deleteBy, deleteKey, expectedDeletedCount);
 
