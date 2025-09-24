@@ -1,21 +1,31 @@
 /** @typedef {import("mongodb").Db} Db */
+/** @typedef {import("#data/types.js").IiifPresentationVersionType} IiifPresentationVersionType */
 
 class AnnotationsAbstract {
   /**
-   * NOTE: async constructors are NOT ALLOWED in JS, so be sure that
-   * all arguments are passed as resolved objects, NOT AS PROMISES.
+   * NOTE: async constructors are NOT ALLOWED in JS, so be sure that all arguments are passed as resolved objects, NOT AS PROMISES.
    *
-   * @param {import("mongodb").Db} db
-   * @param {import("mongodb").MongoClient} client
-   * @param {"annotations2"|"annotations3"} annotationsCollectionName
-   * @param {object} annotationCollectionOptions
+   * @param {import("fastify").FastifyInstance} fastify\
+   * @param {IiifPresentationVersionType} iiifPresentationVersion
    */
-  constructor(client, db, annotationCollectionName, annotationCollectionOptions) {
-    this.client = client;
-    this.db = db;
-    this.annotationsCollection = db.collection(
-      annotationCollectionName,
-      annotationCollectionOptions
+  constructor(fastify, iiifPresentationVersion) {
+    const [ annotationsCollectionName, annotationsCollectionOptions ] =
+      iiifPresentationVersion === 2
+        ? [
+          "annotations2",
+          { validator: { $jsonSchema: fastify.schemasPresentation2.getSchema("annotation") } }
+        ]
+        : [
+          "annotations3",
+          { validator: { /** TODO */ } }
+        ];
+
+    this.fastify = fastify;
+    this.client = fastify.mongo.client;
+    this.db = fastify.mongo.db;
+    this.annotationsCollection = this.db.collection(
+      annotationsCollectionName,
+      annotationsCollectionOptions
     );
   }
 

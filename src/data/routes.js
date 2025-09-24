@@ -2,9 +2,10 @@ import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl } from "#data/utils/utils.js";
 
-async function commonRoutes(fastify, options) {
+async function commonRoutes(fastify) {
   const
-    { annotations2, annotations3 } = options,
+    annotations2 = fastify.annotations2,
+    annotations3 = fastify.annotations3,
     iiifSearchApiVersion = fastify.schemasBase.getSchema("search"),
     iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList");
 

@@ -1,4 +1,7 @@
+import fastifyPlugin from "fastify-plugin";
+
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
+
 
 /**
  * @extends {AnnotationsAbstract}
@@ -6,12 +9,9 @@ import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 class Annnotations3 extends AnnotationsAbstract {
   /**
    * @param {import("fastify").FastifyInstance} fastify
-   * @param {import("mongodb").MongoClient} client
-   * @param {import("mongodb").Db} db
    */
-  constructor(fastify, client, db) {
-    const collectionOptions = {};
-    super(client, db, "annotations3", collectionOptions);
+  constructor(fastify) {
+    super(fastify, 3);
   }
 
   notImplementedError() {
@@ -20,7 +20,10 @@ class Annnotations3 extends AnnotationsAbstract {
 
 }
 
-export default Annnotations3;
+export default fastifyPlugin((fastify, options, done) => {
+  fastify.decorate("annnotations3", new Annnotations3(fastify));
+  done();
+})
 
 // /**
 //  * JSON schema for IIIF 3.x

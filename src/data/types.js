@@ -35,4 +35,6 @@
  * @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType
  */
 
+/** @typedef {2|3} IiifPresentationVersionType */
+
 export {}

@@ -2,6 +2,8 @@
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
  * exposes an `Annnotations2` class that should contain everything you need
  */
+import fasitfyPlugin, { fastifyPlugin } from "fastify-plugin";
+
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
@@ -48,16 +50,9 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * @param {import("fastify").FastifyInstance} fastify
-   * @param {import("mongodb").MongoClient} client
-   * @param {import("mongodb").Db} db
    */
-  constructor(fastify, client, db) {
-    const
-      schemaAnnotation2 = fastify.schemasPresentation2.getSchema("annotation"),
-      collectionOptions = {
-        validator: { $jsonSchema: schemaAnnotation2 }
-      };
-    super(client, db, "annotations2", collectionOptions);
+  constructor(fastify) {
+    super(fastify, 2);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -467,4 +462,8 @@ class Annnotations2 extends AnnotationsAbstract {
 
 }
 
-export default Annnotations2;
+// export default Annnotations2;
+export default fastifyPlugin((fastify, options, done) => {
+  fastify.decorate("annotations2", new Annnotations2(fastify));
+  done();
+})

@@ -79,7 +79,8 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
  */
 async function annotationsRoutes(fastify, options) {
   const
-    { annotations2, annotations3 } = options,
+    annotations2 = fastify.annotations2,
+    annotations3 = fastify.annotations3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routesAnnotations2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),

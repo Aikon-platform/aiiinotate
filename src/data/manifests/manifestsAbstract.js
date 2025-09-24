@@ -2,15 +2,25 @@
 
 class ManifestsAbstract {
   /**
-   * @param {import("mongodb").Db} db
-   * @param {import("mongodb").MongoClient} client
-   * @param {"annotations2"|"annotations3"} manifestsCollectionName
-   * @param {object} manifestsCollectionOptions
+   * @param {import("fastify").FastifyInstance} fastify\
+   * @param {IiifPresentationVersionType} iiifPresentationVersion
    */
-  constructor(client, db, manifestsCollectionName, manifestsCollectionOptions) {
-    this.client = client;
-    this.db = db;
-    this.manifestsCollection = db.collection(
+  constructor(fastify, iiifPresentationVersion) {
+    const [ manifestsCollectionName, manifestsCollectionOptions ] =
+    iiifPresentationVersion === 2
+      ? [
+        "manifests2",
+        { validator: { /** TODO */ } }
+      ]
+      : [
+        "manifests3",
+        { validator: { /** TODO */ } }
+      ];
+
+    this.fastify = fastify;
+    this.client = fastify.mongo.client;
+    this.db = fastify.mongo.db;
+    this.manifestsCollection = this.db.collection(
       manifestsCollectionName,
       manifestsCollectionOptions
     )
