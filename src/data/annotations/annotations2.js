@@ -462,7 +462,6 @@ class Annnotations2 extends AnnotationsAbstract {
 
 }
 
-// export default Annnotations2;
 export default fastifyPlugin((fastify, options, done) => {
   fastify.decorate("annotations2", new Annnotations2(fastify));
   done();
