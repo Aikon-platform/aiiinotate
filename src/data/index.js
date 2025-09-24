@@ -1,9 +1,9 @@
 import fastifyPlugin from "fastify-plugin"
 
-import Annotations2 from "#annotations/annotations2/annotations2.js";
-import Annotations3 from "#annotations/annotations3/annotations3.js";
-import Manifests2 from "#manifests/manifests2/manifests2.js";
-// import Manifests3 from "#manifests/manifests3/manifests3.js";
+import Annotations2 from "#annotations/annotations2.js";
+import Annotations3 from "#annotations/annotations3.js";
+import Manifests2 from "#manifests/manifests2.js";
+// import Manifests3 from "#manifests/manifests3.js";
 import annotationsRoutes from "#annotations/routes.js";
 import commonRoutes from "#data/routes.js";
 
