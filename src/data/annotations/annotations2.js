@@ -2,7 +2,7 @@
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
  * exposes an `Annnotations2` class that should contain everything you need
  */
-import fasitfyPlugin, { fastifyPlugin } from "fastify-plugin";
+import fastifyPlugin from "fastify-plugin";
 
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";

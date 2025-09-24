@@ -8,7 +8,6 @@ class Manifests2 extends ManifestsAbstract {
    */
   constructor(fastify) {
     super(fastify, 2, {});
-
   }
 }
 
