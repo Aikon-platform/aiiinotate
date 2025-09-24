@@ -8,11 +8,14 @@ class Manifests2 extends ManifestsAbstract {
    */
   constructor(fastify) {
     super(fastify, 2, {});
+
   }
 }
 
 export default fastifyPlugin((fastify, options, done) => {
   fastify.decorate("manifests2", new Manifests2(fastify));
   done();
+}, {
+  name: "manifests2",
 })
 

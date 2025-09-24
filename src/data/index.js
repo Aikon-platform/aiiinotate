@@ -22,11 +22,10 @@ function data(fastify, options, done) {
   //   // annotations2 = new Annotations2(fastify, client, db),
   //   // annotations3 = new Annotations3(fastify, client, db);
 
-  fastify.register(Annotations2);
-  fastify.register(Annotations3);
   fastify.register(Manifests2);
   fastify.register(Manifests3);
-
+  fastify.register(Annotations2);
+  fastify.register(Annotations3);
   fastify.register(commonRoutes, { });
   fastify.register(annotationsRoutes, { });
 

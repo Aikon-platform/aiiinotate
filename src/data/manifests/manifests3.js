@@ -14,4 +14,6 @@ class Manifests3 extends ManifestsAbstract {
 export default fastifyPlugin((fastify, options, done) => {
   fastify.decorate("manifests3", new Manifests3(fastify));
   done();
+}, {
+  name: "manifests3",
 })

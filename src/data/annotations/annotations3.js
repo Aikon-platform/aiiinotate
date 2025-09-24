@@ -23,6 +23,9 @@ class Annnotations3 extends AnnotationsAbstract {
 export default fastifyPlugin((fastify, options, done) => {
   fastify.decorate("annnotations3", new Annnotations3(fastify));
   done();
+}, {
+  name: "annotations3",
+  dependencies: ["manifests3"]
 })
 
 // /**
