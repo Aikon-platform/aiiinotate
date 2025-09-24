@@ -156,16 +156,6 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   /**
-   * throw an error with just the object describing the error data (and not the stack or anything else).
-   * used to propagate write errors to routes.
-   * @param {MongoOperations} operation: describes the database operation
-   * @param {import("mongodb").MongoServerError} err: the mongo error
-   */
-  #throwMongoError(operation, err) {
-    throw new Annotations2Error(operation, err.message, err.errorResponse)
-  }
-
-  /**
    * make a uniform response format for #insertOne and #insertMany
    * @param {InsertManyResultType | InsertOneResultType} mongoRes
    * @returns {Promise<InsertResponseType>}
@@ -203,6 +193,16 @@ class Annnotations2 extends AnnotationsAbstract {
       upsertedCount: mongoRes.upsertedCount,
       upsertedId: mongoRes.upsertedId
     };
+  }
+
+  /**
+   * throw an error with just the object describing the error data (and not the stack or anything else).
+   * used to propagate write errors to routes.
+   * @param {MongoOperations} operation: describes the database operation
+   * @param {import("mongodb").MongoServerError} err: the mongo error
+   */
+  #throwMongoError(operation, err) {
+    throw new Annotations2Error(operation, err.message, err.errorResponse)
   }
 
   ////////////////////////////////////////////////////////////////

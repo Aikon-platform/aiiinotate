@@ -7,7 +7,8 @@ class AnnotationsAbstract {
    *
    * @param {import("mongodb").Db} db
    * @param {import("mongodb").MongoClient} client
-   * @param {import("mongodb").Collection} annotationsCollection
+   * @param {"annotations2"|"annotations3"} annotationsCollectionName
+   * @param {object} annotationCollectionOptions
    */
   constructor(client, db, annotationCollectionName, annotationCollectionOptions) {
     this.client = client;
