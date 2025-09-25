@@ -8,6 +8,8 @@ import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#data/utils/iiif2Utils.js";
+import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/responses.js";
+
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
@@ -160,23 +162,18 @@ class Annnotations2 extends AnnotationsAbstract {
       // InsertOneResultType and InsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
-    return {
-      insertedCount: insertedIds.length,
-      insertedIds: insertedIds
-    }
+    return makeInsertResponse(insertedIds);
   }
 
   /**
    * @param {UpdateResultType} mongoRes
-   * @returns {UpdateResponseType}
+   * @returns {Promise<UpdateResponseType>}
    */
-  #makeUpdateResponse(mongoRes) {
-    return {
-      matchedCount: mongoRes.matchedCount,
-      modifiedCount: mongoRes.modifiedCount,
-      upsertedCount: mongoRes.upsertedCount,
-      upsertedId: mongoRes.upsertedId
-    };
+  async #makeUpdateResponse(mongoRes) {
+    if (mongoRes.upsertedId) {
+      mongoRes.upsertedId = await this.#annotationIdFromMongoId(mongoRes.upsertedId);
+    }
+    return makeUpdateResponse(mongoRes);
   }
 
   /**
