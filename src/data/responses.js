@@ -28,8 +28,8 @@ const makeUpdateResponse = (mongoRes) => ({
 });
 
 /**
- * @param {InsertResponseType} insertedIds
- * @returns {InsertResponseType}
+ * @param {DeleteResponseType} mongoRes
+ * @returns {DeleteResponseType}
  */
 const makeDeleteResponse = (mongoRes) => ({
   deletedCount: mongoRes.deletedCount

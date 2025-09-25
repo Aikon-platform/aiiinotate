@@ -171,7 +171,9 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async #makeUpdateResponse(mongoRes) {
     if (mongoRes.upsertedId) {
-      mongoRes.upsertedId = await this.#annotationIdFromMongoId(mongoRes.upsertedId);
+      // only 1 entry can be upserted by a mongo query => extract the 1st upserted @id from the mongo @id.
+      const upsertedIds = await this.#annotationIdFromMongoId(mongoRes.upsertedId);
+      mongoRes.upsertedId = upsertedIds.length ? upsertedIds[0] : mongoRes.upsertedId;
     }
     return makeUpdateResponse(mongoRes);
   }
@@ -248,7 +250,7 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * @param {object} annotation
-   * @returns {Promise<UpdateResponseType}
+   * @returns {Promise<UpdateResponseType>}
    */
   async updateAnnotation(annotation) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
@@ -275,9 +277,9 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async #delete(queryObj) {
     try {
-      //NOTE: should we raise if nothing is deleted ? currently, we will only return { deletedCount: 0 }
+      //NOTE: if nothing is deleted, it's not an error, we return: { deletedCount: 0 }
       const deleteResult = await this.annotationsCollection.deleteMany(queryObj);
-      return { deletedCount: deleteResult.deletedCount };
+      return makeDeleteResponse(deleteResult);
     } catch (err) {
       this.#throwMongoError("delete", err);
     }
