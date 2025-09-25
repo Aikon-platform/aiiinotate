@@ -145,8 +145,7 @@ class Annnotations2 extends AnnotationsAbstract {
     ) {
       this.errorMessage(this.#cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
     }
-    //NOTE: using an arrow function is necessary to avoid losing the scope of `this`.
-    // otherwise, `this` is undefined in `#cleanAnnotation`.
+    //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
     return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
   }
 
@@ -158,22 +157,12 @@ class Annnotations2 extends AnnotationsAbstract {
   async #makeInsertResponse(mongoRes) {
     // retrieve the "@id"s
     const insertedIds = await this.#annotationIdFromMongoId(
+      // InsertOneResultType and InsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
-    // mongoRes is `InsertOneResult`
-    if ( objectHasKey(mongoRes, "insertedId") ) {
-      return {
-        insertedCount: 1,
-        insertedIds: insertedIds
-      }
-    // mongoRes is `insertManyResult`
-    } else if ( objectHasKey(mongoRes, "insertedIds") ) {
-      return {
-        insertedCount: mongoRes.insertedCount,
-        insertedIds: insertedIds
-      }
-    } else {
-      throw new Annotations2Error("insert", "unrecognized mongo response: expected one of 'InsertManyResult' or 'InsertOneResult'", mongoRes)
+    return {
+      insertedCount: insertedIds.length,
+      insertedIds: insertedIds
     }
   }
 
