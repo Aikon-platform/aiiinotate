@@ -3,6 +3,7 @@
  * NOTE: ids should be converted to IIIF ids instead of the mongo idss returned by mongo
  */
 
+/** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
 /** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */

@@ -1,10 +1,24 @@
-/** @typedef {import("mongodb").ObjectId} ObjectIdType */
+/** @typedef {import("mongodb").ObjectId } MongoObjectId */
+
+/** @typedef {import("mongodb").InsertManyResult} MongoInsertManyResultType */
+
+/** @typedef {import("mongodb").InsertOneResult} MongoInsertOneResultType */
+
+/** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
+
+/** @typedef {MongoInsertManyResultType | MongoInsertOneResultType} MongoInsertResultType */
+
+/** @typedef {import("mongodb").DeleteResult} MongoDeleteResultType */
+
+/** @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType */
+
+/** @typedef {2|3} IiifPresentationVersionType */
 
 /**
  * @typedef InsertResponseType
  * @type {object}
  * @property {number} insertedCount
- * @property {Array<string|ObjectIdType>} insertedIds
+ * @property {Array<string|MongoObjectId>} insertedIds
  */
 
 /**
@@ -31,10 +45,5 @@
  *   the allowed mongo operations.
  */
 
-/**
- * @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType
- */
-
-/** @typedef {2|3} IiifPresentationVersionType */
 
 export {}

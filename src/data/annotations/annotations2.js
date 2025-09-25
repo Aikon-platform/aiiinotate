@@ -10,6 +10,15 @@ import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/u
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#data/utils/iiif2Utils.js";
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/responses.js";
 
+/** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
+/** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
+/** @typedef {import("#data/types.js"). MongoUpdateResultType} MongoUpdateResultType */
+/** @typedef {import("#data/types.js"). MongoDeleteResultType} MongoDeleteResultType */
+/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
+/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
+/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
+/** @typedef {import("#data/types.js").DataOperationsType } DataOperationsType */
+/** @typedef {import("#data/types.js").DeleteByType } DeleteByType */
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
@@ -22,16 +31,6 @@ import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#dat
 // Range 	                   {scheme}://{host}/{prefix}/{identifier}/range/{name}
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
-
-/** @typedef {import("mongodb").ObjectId } MongoObjectId */
-/** @typedef {import("mongodb").InsertManyResult} InsertManyResultType */
-/** @typedef {import("mongodb").InsertOneResult} InsertOneResultType */
-/** @typedef {import("mongodb").UpdateResult} UpdateResultType */
-/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
-/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
-/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
-/** @typedef {import("#data/types.js").DataOperationsType } DataOperationsType */
-/** @typedef {import("#data/types.js").DeleteByType } DeleteByType */
 
 class Annotations2Error extends Error {
   /**
@@ -153,20 +152,20 @@ class Annnotations2 extends AnnotationsAbstract {
 
   /**
    * make a uniform response format for #insertOne and #insertMany
-   * @param {InsertManyResultType | InsertOneResultType} mongoRes
+   * @param {MongoInsertResultType} mongoRes
    * @returns {Promise<InsertResponseType>}
    */
   async #makeInsertResponse(mongoRes) {
     // retrieve the "@id"s
     const insertedIds = await this.#annotationIdFromMongoId(
-      // InsertOneResultType and InsertManyResultType have a different structureex
+      // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
     return makeInsertResponse(insertedIds);
   }
 
   /**
-   * @param {UpdateResultType} mongoRes
+   * @param {MongoUpdateResultType} mongoRes
    * @returns {Promise<UpdateResponseType>}
    */
   async #makeUpdateResponse(mongoRes) {

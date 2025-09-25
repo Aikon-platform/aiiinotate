@@ -5,7 +5,8 @@
 
 const
   colName = "annotations2",
-  indexSpec = { "on.full": 1 };
+  indexSpec = { "on.full": 1 },
+  indexOptions = { name: "canvasIdIndex" };
 
 /**
  * @param {import('mongodb').Db} db
@@ -14,7 +15,7 @@ const
  */
 export const up = async (db, client) => {
   const collection = db.collection(colName);
-  const result = await collection.createIndex(indexSpec);
+  const result = await collection.createIndex(indexSpec, indexOptions);
   console.log("created index:", result);
 };
 
@@ -25,6 +26,6 @@ export const up = async (db, client) => {
  */
 export const down = async (db, client) => {
   const collection = db.collection(colName);
-  const result = await collection.dropIndex(indexSpec);
+  const result = await collection.dropIndex(indexOptions.name);
   console.log("dropped index:", result);
 };
