@@ -7,8 +7,8 @@ import fastifyPlugin from "fastify-plugin";
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
-import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#data/utils/iiif2Utils.js";
-import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/responses.js";
+import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, getIiifIdsFromMongoIds } from "#data/utils/iiif2Utils.js";
+import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/utils/responseUtils.js";
 
 /** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
 /** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
@@ -34,7 +34,7 @@ import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#dat
 
 class Annotations2Error extends Error {
   /**
-   * @param {MongoOperations} action
+   * @param {DataOperationsType} action
    * @param {string} message: error message
    * @param {object?} errInfo: extra data
    */
@@ -157,7 +157,8 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async #makeInsertResponse(mongoRes) {
     // retrieve the "@id"s
-    const insertedIds = await this.#annotationIdFromMongoId(
+    const insertedIds = await getIiifIdsFromMongoIds(
+      this.db.collection("annotations2"),
       // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
@@ -171,7 +172,10 @@ class Annnotations2 extends AnnotationsAbstract {
   async #makeUpdateResponse(mongoRes) {
     if (mongoRes.upsertedId) {
       // only 1 entry can be upserted by a mongo query => extract the 1st upserted @id from the mongo @id.
-      const upsertedIds = await this.#annotationIdFromMongoId(mongoRes.upsertedId);
+      const upsertedIds = await getIiifIdsFromMongoIds(
+        this.db.collection("annotations2"),
+        mongoRes.upsertedId
+      );
       mongoRes.upsertedId = upsertedIds.length ? upsertedIds[0] : mongoRes.upsertedId;
     }
     return makeUpdateResponse(mongoRes);
@@ -180,7 +184,7 @@ class Annnotations2 extends AnnotationsAbstract {
   /**
    * throw an error with just the object describing the error data (and not the stack or anything else).
    * used to propagate write errors to routes.
-   * @param {MongoOperations} operation: describes the database operation
+   * @param {DataOperationsType} operation: describes the database operation
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
   #throwMongoError(operation, err) {
@@ -356,20 +360,6 @@ class Annnotations2 extends AnnotationsAbstract {
     return this.annotationsCollection
       .find(queryObj, { projection: projectionObj })
       .toArray();
-  }
-
-  /**
-   * from an array of Mongo "_id", return the corresponding "@id" fields
-   * @param {MongoObjectId | MongoObjectId[]} mongoIds
-   * @returns {Promise<string[]>}
-   */
-  async #annotationIdFromMongoId(mongoIds) {
-    mongoIds = maybeToArray(mongoIds);
-    const annotationIds = await this.find(
-      { _id: { $in: mongoIds } },
-      { "@id": 1 }
-    )
-    return annotationIds.map(a => a["@id"]);
   }
 
   /**

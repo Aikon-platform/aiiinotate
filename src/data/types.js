@@ -1,5 +1,7 @@
 /** @typedef {import("mongodb").ObjectId } MongoObjectId */
 
+/** @typedef {import("mongodb").Collection} MongoCollectionType */
+
 /** @typedef {import("mongodb").InsertManyResult} MongoInsertManyResultType */
 
 /** @typedef {import("mongodb").InsertOneResult} MongoInsertOneResultType */

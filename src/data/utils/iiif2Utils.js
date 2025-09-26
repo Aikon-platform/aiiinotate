@@ -1,7 +1,9 @@
 import { v4 as uuid4 } from "uuid";
-import { getHash, isNullish, isObject } from "#data/utils/utils.js";
+
+import { maybeToArray, getHash, isNullish, isObject } from "#data/utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
+/** @typedef {import("#data/types.js").MongoCollectionType} MongoCollectionType */
 
 // IIIF PRESENTATION 2.1 RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
@@ -169,6 +171,22 @@ const toAnnotationList = (resources, annotationListId, label) => {
   return annotationList;
 }
 
+/**
+ * resolve internal mongo '_id' fields to iiif '@id' fields
+ * @param {MongoCollectionType} collection
+ * @param {string | string[]} mongoIds
+ * @returns {string[]}
+ */
+const getIiifIdsFromMongoIds = async (collection, mongoIds) => {
+  mongoIds = maybeToArray(mongoIds);
+  const annotationIds = await collection.find(
+    { _id: { $in: mongoIds } },
+    { projection: { "@id": 1 } }
+  ).toArray();
+  return annotationIds.map(a => a["@id"]);
+
+}
+
 export {
   makeTarget,
   makeAnnotationId,
@@ -176,5 +194,6 @@ export {
   toAnnotationList,
   getManifestShortId,
   getCanvasShortId,
-  getAnnotationTarget
+  getAnnotationTarget,
+  getIiifIdsFromMongoIds
 }
