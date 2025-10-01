@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 const oaSelectorTypes = [

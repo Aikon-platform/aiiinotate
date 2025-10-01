@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import ManifestsAbstract from "#manifests/manifestsAbstract.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 class Manifests3 extends ManifestsAbstract {
   /**

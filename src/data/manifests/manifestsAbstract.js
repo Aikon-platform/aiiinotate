@@ -1,5 +1,5 @@
 /** @typedef {import("mongodb").Db} Db */
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 class ManifestsAbstract {
   /**

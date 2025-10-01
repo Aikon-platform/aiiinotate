@@ -8,10 +8,10 @@ import { inspectObj, isObject, getRandomItem } from "#data/utils/utils.js"
 import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#data/utils/testUtils.js";
 
 
-/** @typedef {import("#data/types.js").NodeTestType} NodeTestType */
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#data/types.js").FastifyReplyType} FastifyReplyType */
-/** @typedef {import("#data/types.js").DataOperationsType} DataOperationsType */
+/** @typedef {import("#types").NodeTestType} NodeTestType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").DataOperationsType} DataOperationsType */
 
 /**
  * inject an annotationList into the database for test purposes

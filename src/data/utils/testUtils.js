@@ -2,9 +2,9 @@
  * utilities and generally useful functions for tests.
  */
 
-/** @typedef {import("#data/types.js").NodeTestType} NodeTestType */
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#data/types.js").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").NodeTestType} NodeTestType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
 
 /**
  * @param {NodeTestType} t

@@ -4,9 +4,9 @@
  */
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
-/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
-/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
-/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
+/** @typedef {import("#types").InsertResponseType} InsertResponseType */
+/** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
+/** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 
 /**
  * @param {string[]} insertedIds

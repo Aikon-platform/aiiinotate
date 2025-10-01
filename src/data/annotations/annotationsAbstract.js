@@ -1,6 +1,6 @@
 /** @typedef {import("mongodb").Db} Db */
-/** @typedef {import("#data/types.js").IiifPresentationVersionType} IiifPresentationVersionType */
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").IiifPresentationVersionType} IiifPresentationVersionType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 class AnnotationsAbstract {
   /**

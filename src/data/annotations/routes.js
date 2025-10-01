@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#data/utils/utils.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 /**
  * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
@@ -64,8 +64,8 @@ const returnError = (request, reply, err, data) => {
 }
 
 /**
- * @param {import("#data/types.js").InsertResponseArrayType} insertResponseArray
- * @returns {import("#data/types.js").InsertResponseType}
+ * @param {import("#types").InsertResponseArrayType} insertResponseArray
+ * @returns {import("#types").InsertResponseType}
  */
 const reduceInsertResponseArray = (insertResponseArray) => ({
   insertedCount: insertResponseArray.reduce((acc, r) => acc+r.insertedCount, 0),

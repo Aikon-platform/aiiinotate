@@ -11,16 +11,16 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, get
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/utils/responseUtils.js";
 
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
-/** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
-/** @typedef {import("#data/types.js"). MongoUpdateResultType} MongoUpdateResultType */
-/** @typedef {import("#data/types.js"). MongoDeleteResultType} MongoDeleteResultType */
-/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
-/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
-/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
-/** @typedef {import("#data/types.js").DataOperationsType } DataOperationsType */
-/** @typedef {import("#data/types.js").DeleteByType } DeleteByType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types"). MongoObjectId} MongoObjectId */
+/** @typedef {import("#types"). MongoInsertResultType} MongoInsertResultType */
+/** @typedef {import("#types"). MongoUpdateResultType} MongoUpdateResultType */
+/** @typedef {import("#types"). MongoDeleteResultType} MongoDeleteResultType */
+/** @typedef {import("#types").InsertResponseType} InsertResponseType */
+/** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
+/** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
+/** @typedef {import("#types").DataOperationsType } DataOperationsType */
+/** @typedef {import("#types").DeleteByType } DeleteByType */
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //

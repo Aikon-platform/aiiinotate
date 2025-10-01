@@ -5,17 +5,17 @@ import { objectHasKey } from "#data/utils/utils.js";
 import { getManifestShortId, getIiifIdsFromMongoIds, manifestUri } from "#data/utils/iiif2Utils.js";
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#src/data/utils/responseUtils.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
-/** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
-/** @typedef {import("#data/types.js"). MongoUpdateResultType} MongoUpdateResultType */
-/** @typedef {import("#data/types.js"). MongoDeleteResultType} MongoDeleteResultType */
-/** @typedef {import("#data/types.js").InsertResponseType} InsertResponseType */
-/** @typedef {import("#data/types.js").UpdateResponseType} UpdateResponseType */
-/** @typedef {import("#data/types.js").DeleteResponseType} DeleteResponseType */
-/** @typedef {import("#data/types.js").DataOperationsType } DataOperationsType */
-/** @typedef {import("#data/types.js").DeleteByType } DeleteByType */
-/** @typedef {import("#data/types.js").ManifestType } ManifestType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types"). MongoObjectId} MongoObjectId */
+/** @typedef {import("#types"). MongoInsertResultType} MongoInsertResultType */
+/** @typedef {import("#types"). MongoUpdateResultType} MongoUpdateResultType */
+/** @typedef {import("#types"). MongoDeleteResultType} MongoDeleteResultType */
+/** @typedef {import("#types").InsertResponseType} InsertResponseType */
+/** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
+/** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
+/** @typedef {import("#types").DataOperationsType } DataOperationsType */
+/** @typedef {import("#types").DeleteByType } DeleteByType */
+/** @typedef {import("#types").ManifestType } ManifestType */
 
 class Manifest2Error extends Error {
   /**

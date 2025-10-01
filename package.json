@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/Aikon-platform/aiiinotate#readme",
   "imports": {
+    "#types": "./src/types.js",
     "#cli/*.js": "./cli/*.js",
     "#src/*.js": "./src/*.js",
     "#migrations/*.js": "./migrations/*.js",

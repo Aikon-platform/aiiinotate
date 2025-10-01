@@ -4,7 +4,7 @@
 
 import fastifyPlugin from "fastify-plugin";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /** @param {string} slug */

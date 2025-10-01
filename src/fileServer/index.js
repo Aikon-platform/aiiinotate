@@ -9,7 +9,7 @@ import { annotationListUri, annotationListUriArray, annotationList, annotationLi
 import { readFileToObject } from "#fileServer/utils.js";
 import { annotations2Invalid, annotations2Valid }  from "#src/fileServer/annotations2.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /**

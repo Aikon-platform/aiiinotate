@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /**

@@ -3,7 +3,7 @@ import { v4 as uuid4 } from "uuid";
 import { maybeToArray, getHash, isNullish, isObject } from "#data/utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
-/** @typedef {import("#data/types.js").MongoCollectionType} MongoCollectionType */
+/** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
 
 // IIIF PRESENTATION 2.1 RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //

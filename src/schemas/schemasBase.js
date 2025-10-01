@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 /** @param {"search"|"presentation"} slug */
 const makeSchemaUri = (slug) =>

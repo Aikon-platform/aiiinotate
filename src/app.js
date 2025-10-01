@@ -9,7 +9,7 @@ import schemas from "#schemas/index.js";
 import data from "#data/index.js";
 import db from "#db/index.js";
 
-/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 const testConfig = {
   fastify: {
