@@ -3,12 +3,15 @@ import fastifyPlugin from "fastify-plugin";
 import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
 
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+
+
 /**
  * @extends {AnnotationsAbstract}
  */
 class Annnotations3 extends AnnotationsAbstract {
   /**
-   * @param {import("fastify").FastifyInstance} fastify
+   * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
     super(fastify, 3);

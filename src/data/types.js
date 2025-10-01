@@ -1,4 +1,4 @@
-/** @typedef {import("node:test")} TestType */
+/** @typedef {import("node:test")} NodeTestType */
 
 /** @typedef {import("fastify").FastifyInstance} FastifyInstanceType */
 /** @typedef {import("fastify").FastifyReply} FastifyReplyType */

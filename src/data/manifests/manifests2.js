@@ -5,7 +5,7 @@ import { objectHasKey } from "#data/utils/utils.js";
 import { getManifestShortId, getIiifIdsFromMongoIds, manifestUri } from "#data/utils/iiif2Utils.js";
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#src/data/utils/responseUtils.js";
 
-
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
 /** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
 /** @typedef {import("#data/types.js"). MongoUpdateResultType} MongoUpdateResultType */
@@ -32,7 +32,7 @@ class Manifest2Error extends Error {
 
 class Manifests2 extends ManifestsAbstract {
   /**
-   * @param {import("fastify").FastifyInstance} fastify
+   * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
     super(fastify, 2, {});

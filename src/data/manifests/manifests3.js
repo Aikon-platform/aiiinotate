@@ -2,9 +2,11 @@ import fastifyPlugin from "fastify-plugin";
 
 import ManifestsAbstract from "#manifests/manifestsAbstract.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+
 class Manifests3 extends ManifestsAbstract {
   /**
-   * @param {import("fastify").FastifyInstance} fastify
+   * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
     super(fastify, 2, {});

@@ -4,13 +4,15 @@
 
 import fastifyPlugin from "fastify-plugin";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
   `${process.env.APP_BASE_URL}/schemas/routes/${slug}`;
 
 /**
- * @param {import("fastify").FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {"search"|"presentation"} slug
  */
 const getSchema = (fastify, slug) =>
@@ -19,7 +21,7 @@ const getSchema = (fastify, slug) =>
 
 /**
  *
- * @param {import("fastify").FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {object?} options
  * @param {function} done
  */

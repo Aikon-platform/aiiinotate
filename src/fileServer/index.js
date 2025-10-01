@@ -9,10 +9,12 @@ import { annotationListUri, annotationListUriArray, annotationList, annotationLi
 import { readFileToObject } from "#fileServer/utils.js";
 import { annotations2Invalid, annotations2Valid }  from "#src/fileServer/annotations2.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+
 
 /**
  * NOTE: `done` musn't be used with async plugins. it raises an error `FST_ERR_PLUGIN_INVALID_ASYNC_HANDLER`
- * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
+ * @param {FastifyInstanceType} fastify  Encapsulated Fastify Instance
  * @param {object} options
  */
 async function fileServer(fastify, options) {

@@ -10,6 +10,8 @@ import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/u
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, getIiifIdsFromMongoIds } from "#data/utils/iiif2Utils.js";
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/utils/responseUtils.js";
 
+
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#data/types.js"). MongoObjectId} MongoObjectId */
 /** @typedef {import("#data/types.js"). MongoInsertResultType} MongoInsertResultType */
 /** @typedef {import("#data/types.js"). MongoUpdateResultType} MongoUpdateResultType */
@@ -50,7 +52,7 @@ class Annotations2Error extends Error {
 class Annnotations2 extends AnnotationsAbstract {
 
   /**
-   * @param {import("fastify").FastifyInstance} fastify
+   * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
     super(fastify, 2);

@@ -1,8 +1,9 @@
 /** @typedef {import("mongodb").Db} Db */
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 
 class ManifestsAbstract {
   /**
-   * @param {import("fastify").FastifyInstance} fastify\
+   * @param {FastifyInstanceType} fastify
    * @param {IiifPresentationVersionType} iiifPresentationVersion
    */
   constructor(fastify, iiifPresentationVersion) {

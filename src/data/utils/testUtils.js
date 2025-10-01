@@ -2,15 +2,15 @@
  * utilities and generally useful functions for tests.
  */
 
-/** @typedef {import("#data/types.js").TestType} TestType */
+/** @typedef {import("#data/types.js").NodeTestType} NodeTestType */
 /** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#data/types.js").FastifyReplyType} FastifyReplyType */
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {object} obj
  * @param {Array} expectedKeys
- * @returns
+ * @returns {void}
  */
 const assertObjectKeys = (t, obj, expectedKeys) =>
   t.assert.deepStrictEqual(
@@ -19,7 +19,7 @@ const assertObjectKeys = (t, obj, expectedKeys) =>
   );
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @param {number} expectedStatusCode
  * @returns {void}
@@ -28,7 +28,7 @@ const assertStatusCode = (t, r, expectedStatusCode) =>
   t.assert.deepStrictEqual(r.statusCode, expectedStatusCode);
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @param {Array} expectedResponseKeys
  * @returns {void}
@@ -50,7 +50,7 @@ const injectPost = (fastify, route, payload) =>
   });
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @returns {void}
  */
@@ -60,7 +60,7 @@ const assertPostInvalidResponse = (t, r) => {
 }
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @returns {void}
  */
@@ -70,7 +70,7 @@ const assertCreateValidResponse = (t, r) => {
 }
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @returns {void}
  */
@@ -80,7 +80,7 @@ const assertUpdateValidResponse = (t,r) => {
 }
 
 /**
- * @param {TestType} t
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @returns {void}
  */
@@ -99,7 +99,7 @@ const testPostRouteCurry = (fastify) =>
     /** @param {boolean} success: if `true` test that the query succeeds. else, test that it fails */
     (success) =>
       /**
-       * @param {TestType} t
+       * @param {NodeTestType} t
        * @param {string} route: example: /annotations/2/createMany
        * @param {object} payload
        */

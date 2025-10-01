@@ -7,9 +7,10 @@ import Manifests3 from "#manifests/manifests3.js";
 import annotationsRoutes from "#annotations/routes.js";
 import commonRoutes from "#data/routes.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 
 /**
- * @param {import('fastify').FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {object} options
  */
 function data(fastify, options, done) {

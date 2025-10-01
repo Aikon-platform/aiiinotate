@@ -9,6 +9,7 @@ import schemas from "#schemas/index.js";
 import data from "#data/index.js";
 import db from "#db/index.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 
 const testConfig = {
   fastify: {
@@ -29,7 +30,7 @@ const defaultConfig = {
 const allowedModes = ["test", "default"]
 
 /**
- * @param {import('fastify').FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {"test"|"default"} mode
  * @returns {import('fastify').FastifyInstance}
  */

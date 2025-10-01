@@ -2,6 +2,7 @@ import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#data/utils/utils.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 
 /**
  * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
@@ -74,7 +75,7 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
 
 /**
  * Encapsulates the routes
- * @param {import('fastify').FastifyInstance} fastify  Encapsulated Fastify Instance
+ * @param {FastifyInstanceType} fastify  Encapsulated Fastify Instance
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
 async function annotationsRoutes(fastify, options) {

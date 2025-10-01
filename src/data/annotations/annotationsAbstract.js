@@ -1,11 +1,12 @@
 /** @typedef {import("mongodb").Db} Db */
 /** @typedef {import("#data/types.js").IiifPresentationVersionType} IiifPresentationVersionType */
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 
 class AnnotationsAbstract {
   /**
    * NOTE: async constructors are NOT ALLOWED in JS, so be sure that all arguments are passed as resolved objects, NOT AS PROMISES.
    *
-   * @param {import("fastify").FastifyInstance} fastify\
+   * @param {FastifyInstanceType} fastify
    * @param {IiifPresentationVersionType} iiifPresentationVersion
    */
   constructor(fastify, iiifPresentationVersion) {

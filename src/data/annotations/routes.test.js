@@ -8,7 +8,7 @@ import { inspectObj, isObject, getRandomItem } from "#data/utils/utils.js"
 import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#data/utils/testUtils.js";
 
 
-/** @typedef {import("#data/types.js").TestType} TestType */
+/** @typedef {import("#data/types.js").NodeTestType} NodeTestType */
 /** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#data/types.js").FastifyReplyType} FastifyReplyType */
 /** @typedef {import("#data/types.js").DataOperationsType} DataOperationsType */

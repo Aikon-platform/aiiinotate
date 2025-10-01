@@ -2,6 +2,8 @@ import fastifyPlugin from "fastify-plugin";
 
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+
 
 const oaSelectorTypes = [
   "oa:FragmentSelector",
@@ -38,7 +40,7 @@ const makeSchemaUri = (slug) =>
   `${process.env.APP_BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
 
 /**
- * @param {import("fastify").FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {"search"|"presentation"} slug
  */
 const getSchema = (fastify, slug) =>
