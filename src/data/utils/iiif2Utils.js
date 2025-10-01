@@ -145,12 +145,15 @@ const makeAnnotationId = (annotation, manifestShortId) => {
 
 /**
  * @example "127.0.0.1:3000/data/2/wit9_man11_anno165/annotation/c26_abda6e3c-2926-4495-9787-cb3f3588e47c"
- * @param {string} manifestId
+ * @param {string} manifestShortId
  * @param {string} canvasId
  * @returns {string}
  */
-const annotationUri = (manifestId, canvasId) =>
-  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestId}/annotation/${canvasId}_${uuid4()}`;
+const annotationUri = (manifestShortId, canvasId) =>
+  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
+
+const manifestUri = (manifestShortId) =>
+  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
 
 /**
  *
@@ -191,6 +194,7 @@ export {
   makeTarget,
   makeAnnotationId,
   annotationUri,
+  manifestUri,
   toAnnotationList,
   getManifestShortId,
   getCanvasShortId,

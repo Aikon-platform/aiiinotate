@@ -5,99 +5,17 @@ import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
 
 import { inspectObj, isObject, getRandomItem } from "#data/utils/utils.js"
+import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#data/utils/testUtils.js";
 
 
-const assertStatusCode = (t, r, expectedStatusCode) =>
-  t.assert.deepStrictEqual(r.statusCode, expectedStatusCode);
-
-const assertResponseKeys = (t, r, expectedResponseKeys) =>
-  t.assert.deepStrictEqual(
-    Object.keys(JSON.parse(r.body)).sort(),
-    expectedResponseKeys.sort()
-  );
-
-/**
- * @param {import("fastify").FastifyInstance} fastify
- * @param {string} route
- * @param {object} payload
- * @returns {Promise<import("fastify").FastifyReply>}
- */
-const injectPost = (fastify, route, payload) =>
-  fastify.inject({
-    method: "POST",
-    url: route,
-    payload: payload,
-  });
-
-/**
- * @param {import("node:test")} t
- * @param {import("fastify").FastifyReply} r
- * @returns {void}
- */
-const assertPostInvalidResponse = (t, r) => {
-  assertStatusCode(t, r, 500);
-  assertResponseKeys(t, r, ["message", "info", "method", "url", "postBody"].sort());
-}
-
-/**
- * @param {import("node:test")} t
- * @param {import("fastify").FastifyReply} r
- * @returns {void}
- */
-const assertCreateValidResponse = (t, r) => {
-  assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["insertedCount", "insertedIds"]);
-}
-
-/**
- * @param {import("node:test")} t
- * @param {import("fastify").FastifyReply} r
- * @returns {void}
- */
-const assertUpdateValidResponse = (t,r) => {
-  assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
-}
-
-const assertDeleteValidResponse = (t,r) => {
-  assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["deletedCount"]);
-}
-
-/** @param {import("fastify").FastifyInstance} fastify */
-const testPostRouteCurry = (fastify) =>
-  /** @param {import("#data/types.js").DataOperationsType} op */
-  (op) =>
-    /** @param {boolean} success: if `true` test that the query succeeds. else, test that it fails */
-    (success) =>
-      /**
-       * @param {import("node:test")} t
-       * @param {string} route: example: /annotations/2/createMany
-       * @param {object} payload
-       */
-      async (t, route, payload) => {
-        const
-          r = await injectPost(fastify, route, payload),
-          funcInvalid = assertPostInvalidResponse;
-
-        let funcValid;
-        if ( op==="insert" ) {
-          funcValid = assertCreateValidResponse;
-        } else if ( op==="update" ) {
-          funcValid = assertUpdateValidResponse;
-        } else {
-          throw new Error(`routes.test.testPostRouteCurry: unimplemented value of 'op': '${op}'.`)
-        }
-
-        success
-          ? funcValid(t, r)
-          : funcInvalid(t, r);
-        return;
-      }
+/** @typedef {import("#data/types.js").TestType} TestType */
+/** @typedef {import("#data/types.js").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#data/types.js").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#data/types.js").DataOperationsType} DataOperationsType */
 
 /**
  * inject an annotationList into the database for test purposes
- * @param {import("fastify").FastifyInstance} fastify
+ * @param {FastifyInstanceType} fastify
  * @param {import("node:test")} t
  * @param {object} annotationList
  * @returns {Array<number, Array<string>>}
@@ -145,7 +63,7 @@ test("test annotation Routes", async (t) => {
   t.after(() => fastify.close());
 
   // after each subtest has run, delete all database records
-  t.afterEach(fastify.emptyCollections);
+  // t.afterEach(fastify.emptyCollections);
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error

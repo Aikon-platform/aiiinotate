@@ -14,14 +14,6 @@ import commonRoutes from "#data/routes.js";
  */
 function data(fastify, options, done) {
 
-  // const
-  //   db = fastify.mongo.db,
-  //   client = fastify.mongo.client,
-  //   manifests2 = new Manifests2(fastify, client, db);
-  //   // manifests3 = new Manifests3(fastify, client, db);
-  //   // annotations2 = new Annotations2(fastify, client, db),
-  //   // annotations3 = new Annotations3(fastify, client, db);
-
   fastify.register(Manifests2);
   fastify.register(Manifests3);
   fastify.register(Annotations2);
