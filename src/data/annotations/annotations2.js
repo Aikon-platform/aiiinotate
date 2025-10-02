@@ -147,6 +147,7 @@ class Annnotations2 extends CollectionAbstract {
    * @param {object|object[]} annotationData: an annotation, or array of annotations.
    */
   async #insertManifests(annotationData) {
+    // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     annotationData = maybeToArray(annotationData);
     // const canvasIds = annotationData.map((ann) => ann.on.full);
     // console.log("#".repeat(100));
@@ -154,8 +155,18 @@ class Annnotations2 extends CollectionAbstract {
     // console.log("#".repeat(100));
   }
 
+  /**
+   * from the manifests inserted in `#insertManifest`, complete each annotation in `annotationData` with a `canvasPosition` key,
+   * `canvasPosition` indicates the position of the canvas on which the annotation is within the manifest.
+   * example: `canvasPosition===10` -> the annotation is on the 10th canvas.
+   * @param {*} annotationData
+   * @returns
+   */
   async #addCanvasPositions(annotationData) {
     // TODO
+    annotationData = maybeToArray(annotationData);
+
+    // TODO: if annotationData is a single annotation, retroconvert to a single annotation instead of annotation array
     return annotationData;
   }
 
