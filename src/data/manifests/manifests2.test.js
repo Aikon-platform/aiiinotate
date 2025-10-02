@@ -32,17 +32,15 @@ test("test Manifests2 module", async (t) => {
   // after each subtest has run, delete all database records
   t.afterEach(async () => await fastify.emptyCollections());
 
-
   await t.test("test Manifests2.insertManifest", async (t) => {
     const r = await fastify.manifests2.insertManifest(manifest2Valid);
-    console.log(r);
     assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
     return;
   })
 
   await t.test("test Manifests2.insertManifestFromUri", async (t) => {
-    const r = await fastify.manifests2.insertManifest(manifest2ValidUri.uri);
-    console.log(r);
+    const r = await fastify.manifests2.insertManifestFromUri(manifest2ValidUri.uri);
+    console.log("XXXXXXXXXXXX test Manifests2 response", r);
     assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
     return;
   })

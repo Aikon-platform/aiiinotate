@@ -12,10 +12,15 @@
  * @param {string[]} insertedIds
  * @returns {InsertResponseType}
  */
-const makeInsertResponse = (insertedIds) => ({
-  insertedCount: insertedIds.length,
-  insertedIds: insertedIds
-});
+const makeInsertResponse = (insertedIds) => {
+  if ( !Array.isArray(insertedIds) ) {
+    throw new Error(`makeInsertResponse: Type error: expected array of IDs, got '${typeof insertedIds}' on ${insertedIds}`)
+  }
+  return {
+    insertedCount: insertedIds.length,
+    insertedIds: insertedIds
+  }
+}
 
 /**
  * @param {UpdateResponseType} mongoRes

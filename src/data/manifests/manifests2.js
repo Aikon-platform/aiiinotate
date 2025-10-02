@@ -47,6 +47,8 @@ class Manifests2 extends ManifestsAbstract {
    * @returns {void}
    */
   validateManifest(manifest) {
+    console.log(manifest);
+    console.log(["@id", "sequences"].map((k) => Object.keys(manifest).includes(k)))
     if (
       // manifest-level validation
       ! ["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
@@ -83,7 +85,7 @@ class Manifests2 extends ManifestsAbstract {
 
   /**
    * @param {MongoInsertResultType} mongoResponse
-   * @returns {InsertResponseType}
+   * @returns {Promise<InsertResponseType>}
    */
   async #makeInsertResponse(mongoResponse) {
     const insertedIds = await getIiifIdsFromMongoIds(
@@ -102,7 +104,7 @@ class Manifests2 extends ManifestsAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async #insertOne(manifest) {
-    const mongoResponse = await this.manifestsCollection.insertOne(manifest);  // todo
+    const mongoResponse = await this.manifestsCollection.insertOne(manifest);
     return this.#makeInsertResponse(mongoResponse);
   }
 
@@ -115,9 +117,8 @@ class Manifests2 extends ManifestsAbstract {
     try {
       this.validateManifest(manifest);
       manifest = this.#cleanManifest(manifest);
+      return this.#insertOne(manifest);
 
-      const mongoResponse = await this.#insertOne(manifest);
-      return makeInsertResponse(mongoResponse);
     } catch (err) {
       console.log(err);
       throw new Manifest2Error("insert", `error inserting manifest because of '${err.message}'`, manifest);
@@ -133,9 +134,11 @@ class Manifests2 extends ManifestsAbstract {
     try {
       const
         r = await fetch(manifestUri),
-        manifest = JSON.parse(r.body);
+        manifest = await r.json();
       return this.insertManifest(manifest);
     } catch (err) {
+
+      console.log(";;;;;;;;;;;;;;;;;;;;;", err);
       throw new Manifest2Error("insert", `error fetching manifest with URI '${manifestUri}'`);
     }
   }
