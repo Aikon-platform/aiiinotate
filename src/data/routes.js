@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl } from "#data/utils/utils.js";
+import { pathToUrl } from "#utils/utils.js";
 
 async function commonRoutes(fastify) {
   const

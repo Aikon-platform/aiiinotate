@@ -4,8 +4,8 @@ import build from "#src/app.js";
 
 import { v4 as uuid4 } from "uuid";
 
-import { inspectObj, isObject, getRandomItem } from "#data/utils/utils.js"
-import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#data/utils/testUtils.js";
+import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
+import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#utils/testUtils.js";
 
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */

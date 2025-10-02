@@ -1,7 +1,7 @@
 import { v4 as uuid4 } from "uuid";
 
-import { maybeToArray, getHash, isNullish, isObject } from "#data/utils/utils.js";
-import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
+import { maybeToArray, getHash, isNullish, isObject } from "#utils/utils.js";
+import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
 
@@ -174,22 +174,6 @@ const toAnnotationList = (resources, annotationListId, label) => {
   return annotationList;
 }
 
-/**
- * resolve internal mongo '_id' fields to iiif '@id' fields
- * @param {MongoCollectionType} collection
- * @param {string | string[]} mongoIds
- * @returns {string[]}
- */
-const getIiifIdsFromMongoIds = async (collection, mongoIds) => {
-  mongoIds = maybeToArray(mongoIds);
-  const annotationIds = await collection.find(
-    { _id: { $in: mongoIds } },
-    { projection: { "@id": 1 } }
-  ).toArray();
-  return annotationIds.map(a => a["@id"]);
-
-}
-
 export {
   makeTarget,
   makeAnnotationId,
@@ -199,5 +183,4 @@ export {
   getManifestShortId,
   getCanvasShortId,
   getAnnotationTarget,
-  getIiifIdsFromMongoIds
 }

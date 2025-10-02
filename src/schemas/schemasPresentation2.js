@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin";
 
-import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
+import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { getManifestShortId } from "#src/data/utils/iiif2Utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */

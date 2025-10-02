@@ -2,7 +2,7 @@ import test from "node:test";
 
 import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
-import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#data/utils/iiif2Utils.js";
+import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#utils/iiif2Utils.js";
 
 
 const

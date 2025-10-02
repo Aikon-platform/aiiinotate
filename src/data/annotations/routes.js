@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#data/utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 

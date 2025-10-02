@@ -5,10 +5,10 @@
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
-import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
-import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
-import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, getIiifIdsFromMongoIds } from "#data/utils/iiif2Utils.js";
-import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#data/utils/responseUtils.js";
+import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
+import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
+import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
+import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#utils/responseUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -152,94 +152,8 @@ class Annnotations2 extends CollectionAbstract {
     return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
   }
 
-  /**
-   * make a uniform response format for #insertOne and #insertMany
-   * @param {MongoInsertResultType} mongoRes
-   * @returns {Promise<InsertResponseType>}
-   */
-  async #makeInsertResponse(mongoRes) {
-    // retrieve the "@id"s
-    const insertedIds = await getIiifIdsFromMongoIds(
-      this.db.collection("annotations2"),
-      // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
-      mongoRes.insertedId || Object.values(mongoRes.insertedIds)
-    );
-    return makeInsertResponse(insertedIds);
-  }
-
-  /**
-   * @param {MongoUpdateResultType} mongoRes
-   * @returns {Promise<UpdateResponseType>}
-   */
-  async #makeUpdateResponse(mongoRes) {
-    if (mongoRes.upsertedId) {
-      // only 1 entry can be upserted by a mongo query => extract the 1st upserted @id from the mongo @id.
-      const upsertedIds = await getIiifIdsFromMongoIds(
-        this.db.collection("annotations2"),
-        mongoRes.upsertedId
-      );
-      mongoRes.upsertedId = upsertedIds.length ? upsertedIds[0] : mongoRes.upsertedId;
-    }
-    return makeUpdateResponse(mongoRes);
-  }
-
-  /**
-   * throw an error with just the object describing the error data (and not the stack or anything else).
-   * used to propagate write errors to routes.
-   * @param {DataOperationsType} operation: describes the database operation
-   * @param {import("mongodb").MongoServerError} err: the mongo error
-   */
-  #throwMongoError(operation, err) {
-    throw new Annotations2Error(operation, err.message, err.errorResponse)
-  }
-
   ////////////////////////////////////////////////////////////////
   // insert / updates
-
-  /**
-   * insert a single annotation
-   * @private
-   * @param {object} annotation
-   * @returns {Promise<InsertResponseType>}
-   */
-  async #insertOne(annotation) {
-    try {
-      const result = await this.collection.insertOne(annotation);
-      return this.#makeInsertResponse(result);
-    } catch (err) {
-      this.#throwMongoError("insert", err);
-    }
-  }
-
-  /**
-   * insert annotations from an array of annotations
-   * @private
-   * @param {object[]} annotationArray
-   * @returns {Promise<InsertResponseType>}
-   */
-  async #insertMany(annotationArray) {
-    try {
-      const result = await this.collection.insertMany(annotationArray);
-      return this.#makeInsertResponse(result);
-    } catch (err) {
-      this.#throwMongoError("insert", err);
-    }
-  }
-
-  /**
-   * update a single annotation, targeted by its "@id".
-   * @param {object} query: query targeting an annotation by its "@id"
-   * @param {object} update: the updated annotation.
-   * @returns {Promise<UpdateResponseType>}
-   */
-  async #updateOne(query, update){
-    try {
-      const result = await this.collection.updateOne(query, update);
-      return this.#makeUpdateResponse(result);
-    } catch (err) {
-      this.#throwMongoError("update", err)
-    }
-  }
 
   /**
    * validate and insert a single annotation.
@@ -248,7 +162,7 @@ class Annnotations2 extends CollectionAbstract {
    */
   async insertAnnotation(annotation) {
     annotation = this.#cleanAnnotation(annotation);
-    return this.#insertOne(annotation);
+    return this.insertOne(annotation);
   }
 
   /**
@@ -261,7 +175,7 @@ class Annnotations2 extends CollectionAbstract {
     const
       query = { "@id": annotation["@id"] },
       update = { $set: annotation };
-    return this.#updateOne(query, update);
+    return this.updateOne(query, update);
   }
 
   /**
@@ -271,25 +185,11 @@ class Annnotations2 extends CollectionAbstract {
    */
   async insertAnnotationList(annotationList) {
     const annotationArray = this.#cleanAnnotationList(annotationList);
-    return this.#insertMany(annotationArray);
+    return this.insertMany(annotationArray);
   }
 
   ////////////////////////////////////////////////////////////////
   // delete
-
-  /**
-   * @param {object} queryObj
-   * @returns {Promise<DeleteResponseType>}
-   */
-  async #delete(queryObj) {
-    try {
-      //NOTE: if nothing is deleted, it's not an error, we return: { deletedCount: 0 }
-      const deleteResult = await this.collection.deleteMany(queryObj);
-      return makeDeleteResponse(deleteResult);
-    } catch (err) {
-      this.#throwMongoError("delete", err);
-    }
-  }
 
   /**
    * @param {string} deleteId
@@ -309,21 +209,11 @@ class Annnotations2 extends CollectionAbstract {
           ? { "on.full": deleteId }
           : { "on.manifestShortId": deleteId };
 
-    return this.#delete(deleteFilter);
+    return this.delete(deleteFilter);
   }
 
   ////////////////////////////////////////////////////////////////
   // get
-
-  /**
-   * true if `queryObj` matches at least 1 annotation, false otherwise.
-   * @param {object} queryObj
-   * @returns {Promise<boolean>}
-   */
-  async exists(queryObj) {
-    const r = await this.collection.countDocuments(queryObj, { limit: 1 });
-    return r === 1;
-  }
 
   /**
    * find documents based on a `queryObj` and project them to `projectionObj`.

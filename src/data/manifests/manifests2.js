@@ -1,9 +1,10 @@
 import fastifyPlugin from "fastify-plugin";
 
-import ManifestsAbstract from "#manifests/manifestsAbstract.js";
-import { objectHasKey } from "#data/utils/utils.js";
-import { getManifestShortId, getIiifIdsFromMongoIds, manifestUri } from "#data/utils/iiif2Utils.js";
-import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#src/data/utils/responseUtils.js";
+import CollectionAbstract from "#data/collectionAbstract.js";
+// import ManifestsAbstract from "#manifests/manifestsAbstract.js";
+import { objectHasKey } from "#utils/utils.js";
+import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
+import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#utils/responseUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -30,12 +31,15 @@ class Manifest2Error extends Error {
 }
 
 
-class Manifests2 extends ManifestsAbstract {
+/**
+ * @extends {CollectionAbstract}
+ */
+class Manifests2 extends CollectionAbstract {
   /**
    * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
-    super(fastify, 2, {});
+    super(fastify, "manifests2");
   }
 
   /////////////////////////////////////////////
@@ -85,9 +89,8 @@ class Manifests2 extends ManifestsAbstract {
    * @param {MongoInsertResultType} mongoResponse
    * @returns {Promise<InsertResponseType>}
    */
-  async #makeInsertResponse(mongoResponse) {
-    const insertedIds = await getIiifIdsFromMongoIds(
-      this.manifestsCollection,
+  async makeInsertResponse(mongoResponse) {
+    const insertedIds = await this.getIiifIdsFromMongoIds(
       mongoResponse.insertedId || mongoResponse.insertedIds
     );
     return makeInsertResponse(insertedIds);
@@ -99,7 +102,7 @@ class Manifests2 extends ManifestsAbstract {
    * @param {DataOperationsType} operation: describes the database operation
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
-  #throwMongoError(operation, err) {
+  throwMongoError(operation, err) {
     throw new Manifest2Error(operation, err.message, err.errorResponse);
   }
 
@@ -111,12 +114,12 @@ class Manifests2 extends ManifestsAbstract {
    * @param {ManifestType}
    * @returns {Promise<InsertResponseType>}
    */
-  async #insertOne(manifest) {
+  async insertOne(manifest) {
     try {
-      const mongoResponse = await this.manifestsCollection.insertOne(manifest);
-      return this.#makeInsertResponse(mongoResponse);
+      const mongoResponse = await this.collection.insertOne(manifest);
+      return this.makeInsertResponse(mongoResponse);
     } catch (err) {
-      this.#throwMongoError("insert", err)
+      this.throwMongoError("insert", err)
     }
   }
 
@@ -128,7 +131,7 @@ class Manifests2 extends ManifestsAbstract {
   async insertManifest(manifest) {
     this.validateManifest(manifest);
     manifest = this.#cleanManifest(manifest);
-    return this.#insertOne(manifest);
+    return this.insertOne(manifest);
   }
 
   /**

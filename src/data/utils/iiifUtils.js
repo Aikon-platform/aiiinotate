@@ -1,4 +1,4 @@
-import { getHash } from "#data/utils/utils.js";
+import { getHash } from "#utils/utils.js";
 
 const IIIF_PRESENTATION_2 = 2;
 const IIIF_PRESENTATION_3 = 3;
