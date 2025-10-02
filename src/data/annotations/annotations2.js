@@ -8,7 +8,6 @@ import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
-import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#utils/responseUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -34,17 +33,6 @@ import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#uti
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
-class Annotations2Error extends Error {
-  /**
-   * @param {DataOperationsType} action
-   * @param {string} message: error message
-   * @param {object?} errInfo: extra data
-   */
-  constructor(action, message, errInfo) {
-    super(`Annotations2Error: error when performing operation ${action.toLocaleLowerCase()}: ${message}`);
-    this.info = errInfo;
-  }
-}
 
 /**
  * @extends {CollectionAbstract}
@@ -146,7 +134,7 @@ class Annnotations2 extends CollectionAbstract {
       || !objectHasKey(annotationList, "@id")
       || !Array.isArray(annotationList.resources)
     ) {
-      this.errorMessage(this.#cleanAnnotationList, `could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list. received: ${annotationList}`)
+      this.errorNoAction(`Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.`, annotationList)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
     return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
@@ -199,7 +187,7 @@ class Annnotations2 extends CollectionAbstract {
 
     const allowedDeleteBy = [ "uri", "manifestShortId", "canvasUri" ];
     if ( !allowedDeleteBy.includes(deleteBy) ) {
-      throw new Annotations2Error("delete", `${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteBy} for param 'deleteBy', got '${deleteBy}'`)
+      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteBy} for param 'deleteBy', got '${deleteBy}'`)
     }
 
     const deleteFilter =
@@ -234,11 +222,11 @@ class Annnotations2 extends CollectionAbstract {
         .map(([k,v]) => v);
 
     if ( projectionValues.find((x) => ![0,1].includes(x)) ) {
-      throw new Annotations2Error("read", `Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
+      throw this.readError(`Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
     }
     const distinctProjectionValues = [...new Set(projectionValues)]
     if ( distinctProjectionValues.length !== 1 ) {
-      throw new Annotations2Error("read", `Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
+      throw this.readError(`Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
     }
     // negative projection: all fields will be included except for those specified.
     // in this case, negate other fields that we don't ant exposed.
@@ -276,14 +264,6 @@ class Annnotations2 extends CollectionAbstract {
    * @returns {object} annotationList containing results
    */
   async search(queryUrl, manifestShortId, q, motivation) {
-    // TODO: update inserts so that our data format is more strict, for easier searches:
-    //  - motivations:
-    //    - "motivation" key is always named "motivation", not "oa:Motivation"
-    //    - "motivation" is always an array of `oa:...` fields.
-    //  - embedded textual bodies:
-    //    - existnce of an ETB is specified by "resource.@type = "dctypes:Text":string,
-    //    - "resource.chars" always contains the string content.
-
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };

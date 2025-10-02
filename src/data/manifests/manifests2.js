@@ -1,9 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
-import { objectHasKey } from "#utils/utils.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
-import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#utils/responseUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -98,7 +96,7 @@ class Manifests2 extends CollectionAbstract {
         manifest = await r.json();
       return this.insertManifest(manifest);
     } catch (err) {
-      throw this.insertError(`error fetching manifest with URI '${manifestUri}'`);
+      throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
     }
   }
 

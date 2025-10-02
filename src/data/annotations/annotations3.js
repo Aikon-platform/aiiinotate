@@ -17,7 +17,7 @@ class Annnotations3 extends CollectionAbstract {
   }
 
   notImplementedError() {
-    throw new Error(`${this.constructor.name}: not implemented`);
+    throw this.errorNoAction(`${this.constructor.name}: not implemented`);
   }
 
 }

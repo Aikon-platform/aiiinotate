@@ -80,10 +80,13 @@ class CollectionAbstract {
     this.collection = this.db.collection(collectionName, collectionOptions);
     this.iiifPresentationVersion = iiifPresentationVersion;
 
+    /** @type {Function(string?) => Function(string, object) => Error} */
     this.errorConstructor = errorConstructor(collectionName);
-    // create this.(read|insert|update|delete)Error.
+    /** @type {Function(string, object?) => Error} */
+    this.errorNoAction = this.errorConstructor(undefined);
+    // create this.error(Read|Insert|Update|Delete), properties that will be used to throw the proper error.
     [ "read", "insert", "update", "delete" ].forEach((op) =>
-      /** @type {Function(string,object) => Error} */
+      /** @type {Function(string,object?) => Error} */
       this[`${op}Error`] = errorConstructor(collectionName)(op)
     )
   }
@@ -105,7 +108,7 @@ class CollectionAbstract {
   }
 
   /**
-   * TODO delete ?
+   * TODO delete / replace by this.error* functions.
    * generate an error message, with format: className.funcName: errMsg
    * @param {string} func
    * @param {string} msg
