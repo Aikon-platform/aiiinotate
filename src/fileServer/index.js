@@ -1,11 +1,9 @@
 /**
  * the `fileServer` plugin makes test files available to the entire fastify app, mostly for testing purposes.
  */
-import fsPromises from "fs/promises";
-
 import fastifyPlugin from "fastify-plugin";
 
-import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#fileServer/annotationsCreate.js";
+import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fileServer/annotations.js";
 import { readFileToObject } from "#fileServer/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
