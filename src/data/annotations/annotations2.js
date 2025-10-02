@@ -146,18 +146,18 @@ class Annnotations2 extends CollectionAbstract {
    * manifest URIs are extracted from canvas URIs, supposing that URIs follow the IIIF 2.1 specification.
    * @param {object|object[]} annotationData: an annotation, or array of annotations.
    */
-  // async #insertManifests(annotationData) {
-  //   annotationData = maybeToArray(annotationData);
-  //   // const canvasIds = annotationData.map((ann) => ann.on.full);
-  //   // console.log("#".repeat(100));
-  //   // console.log(canvasIds);
-  //   // console.log("#".repeat(100));
-  // }
-//
-  // async #addCanvasPositions(annotationData) {
-  //   // TODO
-  //   return annotationData;
-  // }
+  async #insertManifests(annotationData) {
+    annotationData = maybeToArray(annotationData);
+    // const canvasIds = annotationData.map((ann) => ann.on.full);
+    // console.log("#".repeat(100));
+    // console.log(canvasIds);
+    // console.log("#".repeat(100));
+  }
+
+  async #addCanvasPositions(annotationData) {
+    // TODO
+    return annotationData;
+  }
 
   ////////////////////////////////////////////////////////////////
   // insert / updates
@@ -193,8 +193,8 @@ class Annnotations2 extends CollectionAbstract {
   async insertAnnotationList(annotationList) {
     let annotationArray;
     annotationArray = this.#cleanAnnotationList(annotationList);
-    // await this.#insertManifests(annotationList);
-    // annotationArray = this.#addCanvasPositions(annotationList);
+    await this.#insertManifests(annotationList);
+    annotationArray = await this.#addCanvasPositions(annotationArray);
     return this.insertMany(annotationArray);
   }
 
