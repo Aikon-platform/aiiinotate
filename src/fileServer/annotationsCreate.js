@@ -1,7 +1,8 @@
 // test data for the annotations create and createMany functions.
-import { readFileToObject } from "#fileServer/utils.js";
+import { readFileToObject, toUrl } from "#fileServer/utils.js";
 
-const toUrl = (fn) => `${process.env.APP_BASE_URL}/fileServer/${fn}`;
+const annotations2Invalid = readFileToObject("annotations2Invalid.jsonld");
+const annotations2Valid = readFileToObject("annotations2Valid.jsonld");
 
 const annotationListUri = {
   uri: toUrl("annotationList_aikon_wit9_man11_anno165_all.jsonld")
@@ -27,6 +28,8 @@ const annotationListArray = [
 ];
 
 export {
+  annotations2Invalid,
+  annotations2Valid,
   annotationListUri,
   annotationListUriArray,
   annotationListUriInvalid,

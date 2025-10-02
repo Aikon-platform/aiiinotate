@@ -1,7 +1,5 @@
 import test from "node:test";
 
-// import annotations2Valid from "#fileServer/annotations2Valid.js";
-// import annotationsInvalid from "#fileServer/annotations2Invalid.js";
 import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
 import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#data/utils/iiif2Utils.js";

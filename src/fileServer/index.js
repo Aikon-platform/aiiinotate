@@ -5,9 +5,8 @@ import fsPromises from "fs/promises";
 
 import fastifyPlugin from "fastify-plugin";
 
-import { annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#fileServer/annotationsCreate.js";
+import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#fileServer/annotationsCreate.js";
 import { readFileToObject } from "#fileServer/utils.js";
-import { annotations2Invalid, annotations2Valid }  from "#src/fileServer/annotations2.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 

@@ -21,7 +21,11 @@ const readFileToObject = (fn) => {
   return JSON.parse(fs.readFileSync(path.join(dataDir, fn), { encoding: "utf8" }));
 }
 
+const toUrl = (fn) => `${process.env.APP_BASE_URL}/fileServer/${fn}`;
+
+
 export {
   dataDir,
-  readFileToObject
+  readFileToObject,
+  toUrl
 }
