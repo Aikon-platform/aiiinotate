@@ -19,6 +19,7 @@ test("test Manifests2 module", async (t) => {
 
   await fastify.ready();
 
+  // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
     await fastify.listen({ port: process.env.APP_PORT });
   } catch (err) {
@@ -35,14 +36,11 @@ test("test Manifests2 module", async (t) => {
   await t.test("test Manifests2.insertManifest", async (t) => {
     const r = await fastify.manifests2.insertManifest(manifest2Valid);
     assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
-    return;
   })
 
   await t.test("test Manifests2.insertManifestFromUri", async (t) => {
     const r = await fastify.manifests2.insertManifestFromUri(manifest2ValidUri.uri);
-    console.log("XXXXXXXXXXXX test Manifests2 response", r);
     assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
-    return;
   })
 
   return

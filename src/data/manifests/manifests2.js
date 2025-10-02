@@ -47,8 +47,6 @@ class Manifests2 extends ManifestsAbstract {
    * @returns {void}
    */
   validateManifest(manifest) {
-    console.log(manifest);
-    console.log(["@id", "sequences"].map((k) => Object.keys(manifest).includes(k)))
     if (
       // manifest-level validation
       ! ["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
@@ -137,8 +135,6 @@ class Manifests2 extends ManifestsAbstract {
         manifest = await r.json();
       return this.insertManifest(manifest);
     } catch (err) {
-
-      console.log(";;;;;;;;;;;;;;;;;;;;;", err);
       throw new Manifest2Error("insert", `error fetching manifest with URI '${manifestUri}'`);
     }
   }

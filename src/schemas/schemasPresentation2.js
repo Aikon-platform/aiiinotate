@@ -1,6 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
+import { getManifestShortId } from "#src/data/utils/iiif2Utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -272,6 +273,24 @@ function addSchemas(fastify, options, done) {
     items: { $ref: makeSchemaUri("annotation") }
   })
 
+  /////////////////////////////////////////////
+  // MANIFESTS
+
+  // internally, manifests are just stored as an @id, a short ID, an array of canvas Ids. we don't need more info.
+  fastify.addSchema({
+    $id: makeSchemaUri("manifest"),
+    required: ["@id", "manifestShortId", "canvasIds"],
+    properties: {
+      "@id": { type: "string" },
+      manifestShortId: { type: "string" },
+      canvasIds: { type: "array", items: { type: "string" }}
+    }
+  })
+
+  /////////////////////////////////////////////
+  // DONE
+
+
   fastify.decorate("schemasPresentation2", {
     makeSchemaUri: makeSchemaUri,
     getSchema: (slug) => getSchema(fastify, slug)
@@ -279,6 +298,7 @@ function addSchemas(fastify, options, done) {
 
   done();
 }
+
 
 
 
