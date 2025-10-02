@@ -1,7 +1,6 @@
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
-// import ManifestsAbstract from "#manifests/manifestsAbstract.js";
 import { objectHasKey } from "#utils/utils.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#utils/responseUtils.js";
@@ -17,18 +16,6 @@ import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#uti
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 /** @typedef {import("#types").DeleteByType } DeleteByType */
 /** @typedef {import("#types").ManifestType } ManifestType */
-
-class Manifest2Error extends Error {
-  /**
-   * @param {DataOperationsType} action
-   * @param {string} message: error message
-   * @param {object?} errInfo: extra data
-   */
-  constructor(action, message, errInfo) {
-    super(`Manifest2Error: error when performing operation ${action.toLocaleLowerCase()}: ${message}`);
-    this.info = errInfo;
-  }
-}
 
 
 /**
@@ -50,7 +37,7 @@ class Manifests2 extends CollectionAbstract {
    * @param {object} manifest
    * @returns {void}
    */
-  validateManifest(manifest) {
+  #validateManifest(manifest) {
     if (
       // manifest-level validation
       ! ["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
@@ -63,7 +50,7 @@ class Manifests2 extends CollectionAbstract {
       )
     ) {
       // throw
-      throw new Manifest2Error("insert", "validateManifest: invalid manifest structure", manifest);
+      throw this.insertError("validateManifest: invalid manifest structure", manifest);
     }
   }
 
@@ -85,43 +72,8 @@ class Manifests2 extends CollectionAbstract {
     };
   }
 
-  /**
-   * @param {MongoInsertResultType} mongoResponse
-   * @returns {Promise<InsertResponseType>}
-   */
-  async makeInsertResponse(mongoResponse) {
-    const insertedIds = await this.getIiifIdsFromMongoIds(
-      mongoResponse.insertedId || mongoResponse.insertedIds
-    );
-    return makeInsertResponse(insertedIds);
-  }
-
-  /**
-   * throw an error with just the object describing the error data (and not the stack or anything else).
-   * used to propagate write errors to routes.
-   * @param {DataOperationsType} operation: describes the database operation
-   * @param {import("mongodb").MongoServerError} err: the mongo error
-   */
-  throwMongoError(operation, err) {
-    throw new Manifest2Error(operation, err.message, err.errorResponse);
-  }
-
   /////////////////////////////////////////////
   // write
-
-  /**
-   * write a clean manifest to database
-   * @param {ManifestType}
-   * @returns {Promise<InsertResponseType>}
-   */
-  async insertOne(manifest) {
-    try {
-      const mongoResponse = await this.collection.insertOne(manifest);
-      return this.makeInsertResponse(mongoResponse);
-    } catch (err) {
-      this.throwMongoError("insert", err)
-    }
-  }
 
   /**
    * save a single manifest to database.
@@ -129,7 +81,7 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertManifest(manifest) {
-    this.validateManifest(manifest);
+    this.#validateManifest(manifest);
     manifest = this.#cleanManifest(manifest);
     return this.insertOne(manifest);
   }
@@ -146,7 +98,7 @@ class Manifests2 extends CollectionAbstract {
         manifest = await r.json();
       return this.insertManifest(manifest);
     } catch (err) {
-      throw new Manifest2Error("insert", `error fetching manifest with URI '${manifestUri}'`);
+      throw this.insertError(`error fetching manifest with URI '${manifestUri}'`);
     }
   }
 

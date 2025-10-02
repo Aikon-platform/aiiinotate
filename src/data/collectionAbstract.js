@@ -79,7 +79,13 @@ class CollectionAbstract {
     this.db = fastify.mongo.db;
     this.collection = this.db.collection(collectionName, collectionOptions);
     this.iiifPresentationVersion = iiifPresentationVersion;
+
     this.errorConstructor = errorConstructor(collectionName);
+    // create this.(read|insert|update|delete)Error.
+    [ "read", "insert", "update", "delete" ].forEach((op) =>
+      /** @type {Function(string,object) => Error} */
+      this[`${op}Error`] = errorConstructor(collectionName)(op)
+    )
   }
 
   //////////////////////////////////////
