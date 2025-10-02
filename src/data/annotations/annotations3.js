@@ -1,20 +1,19 @@
 import fastifyPlugin from "fastify-plugin";
 
-import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
-
+import CollectionAbstract from "#data/collectionAbstract.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /**
- * @extends {AnnotationsAbstract}
+ * @extends {CollectionAbstract}
  */
-class Annnotations3 extends AnnotationsAbstract {
+class Annnotations3 extends CollectionAbstract {
   /**
    * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
-    super(fastify, 3);
+    super(fastify, "annotations3");
   }
 
   notImplementedError() {

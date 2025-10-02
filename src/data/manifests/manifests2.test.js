@@ -2,7 +2,7 @@ import test from "node:test";
 
 import build from "#src/app.js";
 
-import { assertObjectKeysInsert, assertObjectKeysError } from "#data/utils/testUtils.js";
+import { assertObjectKeysInsert } from "#data/utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */

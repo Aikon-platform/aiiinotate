@@ -67,12 +67,12 @@ const assertStatusCode = (t, r, expectedStatusCode) =>
  */
 const assertResponseKeys = (t, r, expectedResponse) =>
   expectedResponse === "insert"
-  ? assertObjectKeysInsert(t, JSON.parse(r.body))
-  : expectedResponse === "update"
-  ? assertObjectKeysUpdate(t, JSON.parse(r.body))
-  : expectedResponse === "delete"
-  ? assertObjectKeysDelete(t, JSON.parse(r.body))
-  : assertObjectKeysError(t, JSON.parse(r.body));
+    ? assertObjectKeysInsert(t, JSON.parse(r.body))
+    : expectedResponse === "update"
+      ? assertObjectKeysUpdate(t, JSON.parse(r.body))
+      : expectedResponse === "delete"
+        ? assertObjectKeysDelete(t, JSON.parse(r.body))
+        : assertObjectKeysError(t, JSON.parse(r.body));
 
 /**
  * @param {FastifyInstanceType} fastify

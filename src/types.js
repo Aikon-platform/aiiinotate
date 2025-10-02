@@ -3,6 +3,7 @@
 /** @typedef {import("fastify").FastifyInstance} FastifyInstanceType */
 /** @typedef {import("fastify").FastifyReply} FastifyReplyType */
 
+/** @typedef {import("mongodb").Db} MongoDbType */
 /** @typedef {import("mongodb").ObjectId } MongoObjectId */
 /** @typedef {import("mongodb").Collection} MongoCollectionType */
 /** @typedef {import("mongodb").InsertManyResult} MongoInsertManyResultType */
@@ -14,7 +15,7 @@
 /** @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType */
 
 /** @typedef {2|3} IiifPresentationVersionType */
-
+/** @typedef {"manifests2"|"manifests3"|"annotations2"|"annotations3"} CollectionNamesType */
 /**
  * @typedef InsertResponseType
  * @type {object}

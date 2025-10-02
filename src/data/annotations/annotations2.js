@@ -1,10 +1,10 @@
 /**
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
- * exposes an `Annnotations2` class that should contain everything you need
+ * exposes an `Annnotations2` class that should contain everything you need to interact with the annotations2 collection.
  */
 import fastifyPlugin from "fastify-plugin";
 
-import AnnotationsAbstract from "#annotations/annotationsAbstract.js";
+import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#data/utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#data/utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, getIiifIdsFromMongoIds } from "#data/utils/iiif2Utils.js";
@@ -47,15 +47,15 @@ class Annotations2Error extends Error {
 }
 
 /**
- * @extends {AnnotationsAbstract}
+ * @extends {CollectionAbstract}
  */
-class Annnotations2 extends AnnotationsAbstract {
+class Annnotations2 extends CollectionAbstract {
 
   /**
    * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
-    super(fastify, 2);
+    super(fastify, "annotations2");
   }
 
   ////////////////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async #insertOne(annotation) {
     try {
-      const result = await this.annotationsCollection.insertOne(annotation);
+      const result = await this.collection.insertOne(annotation);
       return this.#makeInsertResponse(result);
     } catch (err) {
       this.#throwMongoError("insert", err);
@@ -219,7 +219,7 @@ class Annnotations2 extends AnnotationsAbstract {
    */
   async #insertMany(annotationArray) {
     try {
-      const result = await this.annotationsCollection.insertMany(annotationArray);
+      const result = await this.collection.insertMany(annotationArray);
       return this.#makeInsertResponse(result);
     } catch (err) {
       this.#throwMongoError("insert", err);
@@ -227,18 +227,16 @@ class Annnotations2 extends AnnotationsAbstract {
   }
 
   /**
-   * update a single annotation, targeted by its "@id"
-   * @param {object} annotation
+   * update a single annotation, targeted by its "@id".
+   * @param {object} query: query targeting an annotation by its "@id"
+   * @param {object} update: the updated annotation.
    * @returns {Promise<UpdateResponseType>}
    */
-  async #updateOne(annotation){
+  async #updateOne(query, update){
     try {
-      const
-        query = { "@id": annotation["@id"] },
-        update = { $set: annotation },
-        result = await this.annotationsCollection.updateOne(query, update);
+      const result = await this.collection.updateOne(query, update);
       return this.#makeUpdateResponse(result);
-    } catch (err) {annotation["@id"]
+    } catch (err) {
       this.#throwMongoError("update", err)
     }
   }
@@ -260,7 +258,10 @@ class Annnotations2 extends AnnotationsAbstract {
   async updateAnnotation(annotation) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
     annotation = this.#cleanAnnotation(annotation, true);
-    return this.#updateOne(annotation);
+    const
+      query = { "@id": annotation["@id"] },
+      update = { $set: annotation };
+    return this.#updateOne(query, update);
   }
 
   /**
@@ -283,7 +284,7 @@ class Annnotations2 extends AnnotationsAbstract {
   async #delete(queryObj) {
     try {
       //NOTE: if nothing is deleted, it's not an error, we return: { deletedCount: 0 }
-      const deleteResult = await this.annotationsCollection.deleteMany(queryObj);
+      const deleteResult = await this.collection.deleteMany(queryObj);
       return makeDeleteResponse(deleteResult);
     } catch (err) {
       this.#throwMongoError("delete", err);
@@ -320,7 +321,7 @@ class Annnotations2 extends AnnotationsAbstract {
    * @returns {Promise<boolean>}
    */
   async exists(queryObj) {
-    const r = await this.annotationsCollection.countDocuments(queryObj, { limit: 1 });
+    const r = await this.collection.countDocuments(queryObj, { limit: 1 });
     return r === 1;
   }
 
@@ -359,7 +360,7 @@ class Annnotations2 extends AnnotationsAbstract {
     }
 
     // 2. find, project and return
-    return this.annotationsCollection
+    return this.collection
       .find(queryObj, { projection: projectionObj })
       .toArray();
   }

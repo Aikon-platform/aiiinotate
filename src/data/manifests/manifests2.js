@@ -6,10 +6,10 @@ import { getManifestShortId, getIiifIdsFromMongoIds, manifestUri } from "#data/u
 import { makeInsertResponse, makeUpdateResponse, makeDeleteResponse } from "#src/data/utils/responseUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#types"). MongoObjectId} MongoObjectId */
-/** @typedef {import("#types"). MongoInsertResultType} MongoInsertResultType */
-/** @typedef {import("#types"). MongoUpdateResultType} MongoUpdateResultType */
-/** @typedef {import("#types"). MongoDeleteResultType} MongoDeleteResultType */
+/** @typedef {import("#types").MongoObjectId} MongoObjectId */
+/** @typedef {import("#types").MongoInsertResultType} MongoInsertResultType */
+/** @typedef {import("#types").MongoUpdateResultType} MongoUpdateResultType */
+/** @typedef {import("#types").MongoDeleteResultType} MongoDeleteResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
