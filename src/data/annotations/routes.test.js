@@ -51,19 +51,21 @@ test("test annotation Routes", async (t) => {
       annotationListUriArrayInvalid
     } = fastify.fileServer;
 
-  // `annotationListUri` and `annotationListUriArray` reference data using URLs to the fastify app, so the app needs to be running.
+  await fastify.ready();
+
+  // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
     await fastify.listen({ port: process.env.APP_PORT });
   } catch (err) {
-    console.log("FASTIFY ERROR");
+    console.log("FASTIFY ERROR", err);
     throw err;
   }
 
   // close the app after running the tests
-  t.after(() => fastify.close());
+  t.after(async () => await fastify.close());
 
   // after each subtest has run, delete all database records
-  // t.afterEach(fastify.emptyCollections);
+  t.afterEach(async() => fastify.emptyCollections());
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error

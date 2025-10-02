@@ -42,7 +42,7 @@ class Manifests2 extends ManifestsAbstract {
   // utils
 
   /**
-   * NOTE: this could be done with a JSONSchema.
+   * NOTE: this could be done with a JSONSchema IF AND ONLY IF the manifest is sent directly through a fastify route. however, we also fetch manifests referenced in annotations.
    * @param {object} manifest
    * @returns {void}
    */

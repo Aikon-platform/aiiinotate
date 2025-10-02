@@ -35,7 +35,7 @@ start () {
         node --watch "$SCRIPT_DIR/src/server.js";
     elif [ "$mode" = "test" ]; then
         dotenvx run -f "$ENV_FILE" -- \
-        node --test;
+        node --test --test-isolation=none;
     elif [ "$mode" = "cli" ] ; then
         dotenvx run -f "$ENV_FILE" -- \
         node "$SCRIPT_DIR/cli/index.js";
