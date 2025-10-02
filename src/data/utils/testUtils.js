@@ -20,6 +20,38 @@ const assertObjectKeys = (t, obj, expectedKeys) =>
 
 /**
  * @param {NodeTestType} t
+ * @param {object} obj
+ * @returns {void}
+ */
+const assertObjectKeysInsert = (t, obj) =>
+  assertObjectKeys(t, obj, ["insertedCount", "insertedIds"]);
+
+/**
+ * @param {NodeTestType} t
+ * @param {object} obj
+ * @returns {void}
+ */
+const assertObjectKeysUpdate = (t, obj) =>
+  assertObjectKeys(t, obj, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
+
+/**
+ * @param {NodeTestType} t
+ * @param {object} obj
+ * @returns {void}
+ */
+const assertObjectKeysDelete = (t, obj) =>
+  assertObjectKeys(t, obj, ["deletedCount"]);
+
+/**
+ * @param {NodeTestType} t
+ * @param {object} obj
+ * @returns {void}
+ */
+const assertObjectKeysError = (t, obj) =>
+  assertObjectKeys(t, obj, ["message", "info", "method", "url", "postBody"]);
+
+/**
+ * @param {NodeTestType} t
  * @param {FastifyReplyType} r
  * @param {number} expectedStatusCode
  * @returns {void}
@@ -30,11 +62,17 @@ const assertStatusCode = (t, r, expectedStatusCode) =>
 /**
  * @param {NodeTestType} t
  * @param {FastifyReplyType} r
- * @param {Array} expectedResponseKeys
+ * @param {"insert"|"update"|"delete"|"error"} expectedResponse: keyword to define the response schema to test against.
  * @returns {void}
  */
-const assertResponseKeys = (t, r, expectedResponseKeys) =>
-  assertObjectKeys(t, JSON.parse(r.body), expectedResponseKeys);
+const assertResponseKeys = (t, r, expectedResponse) =>
+  expectedResponse === "insert"
+  ? assertObjectKeysInsert(t, JSON.parse(r.body))
+  : expectedResponse === "update"
+  ? assertObjectKeysUpdate(t, JSON.parse(r.body))
+  : expectedResponse === "delete"
+  ? assertObjectKeysDelete(t, JSON.parse(r.body))
+  : assertObjectKeysError(t, JSON.parse(r.body));
 
 /**
  * @param {FastifyInstanceType} fastify
@@ -56,7 +94,7 @@ const injectPost = (fastify, route, payload) =>
  */
 const assertPostInvalidResponse = (t, r) => {
   assertStatusCode(t, r, 500);
-  assertResponseKeys(t, r, ["message", "info", "method", "url", "postBody"].sort());
+  assertResponseKeys(t, r, "error");
 }
 
 /**
@@ -66,7 +104,7 @@ const assertPostInvalidResponse = (t, r) => {
  */
 const assertCreateValidResponse = (t, r) => {
   assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["insertedCount", "insertedIds"]);
+  assertResponseKeys(t, r, "insert");
 }
 
 /**
@@ -76,7 +114,7 @@ const assertCreateValidResponse = (t, r) => {
  */
 const assertUpdateValidResponse = (t,r) => {
   assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
+  assertResponseKeys(t, r, "update");
 }
 
 /**
@@ -86,7 +124,7 @@ const assertUpdateValidResponse = (t,r) => {
  */
 const assertDeleteValidResponse = (t,r) => {
   assertStatusCode(t, r, 200);
-  assertResponseKeys(t, r, ["deletedCount"]);
+  assertResponseKeys(t, r, "delete");
 }
 
 /**
@@ -126,6 +164,10 @@ const testPostRouteCurry = (fastify) =>
 
 export {
   assertObjectKeys,
+  assertObjectKeysError,
+  assertObjectKeysInsert,
+  assertObjectKeysUpdate,
+  assertObjectKeysDelete,
   assertStatusCode,
   assertResponseKeys,
   injectPost,

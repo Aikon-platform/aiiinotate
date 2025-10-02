@@ -4,7 +4,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fileServer/annotations.js";
-import { manifest2Valid, manifest2ValidUri } from "#fileServer/manifests.js";
+import { manifest2Valid, manifest2ValidUri, manifest2Invalid, manifest2InvalidUri } from "#fileServer/manifests.js";
 import { readFileToObject } from "#fileServer/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -55,7 +55,9 @@ async function fileServer(fastify, options) {
     annotations2Invalid: annotations2Invalid,
     annotations2Valid: annotations2Valid,
     manifest2Valid: manifest2Valid,
-    manifest2ValidUri: manifest2ValidUri
+    manifest2ValidUri: manifest2ValidUri,
+    manifest2Invalid: manifest2Invalid,
+    manifest2InvalidUri: manifest2InvalidUri
   });
 }
 

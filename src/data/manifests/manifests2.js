@@ -93,6 +93,16 @@ class Manifests2 extends ManifestsAbstract {
     return makeInsertResponse(insertedIds);
   }
 
+  /**
+   * throw an error with just the object describing the error data (and not the stack or anything else).
+   * used to propagate write errors to routes.
+   * @param {DataOperationsType} operation: describes the database operation
+   * @param {import("mongodb").MongoServerError} err: the mongo error
+   */
+  #throwMongoError(operation, err) {
+    throw new Manifest2Error(operation, err.message, err.errorResponse);
+  }
+
   /////////////////////////////////////////////
   // write
 
@@ -102,8 +112,12 @@ class Manifests2 extends ManifestsAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async #insertOne(manifest) {
-    const mongoResponse = await this.manifestsCollection.insertOne(manifest);
-    return this.#makeInsertResponse(mongoResponse);
+    try {
+      const mongoResponse = await this.manifestsCollection.insertOne(manifest);
+      return this.#makeInsertResponse(mongoResponse);
+    } catch (err) {
+      this.#throwMongoError("insert", err)
+    }
   }
 
   /**
@@ -112,15 +126,9 @@ class Manifests2 extends ManifestsAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertManifest(manifest) {
-    try {
-      this.validateManifest(manifest);
-      manifest = this.#cleanManifest(manifest);
-      return this.#insertOne(manifest);
-
-    } catch (err) {
-      console.log(err);
-      throw new Manifest2Error("insert", `error inserting manifest because of '${err.message}'`, manifest);
-    }
+    this.validateManifest(manifest);
+    manifest = this.#cleanManifest(manifest);
+    return this.#insertOne(manifest);
   }
 
   /**

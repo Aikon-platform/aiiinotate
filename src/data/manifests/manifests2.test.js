@@ -2,7 +2,7 @@ import test from "node:test";
 
 import build from "#src/app.js";
 
-import { assertObjectKeys, testPostRouteCurry, injectPost } from "#data/utils/testUtils.js";
+import { assertObjectKeysInsert, assertObjectKeysError } from "#data/utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -14,7 +14,9 @@ test("test Manifests2 module", async (t) => {
     fastify = await build("test"),
     {
       manifest2Valid,
-      manifest2ValidUri
+      manifest2ValidUri,
+      manifest2Invalid,
+      manifest2InvalidUri
     } = fastify.fileServer;
 
   await fastify.ready();
@@ -34,13 +36,19 @@ test("test Manifests2 module", async (t) => {
   t.afterEach(async () => await fastify.emptyCollections());
 
   await t.test("test Manifests2.insertManifest", async (t) => {
-    const r = await fastify.manifests2.insertManifest(manifest2Valid);
-    assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
+    const rSuccess = await fastify.manifests2.insertManifest(manifest2Valid);
+    assertObjectKeysInsert(t, rSuccess);
+
+    // insertion should fail. since we are not inserting through HTTPs, we can't test error response keys
+    await t.assert.rejects(fastify.manifests2.insertManifest(manifest2Invalid));
   })
 
   await t.test("test Manifests2.insertManifestFromUri", async (t) => {
     const r = await fastify.manifests2.insertManifestFromUri(manifest2ValidUri.uri);
-    assertObjectKeys(t, r, ["insertedCount", "insertedIds"]);
+    assertObjectKeysInsert(t, r);
+
+    // insertion should fail. since we are not inserting through HTTPs, we can't test error response keys
+    await t.assert.rejects(fastify.manifests2.insertManifest(manifest2InvalidUri.uri));
   })
 
   return
