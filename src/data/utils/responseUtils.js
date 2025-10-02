@@ -12,9 +12,9 @@
  * @param {string[]} insertedIds
  * @returns {InsertResponseType}
  */
-const makeInsertResponse = (insertedIds) => {
+const formatInsertResponse = (insertedIds) => {
   if ( !Array.isArray(insertedIds) ) {
-    throw new Error(`makeInsertResponse: Type error: expected array of IDs, got '${typeof insertedIds}' on ${insertedIds}`)
+    throw new Error(`formatInsertResponse: Type error: expected array of IDs, got '${typeof insertedIds}' on ${insertedIds}`)
   }
   return {
     insertedCount: insertedIds.length,
@@ -26,7 +26,7 @@ const makeInsertResponse = (insertedIds) => {
  * @param {UpdateResponseType} mongoRes
  * @returns {UpdateResponseType}
  */
-const makeUpdateResponse = (mongoRes) => ({
+const formatUpdateResponse = (mongoRes) => ({
   matchedCount: mongoRes.matchedCount,
   modifiedCount: mongoRes.modifiedCount,
   upsertedCount: mongoRes.upsertedCount,
@@ -37,12 +37,12 @@ const makeUpdateResponse = (mongoRes) => ({
  * @param {DeleteResponseType} mongoRes
  * @returns {DeleteResponseType}
  */
-const makeDeleteResponse = (mongoRes) => ({
+const formatDeleteResponse = (mongoRes) => ({
   deletedCount: mongoRes.deletedCount
 });
 
 export {
-  makeInsertResponse,
-  makeUpdateResponse,
-  makeDeleteResponse
+  formatInsertResponse,
+  formatUpdateResponse,
+  formatDeleteResponse
 }

@@ -134,11 +134,30 @@ class Annnotations2 extends CollectionAbstract {
       || !objectHasKey(annotationList, "@id")
       || !Array.isArray(annotationList.resources)
     ) {
-      this.errorNoAction(`Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.`, annotationList)
+      this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
     return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
   }
+
+  /**
+   * insert all manifests referenced by `annotationData`.
+   * the point is to be able to that manifest's canvas order, and thus to know what "page" (in the case of a book) the annotation is on.
+   * manifest URIs are extracted from canvas URIs, supposing that URIs follow the IIIF 2.1 specification.
+   * @param {object|object[]} annotationData: an annotation, or array of annotations.
+   */
+  // async #insertManifests(annotationData) {
+  //   annotationData = maybeToArray(annotationData);
+  //   // const canvasIds = annotationData.map((ann) => ann.on.full);
+  //   // console.log("#".repeat(100));
+  //   // console.log(canvasIds);
+  //   // console.log("#".repeat(100));
+  // }
+//
+  // async #addCanvasPositions(annotationData) {
+  //   // TODO
+  //   return annotationData;
+  // }
 
   ////////////////////////////////////////////////////////////////
   // insert / updates
@@ -172,7 +191,10 @@ class Annnotations2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotationList(annotationList) {
-    const annotationArray = this.#cleanAnnotationList(annotationList);
+    let annotationArray;
+    annotationArray = this.#cleanAnnotationList(annotationList);
+    // await this.#insertManifests(annotationList);
+    // annotationArray = this.#addCanvasPositions(annotationList);
     return this.insertMany(annotationArray);
   }
 

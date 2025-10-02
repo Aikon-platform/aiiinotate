@@ -11,6 +11,7 @@
 /** @typedef {MongoInsertManyResultType | MongoInsertOneResultType} MongoInsertResultType */
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("mongodb").DeleteResult} MongoDeleteResultType */
+/** @typedef {import("mongodb").MongoClient} MongoClientType */
 
 /** @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType */
 

@@ -1,8 +1,10 @@
 import { maybeToArray } from "#utils/utils.js"
-import { makeInsertResponse, makeDeleteResponse, makeUpdateResponse } from "#utils/responseUtils.js";
+import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#utils/responseUtils.js";
 
 /** @typedef {import("#types").MongoDbType} MongoDbType */
+/** @typedef {import("#types").MongoClientType} MongoClientType */
 /** @typedef {import("#types").IiifPresentationVersionType} IiifPresentationVersionType */
+/** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
 /** @typedef {import("#types").CollectionNamesType} CollectionNamesType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
@@ -13,14 +15,14 @@ class CollectionAbstractError extends Error {
   /**
    * @param {string?} collectionName: name of the collection we're working on
    * @param {string} message: error message
-   * @param {DataOperationsType} action: to describe the type of database interaction
+   * @param {DataOperationsType} operation: to describe the type of database interaction
    * @param {object} errInfo: extra info to display for the error
    */
-  constructor(collectionName, action, message, errInfo) {
+  constructor(collectionName, operation, message, errInfo) {
     const
       collInfo = collectionName ? `on collection '${collectionName}',` : "",
-      actionInfo = action ? `when performing operation '${action.toLocaleLowerCase()}'`: "";
-    super(`CollectionAbstractError: ${collInfo} ${actionInfo}: ${message}`);
+      operationInfo = operation ? `when performing operation '${operation.toLocaleLowerCase()}'`: "";
+    super(`CollectionAbstractError: ${collInfo} ${operationInfo}: ${message}`);
     this.info = errInfo;
   }
 }
@@ -31,10 +33,10 @@ class CollectionAbstractError extends Error {
  */
 const errorConstructor = (collectionName) =>
   /**
-   * @param {string?} action
+   * @param {string?} operation
    * @returns {Function}
    */
-  (action) =>
+  (operation) =>
     /**
      *
      * @param {string} message
@@ -42,7 +44,7 @@ const errorConstructor = (collectionName) =>
      * @returns {CollectionAbstractError}
      */
     (message, errInfo) =>
-      new CollectionAbstractError(collectionName, message, action, errInfo);
+      new CollectionAbstractError(collectionName, operation, message, errInfo);
 
 // an error with no collection name or info.
 const abstractError = errorConstructor(undefined)(undefined);
@@ -74,10 +76,15 @@ class CollectionAbstract {
 
     const iiifPresentationVersion = collectionName.endsWith("2") ? 2 : 3;
 
+    /** @type {FastifyInstanceType} */
     this.fastify = fastify;
+    /** @type {MongoClientType} */
     this.client = fastify.mongo.client;
+    /** @type {MongoDbType} */
     this.db = fastify.mongo.db;
+    /** @type {MongoCollectionType} */
     this.collection = this.db.collection(collectionName, collectionOptions);
+    /** @type {IiifPresentationVersionType} */
     this.iiifPresentationVersion = iiifPresentationVersion;
 
     /** @type {Function(string?) => Function(string, object) => Error} */
@@ -99,30 +106,12 @@ class CollectionAbstract {
     return this.constructor.name;
   }
 
-  /** @param {function} func */
+  /** @param {Function} func */
   funcName(func) {
     if ( typeof func !== "function" ) {
       throw new Error(`${this.className()}.${this.funcName.name} : expected 'func' to be a function, got '${typeof func}' (func = ${func})`);
     }
     return `${this.className()}.${func.name}`
-  }
-
-  /**
-   * TODO delete / replace by this.error* functions.
-   * generate an error message, with format: className.funcName: errMsg
-   * @param {string} func
-   * @param {string} msg
-   * @param {boolean} throwErr: if true, throw the error. otherwise, print the error message and return it
-   * @returns {string?}
-   */
-  errorMessage(func, msg, throwErr=true) {
-    msg = `${this.funcName(func)} : ${msg}`;
-    if ( throwErr ) {
-      throw new Error(msg);
-    } else {
-      console.error(msg);
-      return msg;
-    }
   }
 
   /**
@@ -141,7 +130,6 @@ class CollectionAbstract {
     return annotationIds.map(a => a[key]);
   }
 
-
   //////////////////////////////////////
   // RESPONSES: what is sent from collection classes
   // to routes and other consumers of the class after an insert/update/delete.
@@ -157,7 +145,7 @@ class CollectionAbstract {
       // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
-    return makeInsertResponse(insertedIds);
+    return formatInsertResponse(insertedIds);
   }
 
   /**
@@ -172,7 +160,7 @@ class CollectionAbstract {
       );
       mongoRes.upsertedId = upsertedIds.length ? upsertedIds[0] : mongoRes.upsertedId;
     }
-    return makeUpdateResponse(mongoRes);
+    return formatUpdateResponse(mongoRes);
   }
 
   /**
@@ -182,6 +170,7 @@ class CollectionAbstract {
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
   throwMongoError(operation, err) {
+    console.log("::::::::::::::::::::::::::::::::::::::", operation, err);
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
   }
 
@@ -246,7 +235,7 @@ class CollectionAbstract {
   async delete(queryObj) {
     try {
       const deleteResult = await this.collection.deleteMany(queryObj);
-      return makeDeleteResponse(deleteResult);
+      return formatDeleteResponse(deleteResult);
     } catch (err) {
       this.throwMongoError("delete", err);
     }
