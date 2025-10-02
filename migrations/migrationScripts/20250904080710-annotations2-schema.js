@@ -1,8 +1,6 @@
 /**
  * define the validation schema on collection `annotations2`.
  */
-import util from "node:util";
-
 import build from "#src/app.js"
 
 // const inspect = (theObj) => util.inspect(theObj, {showHidden: false, depth: null, colors: true});
