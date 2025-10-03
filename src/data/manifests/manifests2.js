@@ -42,9 +42,9 @@ class Manifests2 extends CollectionAbstract {
   #validateManifest(manifest) {
     if (
       // manifest-level validation
-      ! ["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
+      !["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
       // canvas-level . all necessary keys go in the first array (["@id"].every(...)).
-      || ! ["@id"].every((k) =>
+      || !["@id"].every((k) =>
         // sequences is an array, but only the 1st element (default sequence) is embedded in the manifest. non-default sequences are not processed here.
         manifest.sequences[0].canvases.every((canvas) =>
           Object.keys(canvas).includes(k)
@@ -74,6 +74,30 @@ class Manifests2 extends CollectionAbstract {
     };
   }
 
+  /**
+   * validation + cleaning pipeline
+   * @param {object} manifest
+   * @returns {object}
+   */
+  #validateAndCleanManifest(manifest) {
+    this.#validateManifest(manifest);
+    return this.#cleanManifest(manifest);
+  }
+
+  /**
+   * fetch a manifest and return it as an object
+   * @param {string} manifestUri
+   * @returns
+   */
+  async #fetchManifestFromUri(manifestUri) {
+    try {
+      const r = await fetch(manifestUri);
+      return await r.json();
+    } catch (err) {
+      throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
+    }
+  }
+
   /////////////////////////////////////////////
   // write
 
@@ -83,9 +107,19 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertManifest(manifest) {
-    this.#validateManifest(manifest);
-    manifest = this.#cleanManifest(manifest);
+    manifest = this.#validateAndCleanManifest(manifest);
     return this.insertOne(manifest);
+  }
+
+  /**
+   * insert several manifests to database
+   * @param {object[]} manifestArray - array of manifests
+   */
+  async insertManifestArray(manifestArray) {
+    // TODO: error handling. here, function will return if 1 manifest isn't valid.
+    // which contradicts concurrent insertion behaviour defined in `this.insertManifestsFromUriArray`
+    manifestArray = manifestArray.map((manifest) => this.#validateAndCleanManifest(manifest));
+    return this.insertMany(manifestArray);
   }
 
   /**
@@ -95,12 +129,10 @@ class Manifests2 extends CollectionAbstract {
    */
   async insertManifestFromUri(manifestUri) {
     try {
-      const
-        r = await fetch(manifestUri),
-        manifest = await r.json();
+      const manifest = await this.#fetchManifestFromUri(manifestUri);
       return this.insertManifest(manifest);
     } catch (err) {
-      throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
+      throw this.errorInsert(`error inserting manifest with URI '${manifestUri}' because of error: ${err.message}`);
     }
   }
 
@@ -111,19 +143,51 @@ class Manifests2 extends CollectionAbstract {
    * the first use case for this function is to index all manifests related to an array of annotations. given that we reconstruct
    * manifest URIs from canvas URIs manually, there may always be an error. we want to insert a manifest when possible, and return an error othersise.
    * @param {string[]} manifestUriArray
-   * @returns {Promise<Array< InsertResponseType | {rejectedManifestUri: string} >>}
+   * @returns {Promise<InsertResponseType>}
    */
-  insertManifestsFromUriArray(manifestUriArray) {
-    return Promise.all(
+  async insertManifestsFromUriArray(manifestUriArray) {
+    // PERFORMANCE: ~2837 ms
+    // return Promise.all(
+    //   manifestUriArray.map(async (manifestUri) => {
+    //     try {
+    //       return await this.insertManifestFromUri(manifestUri)
+    //     } catch (err) {
+    //       console.error(err);
+    //       return { rejectedManifestUri: manifestUri }
+    //     }
+    //   })
+    // )
+
+    // PERFORMANCE ~2850ms
+    const
+      fetchErrors = [],
+      manifestArray = [];
+    await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
-          return await this.insertManifestFromUri(manifestUri)
+          manifestArray.push(await this.#fetchManifestFromUri(manifestUri));
         } catch (err) {
           console.error(err);
-          return { rejectedManifestUri: manifestUri }
+          fetchErrors.push({ rejectedManifestUri: manifestUri });
         }
       })
-    )
+    );
+    // TODO: return both `insertedManifestIds` and `fetchErrors`, and homogeneise the insertMany across collections.
+    // TLDR: here, we need to return 1) the inserted IDs, 2) the IDs of the manifests that could not be fetched in `this.#fetchManifest` or validated by `this.validateManifest`.
+    // there should be no need to change the behaviour of `collectionsAbstract.insertMany`, which always succeeds if our validation functions have succeeded.
+    // BUT: i need to be sure that ALL `insertMany` functions work the same accross collections and offer a uniform interface.
+    // (quitte à faire des insertMany différentes par collection).
+    //
+    // la solution pourrait être de découpler les fonctions de validations des fonctions d'insertion: si la validation fail sur 1 item, alors on dit qu'on inserera pas celui là
+    // mais qu'on insèrera les autres. et à la fin on retourne les @id des insertions et des manifestes qui n'ont pas passé la validation.
+
+    // TODO: le reste:
+    // 1) ajouter `canvasIdx` et `manifestUri` aux JsonSchemas.
+    // 2) faire une Unique clause sur `manifests2.@id`, puisque cet @id là n'est pas changé.
+
+    // NOTE: pour le moment, on ne retourne que les @ids des manifestes pour lesquels l'insertion a réussi.
+    const result = await this.insertManifestArray(manifestArray);
+    return result;
   }
 
   /////////////////////////////////////////////

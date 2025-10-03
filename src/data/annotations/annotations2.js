@@ -168,7 +168,9 @@ class Annotations2 extends CollectionAbstract {
       annotationData.map((ann) => ann.on.manifestUri)
     )];
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
-    const manifestsInserted = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris);
+    const
+      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris),
+      insertedManifestsIds = insertResponse.insertedIds;
 
     // 3. update annotations with 2 things:
     //  - where manifest insertion has failed, set `annotation.on.manifestUri` to undefined
@@ -177,7 +179,7 @@ class Annotations2 extends CollectionAbstract {
       annotationData.map(async (ann) => {
         ann.on.manifestUri =
           // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
-          manifestsInserted.find((x) => x.insertedIds.includes(ann.on.manifestUri))
+          insertedManifestsIds.find((x) => x === ann.on.manifestUri)
             ? ann.on.manifestUri
             : undefined;
         ann.on.canvasIdx =
