@@ -141,7 +141,7 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<number?>}
    */
   async getCanvasIdx(manifestUri, canvasUri) {
-    // NOTE: PERFORMANCE: using `aggregate` with `$indexOfArray` to find the index of `canvasUri` causes an up to 30% faster execution of the app's test suite:
+    // NOTE: PERFORMANCE increases using `aggregate` with `$indexOfArray` to find the index of `canvasUri`: up to 30% faster execution of the app's test suite:
     // - with `aggregate`, ~2800ms for the whole test suite to run.
     // - with a native `coll.findOne()` and then getting the canvas ID manually (`arr.indexOf`), ~4000ms for the whole test suite to run.
     // https://www.mongodb.com/docs/manual/aggregation/
@@ -152,12 +152,8 @@ class Manifests2 extends CollectionAbstract {
      * otherwise the index is returned (-1 if `canvasIdx` was not found in the document)
      */
     const r = await this.collection.aggregate([
-      {
-        $match: { "@id": manifestUri }
-      },
-      {
-        $project: { index: { $indexOfArray: ["$canvasIds", canvasUri] } }
-      }
+      { $match: { "@id": manifestUri } },
+      { $project: { index: { $indexOfArray: ["$canvasIds", canvasUri] } } }
     ]).next();
     return r === null
       ? undefined

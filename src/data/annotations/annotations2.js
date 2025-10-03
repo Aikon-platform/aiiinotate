@@ -145,10 +145,10 @@ class Annotations2 extends CollectionAbstract {
   }
 
   /**
-   * does 2 things:
+   * handle all side effects on the `manifests2` collection. this does 2 things:
    * - insert all manifests referenced by `annotationData`, and set a key `on.manifestId` on all annotations.
    * - set a key `on.canvasIdx`, containing the position of the annotation's target canvas in the manifest,
-   *    (or -1 if the canvas was not found or the annotation is undefined)
+   *    (or undefined if the manifest or canvas were not found).
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
    */
   async #insertManifestsAndGetCanvasIdx(annotationData) {
@@ -178,12 +178,12 @@ class Annotations2 extends CollectionAbstract {
         ann.on.manifestUri =
           // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
           manifestsInserted.find((x) => x.insertedIds.includes(ann.on.manifestUri))
-          ? ann.on.manifestUri
-          : undefined;
+            ? ann.on.manifestUri
+            : undefined;
         ann.on.canvasIdx =
           ann.on.manifestUri
-          ? await this.manifestsPlugin.getCanvasIdx(ann.on.manifestUri, ann.on.full)
-          : undefined;
+            ? await this.manifestsPlugin.getCanvasIdx(ann.on.manifestUri, ann.on.full)
+            : undefined;
         return ann;
       })
     );
@@ -204,10 +204,13 @@ class Annotations2 extends CollectionAbstract {
    */
   async insertAnnotation(annotation) {
     annotation = this.#cleanAnnotation(annotation);
+    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation);
     return this.insertOne(annotation);
   }
 
   /**
+   * TODO: handle side effects when changing `annotation.on`: changes that can affect `manifestShortId`, `manifestUri` and `canvasIdx`
+   *    (for example, updating `annotation.on.full` would ask to change `canvasIdx`).
    * @param {object} annotation
    * @returns {Promise<UpdateResponseType>}
    */
