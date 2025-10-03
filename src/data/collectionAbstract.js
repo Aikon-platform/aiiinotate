@@ -126,11 +126,11 @@ class CollectionAbstract {
   async getIiifIdsFromMongoIds(mongoIds) {
     mongoIds = maybeToArray(mongoIds);
     const key = this.iiifPresentationVersion === 2 ? "@id" : "id";
-    const annotationIds = await this.collection.find(
+    const collectionIds = await this.collection.find(
       { _id: { $in: mongoIds } },
       { projection: { [key]: 1 } }
     ).toArray();
-    return annotationIds.map(a => a[key]);
+    return collectionIds.map(a => a[key]);
   }
 
   //////////////////////////////////////

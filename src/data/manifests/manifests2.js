@@ -133,7 +133,36 @@ class Manifests2 extends CollectionAbstract {
   /////////////////////////////////////////////
   // read
 
-
+  /**
+   * return the position of `canvasUri` within the manifest with ID `manifestUri`,
+   * or return `undefined` if the canvas is not found in the manifest, or the manifest is not indexed.
+   * @param {string} manifestUri
+   * @param {string} canvasUri
+   * @returns {Promise<number?>}
+   */
+  async getCanvasIdx(manifestUri, canvasUri) {
+    // NOTE: PERFORMANCE: using `aggregate` with `$indexOfArray` to find the index of `canvasUri` causes an up to 30% faster execution of the app's test suite:
+    // - with `aggregate`, ~2800ms for the whole test suite to run.
+    // - with a native `coll.findOne()` and then getting the canvas ID manually (`arr.indexOf`), ~4000ms for the whole test suite to run.
+    // https://www.mongodb.com/docs/manual/aggregation/
+    // https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/
+    /**
+     * @type { { _id: MongoObjectId, index: number } | null }
+     * if `cursor.next() => null`, no document was found.
+     * otherwise the index is returned (-1 if `canvasIdx` was not found in the document)
+     */
+    const r = await this.collection.aggregate([
+      {
+        $match: { "@id": manifestUri }
+      },
+      {
+        $project: { index: { $indexOfArray: ["$canvasIds", canvasUri] } }
+      }
+    ]).next();
+    return r === null
+      ? undefined
+      : r.index !== -1 ? r.index : undefined;
+  }
 }
 
 export default fastifyPlugin((fastify, options, done) => {

@@ -145,12 +145,13 @@ class Annotations2 extends CollectionAbstract {
   }
 
   /**
-   * insert all manifests referenced by `annotationData`.
-   * the point is to be able to that manifest's canvas order, and thus to know what "page" (in the case of a book) the annotation is on.
-   * manifest URIs are extracted from canvas URIs, supposing that URIs follow the IIIF 2.1 specification.
+   * does 2 things:
+   * - insert all manifests referenced by `annotationData`, and set a key `on.manifestId` on all annotations.
+   * - set a key `on.canvasIdx`, containing the position of the annotation's target canvas in the manifest,
+   *    (or -1 if the canvas was not found or the annotation is undefined)
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
    */
-  async #insertManifests(annotationData) {
+  async #insertManifestsAndGetCanvasIdx(annotationData) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     // convert objects to array to get a uniform interface.
     let converted, manifestUris;
@@ -169,34 +170,28 @@ class Annotations2 extends CollectionAbstract {
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const manifestsInserted = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris);
 
-    // 3. where manifest insertion has failed, set `annotation.on.manifestUri` to undefined
-    annotationData = annotationData.map((ann) => {
-      ann.on.manifestUri =
-        // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
-        manifestsInserted.find((x) => x.insertedIds.includes(ann.on.manifestUri))
-        ? ann.on.manifestUri
-        : undefined;
-    });
+    // 3. update annotations with 2 things:
+    //  - where manifest insertion has failed, set `annotation.on.manifestUri` to undefined
+    //  - set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
+    annotationData = await Promise.all(
+      annotationData.map(async (ann) => {
+        ann.on.manifestUri =
+          // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
+          manifestsInserted.find((x) => x.insertedIds.includes(ann.on.manifestUri))
+          ? ann.on.manifestUri
+          : undefined;
+        ann.on.canvasIdx =
+          ann.on.manifestUri
+          ? await this.manifestsPlugin.getCanvasIdx(ann.on.manifestUri, ann.on.full)
+          : undefined;
+        return ann;
+      })
+    );
 
     // retroconvert array to single object, if single object was converted.
     return converted
       ? annotationData[0]
       : annotationData;
-  }
-
-  /**
-   * from the manifests inserted in `#insertManifest`, complete each annotation in `annotationData` with a `canvasPosition` key,
-   * `canvasPosition` indicates the position of the canvas on which the annotation is within the manifest.
-   * example: `canvasPosition===10` -> the annotation is on the 10th canvas.
-   * @param {object|object[]} annotationData - an annotation, or array of annotations
-   * @returns
-   */
-  async #addCanvasPositions(annotationData) {
-    // TODO
-    annotationData = maybeToArray(annotationData);
-
-    // TODO: if annotationData is a single annotation, retroconvert to a single annotation instead of annotation array
-    return annotationData;
   }
 
   ////////////////////////////////////////////////////////////////
@@ -233,8 +228,7 @@ class Annotations2 extends CollectionAbstract {
   async insertAnnotationList(annotationList) {
     let annotationArray;
     annotationArray = this.#cleanAnnotationList(annotationList);
-    await this.#insertManifests(annotationArray);
-    annotationArray = await this.#addCanvasPositions(annotationArray);
+    annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray);
     return this.insertMany(annotationArray);
   }
 
