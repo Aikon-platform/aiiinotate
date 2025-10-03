@@ -57,4 +57,21 @@
  * @property {string[]} canvasIds
  */
 
+/**
+ * @typedef {import("#manifests/manifests2.js").Manifests2InstanceType} Manifests2InstanceType
+ * type of an instance of the Manifests2 class.
+ */
+/**
+ * @typedef {import("#manifests/annotations2.js").Annotations2InstanceType} Annotations2InstanceType
+ * type of an instance of the Annotations2 class.
+ */
+/**
+ * @typedef {import("#manifests/manifests3.js").Manifests3InstanceType} Manifests3InstanceType
+ * type of an instance of the Manifests3 class.
+ */
+/**
+ * @typedef {import("#manifests/annotations3.js").Annotations3InstanceType} Annotations3InstanceType
+ * type of an instance of the Annotations3 class.
+ */
+
 export {}

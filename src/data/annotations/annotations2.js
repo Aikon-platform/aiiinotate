@@ -1,25 +1,28 @@
 /**
  * IIIF presentation 2.1 annotation internals: convert incoming data, interct with the database, return data.
- * exposes an `Annnotations2` class that should contain everything you need to interact with the annotations2 collection.
+ * exposes an `Annotations2` class that should contain everything you need to interact with the annotations2 collection.
  */
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
-import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
+import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
-/** @typedef {import("#types"). MongoObjectId} MongoObjectId */
-/** @typedef {import("#types"). MongoInsertResultType} MongoInsertResultType */
-/** @typedef {import("#types"). MongoUpdateResultType} MongoUpdateResultType */
-/** @typedef {import("#types"). MongoDeleteResultType} MongoDeleteResultType */
+/** @typedef {import("#types").MongoObjectId} MongoObjectId */
+/** @typedef {import("#types").MongoInsertResultType} MongoInsertResultType */
+/** @typedef {import("#types").MongoUpdateResultType} MongoUpdateResultType */
+/** @typedef {import("#types").MongoDeleteResultType} MongoDeleteResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 /** @typedef {import("#types").DeleteByType } DeleteByType */
+/** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
+
+/** @typedef {Annotations2} Annotations2InstanceType */
 
 // RECOMMENDED URI PATTERNS https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
 //
@@ -33,17 +36,18 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList } fr
 // Layer 	                   {scheme}://{host}/{prefix}/{identifier}/layer/{name}
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
-
 /**
  * @extends {CollectionAbstract}
  */
-class Annnotations2 extends CollectionAbstract {
+class Annotations2 extends CollectionAbstract {
 
   /**
    * @param {FastifyInstanceType} fastify
    */
   constructor(fastify) {
     super(fastify, "annotations2");
+    /** @type {Manifests2InstanceType} */
+    this.manifestsPlugin = this.fastify.manifests2;
   }
 
   ////////////////////////////////////////////////////////////////
@@ -55,7 +59,7 @@ class Annnotations2 extends CollectionAbstract {
    * if `update`, some cleaning will be skipped (especially the redefinition of "@id"), otherwise updates would fail.
    *
    * @param {object} annotation
-   * @param {boolean} update: set to `true` if performing an update instead of an insert.
+   * @param {boolean} update - set to `true` if performing an update instead of an insert.
    * @returns {object}
    */
   #cleanAnnotation(annotation, update=false) {
@@ -144,22 +148,47 @@ class Annnotations2 extends CollectionAbstract {
    * insert all manifests referenced by `annotationData`.
    * the point is to be able to that manifest's canvas order, and thus to know what "page" (in the case of a book) the annotation is on.
    * manifest URIs are extracted from canvas URIs, supposing that URIs follow the IIIF 2.1 specification.
-   * @param {object|object[]} annotationData: an annotation, or array of annotations.
+   * @param {object|object[]} annotationData - an annotation, or array of annotations.
    */
   async #insertManifests(annotationData) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
-    annotationData = maybeToArray(annotationData);
-    // const canvasIds = annotationData.map((ann) => ann.on.full);
-    // console.log("#".repeat(100));
-    // console.log(canvasIds);
-    // console.log("#".repeat(100));
+    // convert objects to array to get a uniform interface.
+    let converted, manifestUris;
+    [ annotationData, converted ] = maybeToArray(annotationData, true);
+
+    // extract all manifest URIs and add them to `annotationData`
+    annotationData = annotationData.map((ann) => {
+      ann.on.manifestUri = canvasUriToManifestUri(ann.on.full);
+      return ann;
+    })
+
+    // get all distinct manifest URIs, and insert them.
+    manifestUris = [...new Set(
+      annotationData.map((ann) => ann.on.manifestUri)
+    )];
+    // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
+    const manifestsInserted = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris);
+
+    // 3. where manifest insertion has failed, set `annotation.on.manifestUri` to undefined
+    annotationData = annotationData.map((ann) => {
+      ann.on.manifestUri =
+        // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
+        manifestsInserted.find((x) => x.insertedIds.includes(ann.on.manifestUri))
+        ? ann.on.manifestUri
+        : undefined;
+    });
+
+    // retroconvert array to single object, if single object was converted.
+    return converted
+      ? annotationData[0]
+      : annotationData;
   }
 
   /**
    * from the manifests inserted in `#insertManifest`, complete each annotation in `annotationData` with a `canvasPosition` key,
    * `canvasPosition` indicates the position of the canvas on which the annotation is within the manifest.
    * example: `canvasPosition===10` -> the annotation is on the 10th canvas.
-   * @param {*} annotationData
+   * @param {object|object[]} annotationData - an annotation, or array of annotations
    * @returns
    */
   async #addCanvasPositions(annotationData) {
@@ -204,7 +233,7 @@ class Annnotations2 extends CollectionAbstract {
   async insertAnnotationList(annotationList) {
     let annotationArray;
     annotationArray = this.#cleanAnnotationList(annotationList);
-    await this.#insertManifests(annotationList);
+    await this.#insertManifests(annotationArray);
     annotationArray = await this.#addCanvasPositions(annotationArray);
     return this.insertMany(annotationArray);
   }
@@ -243,7 +272,7 @@ class Annnotations2 extends CollectionAbstract {
    * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
    *      https://stackoverflow.com/questions/74447979/mongoservererror-cannot-do-exclusion-on-field-date-in-inclusion-projection
    * @param {object} queryObj
-   * @param {object?} projectionObj: extra projection fields to tailor the reponse format
+   * @param {object?} projectionObj - extra projection fields to tailor the reponse format
    * @returns {Promise<object[]>}
    */
   async find(queryObj, projectionObj) {
@@ -346,7 +375,7 @@ class Annnotations2 extends CollectionAbstract {
 }
 
 export default fastifyPlugin((fastify, options, done) => {
-  fastify.decorate("annotations2", new Annnotations2(fastify));
+  fastify.decorate("annotations2", new Annotations2(fastify));
   done();
 }, {
   name: "annotations2",

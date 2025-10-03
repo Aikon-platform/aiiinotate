@@ -15,8 +15,12 @@ import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
 /** @typedef {import("#types").DeleteByType } DeleteByType */
 /** @typedef {import("#types").ManifestType } ManifestType */
 
+/** @typedef {Manifests2} Manifests2InstanceType */
 
 /**
+ * @class
+ * @constructor
+ * @public
  * @extends {CollectionAbstract}
  */
 class Manifests2 extends CollectionAbstract {
@@ -75,7 +79,7 @@ class Manifests2 extends CollectionAbstract {
 
   /**
    * save a single manifest to database.
-   * @param {object} manifest: a IIIF manifest
+   * @param {object} manifest - a IIIF manifest
    * @returns {Promise<InsertResponseType>}
    */
   async insertManifest(manifest) {
@@ -98,6 +102,28 @@ class Manifests2 extends CollectionAbstract {
     } catch (err) {
       throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
     }
+  }
+
+  /**
+   * NOTE: this function doesn't throw.
+   * the goal is to offer a uniform interface to insert many manifests with promise concurrency. so, we try to insert everything,
+   * and when it fails on some of the promises, return success objects where there are successes, failures otherwise.
+   * the first use case for this function is to index all manifests related to an array of annotations. given that we reconstruct
+   * manifest URIs from canvas URIs manually, there may always be an error. we want to insert a manifest when possible, and return an error othersise.
+   * @param {string[]} manifestUriArray
+   * @returns {Promise<Array< InsertResponseType | {rejectedManifestUri: string} >>}
+   */
+  insertManifestsFromUriArray(manifestUriArray) {
+    return Promise.all(
+      manifestUriArray.map(async (manifestUri) => {
+        try {
+          return await this.insertManifestFromUri(manifestUri)
+        } catch (err) {
+          console.error(err);
+          return { rejectedManifestUri: manifestUri }
+        }
+      })
+    )
   }
 
   /////////////////////////////////////////////

@@ -4,6 +4,7 @@ import CollectionAbstract from "#data/collectionAbstract.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
+/** @typedef {Annnotations3} Annnotations3InstanceType */
 
 /**
  * @extends {CollectionAbstract}

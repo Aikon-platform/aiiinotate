@@ -95,8 +95,17 @@ const arrayEqualsShallow = (a1, a2, sort=false) => {
   return a1.every((el, i) => a2[i]===el);
 }
 
-const maybeToArray = (x) =>
-  Array.isArray(x) ? x : [x];
+/**
+ * convert object `x` to an array if it is not aldready an array.
+ * if `convertedFlag`, return [ obj, converted ]. `converted` is `true` if the object was converted to an array, false otherwise.
+ * @param {any} x
+ * @param {boolean} convertedFlag
+ * @returns {Array | Array<Array, boolean> }
+ */
+const maybeToArray = (x, convertedFlag=false) =>
+  convertedFlag
+    ? Array.isArray(x) ? [x, false] : [[x], true]
+    : Array.isArray(x) ? x : [x];
 
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`

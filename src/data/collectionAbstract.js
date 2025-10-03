@@ -52,6 +52,9 @@ const abstractError = errorConstructor(undefined)(undefined);
 /**
  * abstract class defining common processes to interact with a mongo collectios: inserts, updates, errors...
  * this class contains agnostic methods and data that can be applied to any collection.
+ * @class
+ * @constructor
+ * @public
  */
 class CollectionAbstract {
   /**
@@ -170,7 +173,6 @@ class CollectionAbstract {
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
   throwMongoError(operation, err) {
-    console.log("::::::::::::::::::::::::::::::::::::::", operation, err);
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
   }
 

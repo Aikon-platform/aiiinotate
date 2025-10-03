@@ -156,6 +156,14 @@ const manifestUri = (manifestShortId) =>
   `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
 
 /**
+ * if `canvasUri` follows the recommended IIIF 2.1 recommended URI pattern, convert it to a JSON manifest URI.
+ * @param {string} canvasUri
+ * @returns {string} : the manifest URI
+ */
+const canvasUriToManifestUri = (canvasUri) =>
+  canvasUri.split("/").slice(0,-2).join("/") + "/manifest.json";
+
+/**
  *
  * @param {object[]} resources: the annotatons
  * @param {string?} annotationListId: the AnnotationList's '@id' key
@@ -183,4 +191,5 @@ export {
   getManifestShortId,
   getCanvasShortId,
   getAnnotationTarget,
+  canvasUriToManifestUri,
 }

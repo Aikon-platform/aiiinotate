@@ -4,6 +4,8 @@ import CollectionAbstract from "#data/collectionAbstract.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
+/** @typedef {Manifests3} Manifests3InstanceType */
+
 class Manifests3 extends CollectionAbstract {
   /**
    * @param {FastifyInstanceType} fastify
