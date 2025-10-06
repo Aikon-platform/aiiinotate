@@ -127,7 +127,6 @@ class Annotations2 extends CollectionAbstract {
         delete(annotation.resource);
       }
     }
-
     return annotation;
   }
 
@@ -172,7 +171,8 @@ class Annotations2 extends CollectionAbstract {
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
       insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, false),
-      insertedManifestsIds = insertResponse.insertedIds;
+      /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
+      insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
 
     // 3. update annotations with 2 things:
     //  - where manifest insertion has failed, set `annotation.on.manifestUri` to undefined

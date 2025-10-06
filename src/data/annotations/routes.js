@@ -83,7 +83,7 @@ async function annotationsRoutes(fastify, options) {
     annotations2 = fastify.annotations2,
     annotations3 = fastify.annotations3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
-    routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routesAnnotations2Or3"),
+    routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");

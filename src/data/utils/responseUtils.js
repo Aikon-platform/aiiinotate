@@ -9,6 +9,7 @@
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 
 /**
+ * TODO: update to handle nvx cas de figure (preExistingIds, rejectedIds)
  * @param {string[]} insertedIds
  * @returns {InsertResponseType}
  */
@@ -41,8 +42,34 @@ const formatDeleteResponse = (mongoRes) => ({
   deletedCount: mongoRes.deletedCount
 });
 
+/**
+ * functionnal alternative to `formatInsertResponse`, that aldready expects a formatted object
+ * @param {string[]?} insertedIds
+ * @param {string[]?} preExistingIds
+ * @param {string[]?} fetchErrorIds
+ * @param {string[]?} rejectedIds
+ * @returns {InsertResponseType}
+ */
+const toInsertResponse = (insertedIds, preExistingIds, fetchErrorIds, rejectedIds) => {
+  const out = {
+    insertedCount: insertedIds?.length || 0,
+    insertedIds: insertedIds || [],
+  };
+  if ( fetchErrorIds?.length ) {
+    out.fetchErrorIds = fetchErrorIds;
+  }
+  if ( rejectedIds?.length ) {
+    out.rejectedIds = rejectedIds;
+  }
+  if ( preExistingIds?.length ) {
+    out.preExistingIds = preExistingIds;
+  };
+  return out;
+}
+
 export {
   formatInsertResponse,
   formatUpdateResponse,
-  formatDeleteResponse
+  formatDeleteResponse,
+  toInsertResponse
 }

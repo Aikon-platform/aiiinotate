@@ -6,8 +6,8 @@ const
   indexOptions = { name: "manifestIdIndex", unique: true };
 
 /**
- * @param db {import('mongodb').Db}
- * @param client {import('mongodb').MongoClient}
+ * @param {import('mongodb').Db} db
+ * @param {import('mongodb').MongoClient} client
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
@@ -17,8 +17,8 @@ export const up = async (db, client) => {
 };
 
 /**
- * @param db {import('mongodb').Db}
- * @param client {import('mongodb').MongoClient}
+ * @param {import('mongodb').Db} db
+ * @param {import('mongodb').MongoClient} client
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {

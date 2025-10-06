@@ -24,6 +24,7 @@
  * @type {object}
  * @property {number} insertedCount - the number of documents that were properly inserted
  * @property {Array<string|MongoObjectId>} insertedIds - the ids of the documents that were properly inserted
+ * @property {Array<string|MongoObjectId>} [preExistingIds] - the ids of documents that were aldready inserted in a collection with a UNIQUE clause. USED ONLY BY `manifests2` and `manifests3`
  * @property {Array<string>} [fetchErrorIds] - the ids of referenced documents that could not be fetched. USED ONLY BY `manifests2` and `manifests3`
  * @property {{ [x: string]: string }} [rejectedIds] - the ids of the documents that did not pass validation, mapped to validation errors. USED ONLY BY `manifests2` and `manifests3`
  */

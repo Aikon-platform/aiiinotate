@@ -1,4 +1,4 @@
-import { maybeToArray } from "#utils/utils.js"
+import { maybeToArray, inspectObj } from "#utils/utils.js"
 import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#utils/responseUtils.js";
 
 /** @typedef {import("#types").MongoDbType} MongoDbType */
@@ -173,6 +173,7 @@ class CollectionAbstract {
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
   throwMongoError(operation, err) {
+    console.log(">>>>>>>>>>>>>>>>>", inspectObj(err.errorResponse));
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
   }
 

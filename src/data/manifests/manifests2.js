@@ -2,6 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
+import { toInsertResponse } from "#utils/responseUtils.js";
 import { inspectObj, ajv } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -105,7 +106,12 @@ class Manifests2 extends CollectionAbstract {
    */
   async insertManifest(manifest) {
     manifest = this.#validateAndCleanManifest(manifest);
-    return this.insertOne(manifest);
+    const manifestExists = await this.exists({ "@id": manifest["@id"] });
+    if ( !manifestExists ) {
+      return this.insertOne(manifest);
+    } else {
+      return toInsertResponse({ preExistingIds: [manifest["@id"]] })
+    }
   }
 
   /**
@@ -118,7 +124,7 @@ class Manifests2 extends CollectionAbstract {
    */
   async insertManifestArray(manifestArray, throwOnError=true) {
     // build 2 arrays, one of the manifests that pass validation, one of the @ids of the manifests with errors, mapped to an error message.
-    const
+    let
       cleanManifestArray = [],
       invalidManifestArray = [];
     manifestArray.map((manifest) => {
@@ -132,12 +138,36 @@ class Manifests2 extends CollectionAbstract {
         invalidManifestArray.push({ [manifest["@id"]]: err.message });
       }
     });
-    const result = await this.insertMany(cleanManifestArray);
-    // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
-    if ( !throwOnError ) {
+
+    // find which manifests are not aldready in the DB, to avoid a unique constraint error.
+    // `preExistingIds` = all @ids that are in `cleanManifestArray` that are aldready in the database
+    const
+      mongoResponse =
+        await this.collection.find(
+          { "@id": {
+            $in: cleanManifestArray.map((manifest) => manifest["@id"])
+          }},
+          { projection: { "@id": 1 } }
+        )
+        .toArray(),
+      preExistingIds = mongoResponse.map((r) => r["@id"]);
+
+    // insert. if there has been an error but error-throwing was disabled, complete the response object with description of the errors
+    cleanManifestArray = cleanManifestArray.filter((manifest) => !preExistingIds.includes(manifest["@id"]))
+    if ( cleanManifestArray.length ) {
+      const result = await this.insertMany(cleanManifestArray);
+      result.preExistingIds = preExistingIds;
       result.rejectedIds = invalidManifestArray;
+      return result;
+
+    } else {
+      return toInsertResponse(
+        [],
+        preExistingIds,
+        [],
+        invalidManifestArray
+      );
     }
-    return result;
   }
 
   /**
