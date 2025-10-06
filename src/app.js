@@ -29,9 +29,8 @@ const defaultConfig = {
 const allowedModes = ["test", "default"]
 
 /**
- * @param {FastifyInstanceType} fastify
  * @param {"test"|"default"} mode
- * @returns {import('fastify').FastifyInstance}
+ * @returns {Promise<FastifyInstanceType>}
  */
 async function build(mode="default") {
 

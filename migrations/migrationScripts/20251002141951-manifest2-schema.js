@@ -12,7 +12,7 @@ import build from "#src/app.js"
 export const up = async (db, client) => {
   const
     fastify = await build(),
-    fastifySchema = fastify.schemasPresentation2.getSchema("manifest"),
+    fastifySchema = fastify.schemasPresentation2.getSchema("manifestMongo"),
     schema = fastify.schemasToMongo(fastifySchema),
     commandDoc = {
       collMod: "manifests2",

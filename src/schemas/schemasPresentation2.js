@@ -276,14 +276,45 @@ function addSchemas(fastify, options, done) {
   /////////////////////////////////////////////
   // MANIFESTS
 
-  // internally, manifests are just stored as an @id, a short ID, an array of canvas Ids. we don't need more info.
+  // internal data model for IIIF manifests, containing just what we need.
+  // manifests are just stored as an @id, a short ID, an array of canvas Ids. we don't need more info.
   fastify.addSchema({
-    $id: makeSchemaUri("manifest"),
+    $id: makeSchemaUri("manifestMongo"),
     required: ["@id", "manifestShortId", "canvasIds"],
     properties: {
       "@id": { type: "string" },
       manifestShortId: { type: "string" },
       canvasIds: { type: "array", items: { type: "string" }}
+    }
+  })
+
+  // minimal structure we need to work with a IIIF 2.x manifest.
+  fastify.addSchema({
+    $id: makeSchemaUri("manifestPublic"),
+    type: "object",
+    required: ["@id", "sequences"],
+    properties: {
+      "@id": { type: "string" },
+      sequences: {
+        type: "array",
+        items: {
+          type: "object",
+          required: [ "@id", "canvases" ],
+          properties: {
+            "@id": { type: "string" },
+            canvases: {
+              type: "array",
+              items: {
+                type: "object",
+                required: [ "@id" ],
+                properties: {
+                  "@id": { type: "string" }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   })
 

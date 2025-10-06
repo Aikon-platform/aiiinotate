@@ -31,34 +31,36 @@ class Manifests2 extends CollectionAbstract {
    */
   constructor(fastify) {
     super(fastify, "manifests2");
-
-    this.validatorManifest = ajv.compile({
-      type: "object",
-      required: ["@id", "sequences"],
-      properties: {
-        "@id": { type: "string" },
-        sequences: {
-          type: "array",
-          items: {
-            type: "object",
-            required: [ "@id", "canvases" ],
-            properties: {
-              "@id": { type: "string" },
-              canvases: {
-                type: "array",
-                items: {
-                  type: "object",
-                  required: [ "@id" ],
-                  properties: {
-                    "@id": { type: "string" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
+    this.validatorManifest = ajv.compile(fastify.schemasToMongo(
+      fastify.schemasPresentation2.getSchema("manifestPublic")
+    ));
+    // this.validatorManifest = ajv.compile({
+    //   type: "object",
+    //   required: ["@id", "sequences"],
+    //   properties: {
+    //     "@id": { type: "string" },
+    //     sequences: {
+    //       type: "array",
+    //       items: {
+    //         type: "object",
+    //         required: [ "@id", "canvases" ],
+    //         properties: {
+    //           "@id": { type: "string" },
+    //           canvases: {
+    //             type: "array",
+    //             items: {
+    //               type: "object",
+    //               required: [ "@id" ],
+    //               properties: {
+    //                 "@id": { type: "string" }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // })
   }
 
   /////////////////////////////////////////////

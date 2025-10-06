@@ -73,7 +73,7 @@ class CollectionAbstract {
         : collectionName === "annotations3"
           ? { validator: { /** TODO */ } }
           : collectionName === "manifests2"
-            ? { validator: { $jsonSchema: fastify.schemasPresentation2.getSchema("manifest") } }
+            ? { validator: { $jsonSchema: fastify.schemasPresentation2.getSchema("manifestMongo") } }
           // else: manifets3.
             : { validator: { /** TODO */ }};
 
