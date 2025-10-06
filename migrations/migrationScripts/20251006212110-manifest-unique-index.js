@@ -1,7 +1,7 @@
 /** create a unique index on `manifests2.@id` */
 
 const
-  colName = "manifestss2",
+  colName = "manifests2",
   indexSpec = { "@id": 1 },
   indexOptions = { name: "manifestIdIndex", unique: true };
 
