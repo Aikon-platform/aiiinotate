@@ -13,6 +13,8 @@
 /** @typedef {import("mongodb").DeleteResult} MongoDeleteResultType */
 /** @typedef {import("mongodb").MongoClient} MongoClientType */
 
+/** @typedef {import("ajv").ValidateFunction} AjvValidateFunctionType */
+
 /** @typedef {"uri"|"manifestShortId"|"canvasUri"} DeleteByType */
 
 /** @typedef {2|3} IiifPresentationVersionType */

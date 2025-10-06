@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
+import { ajv, objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -21,6 +21,7 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, can
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 /** @typedef {import("#types").DeleteByType } DeleteByType */
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
+/** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
 
 /** @typedef {Annotations2} Annotations2InstanceType */
 
@@ -48,6 +49,10 @@ class Annotations2 extends CollectionAbstract {
     super(fastify, "annotations2");
     /** @type {Manifests2InstanceType} */
     this.manifestsPlugin = this.fastify.manifests2;
+    /** @type {AjvValidateFunctionType} */
+    this.validatorAnnotationList = ajv.compile(fastify.schemasToMongo(
+      fastify.schemasPresentation2.getSchema("annotationList")
+    ));
   }
 
   ////////////////////////////////////////////////////////////////
@@ -133,11 +138,8 @@ class Annotations2 extends CollectionAbstract {
    * @returns {object[]}
    */
   #cleanAnnotationList(annotationList) {
-    if (
-      annotationList["@type"] !== "sc:AnnotationList"
-      || !objectHasKey(annotationList, "@id")
-      || !Array.isArray(annotationList.resources)
-    ) {
+    // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
+    if ( this.validatorAnnotationList(annotationList) ) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.

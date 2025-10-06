@@ -257,7 +257,7 @@ function addSchemas(fastify, options, done) {
       "@context": { $ref: makeSchemaUri("context") },
       "@type": {
         type: "string",
-        enum: [ "oa:Annotation" ]
+        enum: [ "sc:AnnotationList" ]
       },
       "resources": {
         type: "array",

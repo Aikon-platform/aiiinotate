@@ -15,6 +15,7 @@ import { inspectObj, ajv } from "#utils/utils.js";
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 /** @typedef {import("#types").DeleteByType } DeleteByType */
 /** @typedef {import("#types").ManifestType } ManifestType */
+/** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
 
 /** @typedef {Manifests2} Manifests2InstanceType */
 
@@ -31,36 +32,11 @@ class Manifests2 extends CollectionAbstract {
    */
   constructor(fastify) {
     super(fastify, "manifests2");
+
+    /** @type {AjvValidateFunctionType} */
     this.validatorManifest = ajv.compile(fastify.schemasToMongo(
       fastify.schemasPresentation2.getSchema("manifestPublic")
     ));
-    // this.validatorManifest = ajv.compile({
-    //   type: "object",
-    //   required: ["@id", "sequences"],
-    //   properties: {
-    //     "@id": { type: "string" },
-    //     sequences: {
-    //       type: "array",
-    //       items: {
-    //         type: "object",
-    //         required: [ "@id", "canvases" ],
-    //         properties: {
-    //           "@id": { type: "string" },
-    //           canvases: {
-    //             type: "array",
-    //             items: {
-    //               type: "object",
-    //               required: [ "@id" ],
-    //               properties: {
-    //                 "@id": { type: "string" }
-    //               }
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // })
   }
 
   /////////////////////////////////////////////
