@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
-import { inspectObj } from "#utils/utils.js";
+import { inspectObj, ajv } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -18,6 +18,7 @@ import { inspectObj } from "#utils/utils.js";
 
 /** @typedef {Manifests2} Manifests2InstanceType */
 
+
 /**
  * @class
  * @constructor
@@ -30,29 +31,46 @@ class Manifests2 extends CollectionAbstract {
    */
   constructor(fastify) {
     super(fastify, "manifests2");
+
+    this.validatorManifest = ajv.compile({
+      type: "object",
+      required: ["@id", "sequences"],
+      properties: {
+        "@id": { type: "string" },
+        sequences: {
+          type: "array",
+          items: {
+            type: "object",
+            required: [ "@id", "canvases" ],
+            properties: {
+              "@id": { type: "string" },
+              canvases: {
+                type: "array",
+                items: {
+                  type: "object",
+                  required: [ "@id" ],
+                  properties: {
+                    "@id": { type: "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
   /////////////////////////////////////////////
   // utils
 
   /**
-   * NOTE: this could be done with a JSONSchema IF AND ONLY IF the manifest is sent directly through a fastify route. however, we also fetch manifests referenced in annotations.
+   * NOTE: PERFORMANCE: using AJV validation is MUCH FASTER than doing manual verifications (-25% execution time for the test suite)
    * @param {object} manifest
    * @returns {void}
    */
   #validateManifest(manifest) {
-    if (
-      // manifest-level validation
-      !["@id", "sequences"].every((k) => Object.keys(manifest).includes(k))
-      // canvas-level . all necessary keys go in the first array (["@id"].every(...)).
-      || !["@id"].every((k) =>
-        // sequences is an array, but only the 1st element (default sequence) is embedded in the manifest. non-default sequences are not processed here.
-        manifest.sequences[0].canvases.every((canvas) =>
-          Object.keys(canvas).includes(k)
-        )
-      )
-    ) {
-      // throw
+    if ( !this.validatorManifest(manifest) ) {
       throw this.insertError("validateManifest: invalid manifest structure", manifest);
     }
   }

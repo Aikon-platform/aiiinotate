@@ -14,6 +14,8 @@ test("test 'iiif2Utils' functions", async (t) => {
     fastify = await build("test"),
     { annotations2Valid, annotations2Invalid } = fastify.fileServer;
 
+  await fastify.ready();
+
   t.after(() => fastify.close());
 
   t.test("test 'getManifestShortId'", (t) => {

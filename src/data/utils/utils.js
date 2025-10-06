@@ -1,4 +1,5 @@
 import util from "node:util";
+import Ajv from "ajv";
 
 
 const objectHasKey = (obj, key) =>
@@ -121,6 +122,18 @@ const inspectObj = (obj) =>
 const getRandomItem = (arr) =>
   arr.at(Math.floor(Math.random() * arr.length));
 
+/**
+ * AJV instance to run JsonSchema compilation/validation anywhere in the app
+ * (not just in Fastify routes and at Mongo interactions).
+ * NOTE: this is a workaround since i could not get to access fastify's AJV instance, although fastify uses AJV internally.
+ */
+const ajv = new Ajv({
+  removeAdditional: false,
+  useDefaults: true,
+  coerceTypes: true,
+  allErrors: true
+})
+
 export {
   maybeToArray,
   pathToUrl,
@@ -133,5 +146,6 @@ export {
   getRandomItem,
   arrayEqualsShallow,
   throwIfKeyUndefined,
-  throwIfValueError
+  throwIfValueError,
+  ajv
 }

@@ -13,7 +13,6 @@ import db from "#db/index.js";
 
 const testConfig = {
   fastify: {
-
   },
   mongo: {
     test: true,
@@ -49,6 +48,7 @@ async function build(mode="default") {
   await fastify.register(fileServer);
   fastify.register(schemas);
   fastify.register(data);
+  await fastify.ready();
 
   return fastify
 }
