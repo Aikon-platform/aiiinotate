@@ -2,6 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
+import { inspectObj } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -113,13 +114,34 @@ class Manifests2 extends CollectionAbstract {
 
   /**
    * insert several manifests to database
+   * if `throwOnError===false`, don't raise if there is an error: instead, insert as many documents as possible.
+   * see the docs of `insertManifestsFromUriArray` for more info.
+   *
    * @param {object[]} manifestArray - array of manifests
+   * @returns {Promise<InsertResponseType>}
    */
-  async insertManifestArray(manifestArray) {
-    // TODO: error handling. here, function will return if 1 manifest isn't valid.
-    // which contradicts concurrent insertion behaviour defined in `this.insertManifestsFromUriArray`
-    manifestArray = manifestArray.map((manifest) => this.#validateAndCleanManifest(manifest));
-    return this.insertMany(manifestArray);
+  async insertManifestArray(manifestArray, throwOnError=true) {
+    // build 2 arrays, one of the manifests that pass validation, one of the @ids of the manifests with errors, mapped to an error message.
+    const
+      cleanManifestArray = [],
+      invalidManifestArray = [];
+    manifestArray.map((manifest) => {
+      try {
+        cleanManifestArray.push(this.#validateAndCleanManifest(manifest));
+      } catch (err) {
+        if ( throwOnError ) {
+          throw err;
+        }
+        // returns a mapping of `{manifestId: errorMessage}`
+        invalidManifestArray.push({ [manifest["@id"]]: err.message });
+      }
+    });
+    const result = await this.insertMany(cleanManifestArray);
+    // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
+    if ( !throwOnError ) {
+      result.rejectedIds = invalidManifestArray;
+    }
+    return result;
   }
 
   /**
@@ -137,15 +159,17 @@ class Manifests2 extends CollectionAbstract {
   }
 
   /**
-   * NOTE: this function doesn't throw.
-   * the goal is to offer a uniform interface to insert many manifests with promise concurrency. so, we try to insert everything,
-   * and when it fails on some of the promises, return success objects where there are successes, failures otherwise.
-   * the first use case for this function is to index all manifests related to an array of annotations. given that we reconstruct
+   * from an array of URIs, insert many manifests.
+   *
+   * if `throwOnError===false`, the function will not throw. instead, it will try to insert as much as possible, and the response will give info on the failure cases.
+   * the first use case for this behaviour is to index all manifests related to an array of annotations. given that we reconstruct
    * manifest URIs from canvas URIs manually, there may always be an error. we want to insert a manifest when possible, and return an error othersise.
+   *
    * @param {string[]} manifestUriArray
+   * @param {boolean} throwOnError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertManifestsFromUriArray(manifestUriArray) {
+  async insertManifestsFromUriArray(manifestUriArray, throwOnError=true) {
     // PERFORMANCE: ~2837 ms
     // return Promise.all(
     //   manifestUriArray.map(async (manifestUri) => {
@@ -160,33 +184,25 @@ class Manifests2 extends CollectionAbstract {
 
     // PERFORMANCE ~2850ms
     const
-      fetchErrors = [],
+      fetchErrorIds = [],
       manifestArray = [];
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
           manifestArray.push(await this.#fetchManifestFromUri(manifestUri));
         } catch (err) {
-          console.error(err);
-          fetchErrors.push({ rejectedManifestUri: manifestUri });
+          if ( throwOnError ) {
+            throw err;
+          }
+          fetchErrorIds.push(manifestUri);
         }
       })
     );
-    // TODO: return both `insertedManifestIds` and `fetchErrors`, and homogeneise the insertMany across collections.
-    // TLDR: here, we need to return 1) the inserted IDs, 2) the IDs of the manifests that could not be fetched in `this.#fetchManifest` or validated by `this.validateManifest`.
-    // there should be no need to change the behaviour of `collectionsAbstract.insertMany`, which always succeeds if our validation functions have succeeded.
-    // BUT: i need to be sure that ALL `insertMany` functions work the same accross collections and offer a uniform interface.
-    // (quitte à faire des insertMany différentes par collection).
-    //
-    // la solution pourrait être de découpler les fonctions de validations des fonctions d'insertion: si la validation fail sur 1 item, alors on dit qu'on inserera pas celui là
-    // mais qu'on insèrera les autres. et à la fin on retourne les @id des insertions et des manifestes qui n'ont pas passé la validation.
-
-    // TODO: le reste:
-    // 1) ajouter `canvasIdx` et `manifestUri` aux JsonSchemas.
-    // 2) faire une Unique clause sur `manifests2.@id`, puisque cet @id là n'est pas changé.
-
-    // NOTE: pour le moment, on ne retourne que les @ids des manifestes pour lesquels l'insertion a réussi.
-    const result = await this.insertManifestArray(manifestArray);
+    const result = await this.insertManifestArray(manifestArray, throwOnError);
+    // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
+    if ( !throwOnError ) {
+      result.fetchErrorIds = fetchErrorIds;
+    }
     return result;
   }
 

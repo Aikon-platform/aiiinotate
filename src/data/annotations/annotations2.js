@@ -169,7 +169,7 @@ class Annotations2 extends CollectionAbstract {
     )];
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
-      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris),
+      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, false),
       insertedManifestsIds = insertResponse.insertedIds;
 
     // 3. update annotations with 2 things:
