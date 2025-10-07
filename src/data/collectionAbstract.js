@@ -173,7 +173,6 @@ class CollectionAbstract {
    * @param {import("mongodb").MongoServerError} err: the mongo error
    */
   throwMongoError(operation, err) {
-    console.log(">>>>>>>>>>>>>>>>>", inspectObj(err.errorResponse));
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
   }
 

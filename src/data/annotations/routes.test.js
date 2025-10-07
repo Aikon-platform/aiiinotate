@@ -18,7 +18,7 @@ import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#util
  * @param {FastifyInstanceType} fastify
  * @param {import("node:test")} t
  * @param {object} annotationList
- * @returns {Array<number, Array<string>>}
+ * @returns {Promise<Array<number, Array<string>>>}
  */
 const injectDummyData = async (fastify, t, annotationList) => {
   const
@@ -117,7 +117,7 @@ test("test annotation Routes", async (t) => {
       annotation.label = newLabel;
       annotation.resource = newBody;
       if (!success) {
-        annotation.motivation = { "invalidMotivation": "should be an array or a dict." }
+        annotation["@type"] = "invalidType";
       }
       success
         ? await testPostRouteUpdateSuccess(t, "/annotations/2/update", annotation)

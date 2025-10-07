@@ -149,7 +149,7 @@ class Manifests2 extends CollectionAbstract {
           }},
           { projection: { "@id": 1 } }
         )
-        .toArray(),
+          .toArray(),
       preExistingIds = mongoResponse.map((r) => r["@id"]);
 
     // insert. if there has been an error but error-throwing was disabled, complete the response object with description of the errors
