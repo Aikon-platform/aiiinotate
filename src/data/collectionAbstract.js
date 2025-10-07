@@ -1,5 +1,5 @@
 import { maybeToArray, inspectObj } from "#utils/utils.js"
-import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#utils/responseUtils.js";
+import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#src/data/utils/routeUtils.js";
 
 /** @typedef {import("#types").MongoDbType} MongoDbType */
 /** @typedef {import("#types").MongoClientType} MongoClientType */

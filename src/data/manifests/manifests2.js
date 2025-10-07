@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
-import { toInsertResponse } from "#utils/responseUtils.js";
+import { toInsertResponse } from "#src/data/utils/routeUtils.js";
 import { inspectObj, ajv } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -196,18 +196,6 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertManifestsFromUriArray(manifestUriArray, throwOnError=true) {
-    // PERFORMANCE: ~2837 ms
-    // return Promise.all(
-    //   manifestUriArray.map(async (manifestUri) => {
-    //     try {
-    //       return await this.insertManifestFromUri(manifestUri)
-    //     } catch (err) {
-    //       console.error(err);
-    //       return { rejectedManifestUri: manifestUri }
-    //     }
-    //   })
-    // )
-
     // PERFORMANCE ~2850ms
     const
       fetchErrorIds = [],

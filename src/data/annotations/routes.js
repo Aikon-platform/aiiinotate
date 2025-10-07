@@ -1,6 +1,8 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#utils/utils.js";
+import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
+
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -39,31 +41,6 @@ const validateAnnotationArrayVersion = (iiifPresentationVersion, annotationArray
   annotationArray.map(annotationData => validateAnnotationVersion(iiifPresentationVersion, annotationData, true));
 
 /**
- *
- * @param {import("fastify").FastifyRequest} request
- * @param {import("fastify").FastifyReply} reply
- * @param {Error} err: the error we're returning
- * @param {any?} data: the data on which the error occurred, for POST requests
- */
-const returnError = (request, reply, err, data) => {
-  console.error(err);
-
-  const error = {
-    message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
-    info: err.info || {},
-    method: request.method,
-    url: request.url
-  };
-  if ( data !== undefined ) {
-    error.postBody = data
-  }
-  reply
-    .status(500)
-    .header("Content-Type", "application/json; charset=utf-8")
-    .send(error);
-}
-
-/**
  * @param {import("#types").InsertResponseArrayType} insertResponseArray
  * @returns {import("#types").InsertResponseType}
  */
@@ -78,7 +55,7 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
  * @param {FastifyInstanceType} fastify  Encapsulated Fastify Instance
  * @param {Object} options plugin options, refer to https://fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
-async function annotationsRoutes(fastify, options) {
+function annotationsRoutes(fastify, options, done) {
   const
     annotations2 = fastify.annotations2,
     annotations3 = fastify.annotations3,
@@ -86,21 +63,8 @@ async function annotationsRoutes(fastify, options) {
     routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
-    iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray");
-
-  //NOTE: fastify only implements top-level `$ref` in responses, so doing `anyOf: [ { $ref: ... } ]` is not allowed.
-  // in turn, we can't use `{ $ref: makeSchemaUri }` and must resolve schemas instead.
-  const responsePostSchema = {
-    200: {
-      // type: "object",
-      anyOf: [
-        fastify.schemasRoutes.getSchema("routeResponseInsert"),
-        fastify.schemasRoutes.getSchema("routeResponseUpdate"),
-        fastify.schemasRoutes.getSchema("routeResponseDelete"),
-      ]
-    },
-    500: fastify.schemasRoutes.getSchema("routeResponseError")
-  };
+    iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
+    responsePostSchema = makeResponsePostSchena(fastify);
 
   /////////////////////////////////////////////////////////
   // get routes
@@ -316,6 +280,7 @@ async function annotationsRoutes(fastify, options) {
     }
   )
 
+  done();
 
 }
 

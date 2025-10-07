@@ -5,6 +5,7 @@ import Annotations3 from "#annotations/annotations3.js";
 import Manifests2 from "#manifests/manifests2.js";
 import Manifests3 from "#manifests/manifests3.js";
 import annotationsRoutes from "#annotations/routes.js";
+import manifestsRoutes from "#manifests/routes.js";
 import commonRoutes from "#data/routes.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -19,8 +20,9 @@ function data(fastify, options, done) {
   fastify.register(Manifests3);
   fastify.register(Annotations2);
   fastify.register(Annotations3);
-  fastify.register(commonRoutes, { });
-  fastify.register(annotationsRoutes, { });
+  fastify.register(commonRoutes);
+  fastify.register(annotationsRoutes);
+  fastify.register(manifestsRoutes);
 
   done();
 }

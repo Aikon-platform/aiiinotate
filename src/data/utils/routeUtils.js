@@ -67,9 +67,52 @@ const toInsertResponse = (insertedIds, preExistingIds, fetchErrorIds, rejectedId
   return out;
 }
 
+/**
+ * NOTE: fastify only implements top-level `$ref` in responses, so doing `anyOf: [ { $ref: ... } ]` is not allowed.
+ * in turn, we can't use `{ $ref: makeSchemaUri }` and must resolve schemas instead.
+ */
+const makeResponsePostSchena = (fastify) => ({
+  200: {
+    // type: "object",
+    anyOf: [
+      fastify.schemasRoutes.getSchema("routeResponseInsert"),
+      fastify.schemasRoutes.getSchema("routeResponseUpdate"),
+      fastify.schemasRoutes.getSchema("routeResponseDelete"),
+    ]
+  },
+  500: fastify.schemasRoutes.getSchema("routeResponseError")
+});
+
+/**
+ *
+ * @param {import("fastify").FastifyRequest} request
+ * @param {import("fastify").FastifyReply} reply
+ * @param {Error} err: the error we're returning
+ * @param {any?} data: the data on which the error occurred, for POST requests
+ */
+const returnError = (request, reply, err, data) => {
+  console.error(err);
+
+  const error = {
+    message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
+    info: err.info || {},
+    method: request.method,
+    url: request.url
+  };
+  if ( data !== undefined ) {
+    error.postBody = data
+  }
+  reply
+    .status(500)
+    .header("Content-Type", "application/json; charset=utf-8")
+    .send(error);
+}
+
 export {
   formatInsertResponse,
   formatUpdateResponse,
   formatDeleteResponse,
-  toInsertResponse
+  toInsertResponse,
+  makeResponsePostSchena,
+  returnError
 }
