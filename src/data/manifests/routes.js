@@ -4,12 +4,18 @@ import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
 import { objectHasKey } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
+/** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
 
 function manifestsRoutes(fastify, options, done) {
   const
+    /** @type {Manifests2InstanceType} */
     manifests2 = fastify.manifests2,
+    /** @type {Manifests3InstanceType} */
     manifests3 = fastify.manifests3,
+    /** @type {object} */
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
+    /** @type {object} */
     responsePostSchema = makeResponsePostSchena(fastify);
 
   fastify.post(

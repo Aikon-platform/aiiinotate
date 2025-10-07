@@ -12,7 +12,9 @@ test("test manifests Routes", async (t) => {
     testPostRouteCreateFailure = testPostRouteCreate(false),
     {
       manifest2Valid,
-      manifest2Invalid
+      manifest2Invalid,
+      manifest2ValidUri,
+      manifest2InvalidUri,
     } = fastify.fileServer;
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
@@ -27,17 +29,22 @@ test("test manifests Routes", async (t) => {
   t.after(async () => await fastify.close());
 
   // after each subtest has run, delete all database records
-  t.afterEach(async() => fastify.emptyCollections());
+  t.afterEach(async() => await fastify.emptyCollections());
 
 
   await t.test("test route /manifests/:iiifPresentationVersion/create", async (t) => {
     const data = [
-      [manifest2Valid, testPostRouteCreateSuccess],
-      [manifest2Invalid, testPostRouteCreateFailure],
+      [ [manifest2Valid, manifest2ValidUri], testPostRouteCreateSuccess ],
+      [ [manifest2Invalid, manifest2InvalidUri], testPostRouteCreateFailure ]
     ]
     for ( let i=0; i<data.length; i++ ) {
-      let [ testData, func ] = data.at(i);
-      await func(t, "manifests/2/create", testData);
+      const [ testData, func ] = data.at(i);
+      for ( let j=0; j<testData.length; j++ ) {
+        const payload = testData.at(j);
+        await func(t, "/manifests/2/create", payload);
+        // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a validation error.
+        await fastify.emptyCollections();
+      }
     }
   })
 

@@ -2,6 +2,11 @@ import util from "node:util";
 import Ajv from "ajv";
 
 
+/**
+ * @param {object} obj
+ * @param {string} key
+ * @returns {boolean}
+ */
 const objectHasKey = (obj, key) =>
   Object.keys(obj).includes(key);
 
