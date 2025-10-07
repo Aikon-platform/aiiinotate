@@ -223,6 +223,26 @@ class Manifests2 extends CollectionAbstract {
   /////////////////////////////////////////////
   // delete
 
+  /**
+   *
+   * @param {"manifestShortId"|"uri"} deleteBy
+   * @param {string} deleteId
+   * @returns {Promise<DeleteResponseType>}
+   */
+  async deleteManifest(deleteBy, deleteId) {
+    const allowedDeleteBy = ["uri", "manifestShortId"];
+    if ( !allowedDeleteBy.includes(deleteBy) ) {
+      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteBy}, got '${deleteBy}'`);
+    }
+
+    const deleteFilter =
+      deleteBy==="uri"
+        ? { "@id": deleteId }
+        : { manifestShortId: deleteId };
+
+    return this.delete(deleteFilter);
+  }
+
 
   /////////////////////////////////////////////
   // read

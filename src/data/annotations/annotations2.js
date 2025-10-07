@@ -244,7 +244,8 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * @param {string} deleteId
-   * @param {Promise<DeleteByType>} deleteBy
+   * @param {DeleteByType} deleteBy
+   * @returns {Promise<DeleteResponseType>}
    */
   async deleteAnnotations(deleteId, deleteBy) {
 
