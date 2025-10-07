@@ -87,33 +87,28 @@ test("test annotation Routes", async (t) => {
     //     await testPostRouteCreateFailure(t, "/annotations/2/createMany", payload)
     //   )
     // )
+    const data = [
+      [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
+      [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
+    ];
+    for ( let i=0; i<data.length; i++ ) {
+      let [ testData, func ] = data.at(i);
+      for ( let i=0; i<testData.length; i++ ) {
+        await func(t, "/annotations/2/createMany", testData.at(i));
+      }
+    }
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
-    // inserts that shouldn't raise
-    // await Promise.all(
-    //   fastify.fileServer.annotations2Valid.map(async (payload) =>
-    //     await testPostRouteCreateSuccess(t, "/annotations/2/create", payload)
-    //   )
-    // )
-    // // inserts that should raise
-    // await Promise.all(
-    //   fastify.fileServer.annotations2Invalid.map(async (payload) =>
-    //     await testPostRouteCreateFailure(t, "/annotations/2/create", payload)
-    //   )
-    // )
+    //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     const data = [
-      [fastify.fileServer.annotations2Valid, true],
-      [fastify.fileServer.annotations2Invalid, false],
+      [fastify.fileServer.annotations2Valid, testPostRouteCreateSuccess],
+      [fastify.fileServer.annotations2Invalid, testPostRouteCreateFailure],
     ]
     for ( let i=0; i<data.length; i++ ) {
-      let [ annotationsArray, expectSuccess ] = data.at(i);
-      console.log(expectSuccess, annotationsArray);
-      for ( let i=0; i<annotationsArray.length; i++ ) {
-        let
-          payload = annotationsArray.at(i),
-          func = expectSuccess ? testPostRouteCreateSuccess : testPostRouteCreateFailure;
-        await func(t, "/annotations/2/create", payload);
+      let [ testData, func ] = data.at(i);
+      for ( let i=0; i<testData.length; i++ ) {
+        await func(t, "/annotations/2/create", testData.at(i));
       }
     };
   })
