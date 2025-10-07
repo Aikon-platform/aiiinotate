@@ -31,18 +31,17 @@ test("test manifests Routes", async (t) => {
   // after each subtest has run, delete all database records
   t.afterEach(async() => await fastify.emptyCollections());
 
-
   await t.test("test route /manifests/:iiifPresentationVersion/create", async (t) => {
     const data = [
       [ [manifest2Valid, manifest2ValidUri], testPostRouteCreateSuccess ],
       [ [manifest2Invalid, manifest2InvalidUri], testPostRouteCreateFailure ]
-    ]
+    ];
     for ( let i=0; i<data.length; i++ ) {
       const [ testData, func ] = data.at(i);
       for ( let j=0; j<testData.length; j++ ) {
         const payload = testData.at(j);
         await func(t, "/manifests/2/create", payload);
-        // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a validation error.
+        // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a JSONSchema validation error.
         await fastify.emptyCollections();
       }
     }

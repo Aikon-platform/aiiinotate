@@ -57,6 +57,25 @@ const getHash = (str, seed=0) => {
 };
 
 /**
+ * `obj` is an object of form `{ key1: val1, key2: val2, key3: val3 }`, where only a single key-value pair can be defined at the same time.
+ * return the only key-value pair that is not undefined.
+ *
+ * use case: in a route's querystring, there may be different options that are mutually exclusive (defined using JSONschema oneOf). in that case, return the only key-value pair that is not undefined.
+ * see: src/data/annotations2: '/annotations/:iiifPresentationVersion/delete'
+ *
+ * @param {Array<object>} obj
+ * @returns {Array<string, any>?}
+ */
+const getFirstNonEmptyPair = (obj) => {
+  let [ key,val ] = [ undefined, undefined ];
+  [ key, val ] = Object.entries(obj).find(([k,v]) => v != null);
+  if ( key!== undefined && val!==undefined ) {
+    return [key, val];
+  }
+  return undefined;
+}
+
+/**
  * if obj[typeKey] !== expectedTypeVal, throw
  * @param {object} obj
  * @param {2|3} iiifPresentationVersion
@@ -147,6 +166,7 @@ export {
   isObject,
   objectHasKey,
   addKeyValueToObjIfHasKey,
+  getFirstNonEmptyPair,
   inspectObj,
   getRandomItem,
   arrayEqualsShallow,

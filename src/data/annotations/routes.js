@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError } from "#utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair } from "#utils/utils.js";
 import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
 
 
@@ -265,12 +265,11 @@ function annotationsRoutes(fastify, options, done) {
       const
         { iiifPresentationVersion } = request.params,
         // 'deleteBy' is the type of id ("uri|manifestShortId|canvasUri"), `deleteId` is the id to use for deletion.
-        [ deleteBy, deleteId ] = Object.entries(request.query).find(([k,v]) => v != null);
+        [ deleteBy, deleteId ] = getFirstNonEmptyPair(request.query);// Object.entries(request.query).find(([k,v]) => v != null);
 
       try {
         if ( iiifPresentationVersion === 2 ) {
-          const r = await annotations2.deleteAnnotations(deleteId, deleteBy);
-          return await r;
+          return await annotations2.deleteAnnotations(deleteId, deleteBy);
         } else {
           annotations3.notImplementedError();
         }
