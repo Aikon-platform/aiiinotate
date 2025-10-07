@@ -5,7 +5,7 @@ import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
 
 import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
-import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectPost, assertDeleteValidResponse } from "#utils/testUtils.js";
 
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -16,7 +16,7 @@ import { testPostRouteCurry, injectPost, assertDeleteValidResponse } from "#util
 /**
  * inject an annotationList into the database for test purposes
  * @param {FastifyInstanceType} fastify
- * @param {import("node:test")} t
+ * @param {NodeTestType} t
  * @param {object} annotationList
  * @returns {Promise<Array<number, Array<string>>>}
  */
@@ -38,6 +38,7 @@ test("test annotation Routes", async (t) => {
     testPostRoute = testPostRouteCurry(fastify),
     testPostRouteCreate = testPostRoute("insert"),
     testPostRouteUpdate = testPostRoute("update"),
+    testDeleteRoute = testDeleteRouteCurry(fastify),
     testPostRouteCreateSuccess = testPostRouteCreate(true),
     testPostRouteCreateFailure = testPostRouteCreate(false),
     testPostRouteUpdateSuccess = testPostRouteUpdate(true),
@@ -169,13 +170,7 @@ test("test annotation Routes", async (t) => {
                         : annotations.filter((a) => a.on.manifestShortId===deleteKey).length
                     : 0;
 
-              const r = await fastify.inject({
-                method: "DELETE",
-                url: `/annotations/2/delete?${deleteBy}=${deleteKey}`
-              })
-
-              assertDeleteValidResponse(t, r);
-              t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
+              await testDeleteRoute(t, `/annotations/2/delete?${deleteBy}=${deleteKey}`, expectedDeletedCount);
             })
         )
       );

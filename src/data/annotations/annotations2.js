@@ -19,7 +19,7 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, can
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
-/** @typedef {import("#types").DeleteByType } DeleteByType */
+/** @typedef {import("#types").AnnotationsDeleteByType } AnnotationsDeleteByType */
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
 
@@ -243,8 +243,8 @@ class Annotations2 extends CollectionAbstract {
   // delete
 
   /**
-   * @param {string} deleteId
-   * @param {DeleteByType} deleteBy
+   * @param {string} deleteId - deletion key
+   * @param {AnnotationsDeleteByType} deleteBy - what deleteId describes: an annotation's '@id', a manifest's URI...
    * @returns {Promise<DeleteResponseType>}
    */
   async deleteAnnotations(deleteId, deleteBy) {

@@ -1,7 +1,24 @@
 import test from "node:test";
 
 import build from "#src/app.js";
-import { testPostRouteCurry, injectPost } from "#utils/testUtils.js";
+import { getManifestShortId } from "#utils/iiif2Utils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectPost } from "#utils/testUtils.js";
+
+
+/**
+ * inject a manifest into the database for test purposes
+ * @param {FastifyInstanceType} fastify
+ * @param {NodeTestType} t
+ * @param {object} data - the manifest to insert
+ * @returns {Promise<Array<number, Array<string>>>}
+ */
+const injectDummyData = async (fastify, t, data) => {
+  const
+    r = await injectPost(fastify, "/manifests/2/create", data),
+    { insertedCount, insertedIds } = JSON.parse(r.body);
+  t.assert.deepStrictEqual(insertedCount, 1);
+  return [ insertedCount, insertedIds ];
+}
 
 test("test manifests Routes", async (t) => {
   const
@@ -10,6 +27,7 @@ test("test manifests Routes", async (t) => {
     testPostRouteCreate = testPostRoute("insert"),
     testPostRouteCreateSuccess = testPostRouteCreate(true),
     testPostRouteCreateFailure = testPostRouteCreate(false),
+    testDeleteRoute = testDeleteRouteCurry(fastify),
     {
       manifest2Valid,
       manifest2Invalid,
@@ -44,6 +62,22 @@ test("test manifests Routes", async (t) => {
         // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a JSONSchema validation error.
         await fastify.emptyCollections();
       }
+    }
+  })
+
+  await t.test("test route /manifests/:iiifPresentationVersion/delete", async (t) => {
+    const
+      manifest = manifest2Valid,
+      deleteQuery = [
+        [ "uri", manifest["@id"] ],
+        [ "manifestShortId", getManifestShortId(manifest["@id"]) ]
+      ]
+
+    for ( let i=0; i<deleteQuery.length; i++ ) {
+      const [deleteBy, deleteKey] = deleteQuery.at(i);
+      await injectDummyData(fastify, t, manifest);
+      await testDeleteRoute(t, `/manifests/2/delete?${deleteBy}=${deleteKey}`, 1);
+      await fastify.emptyCollections();
     }
   })
 

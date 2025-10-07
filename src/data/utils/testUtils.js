@@ -161,6 +161,23 @@ const testPostRouteCurry = (fastify) =>
         return;
       }
 
+const testDeleteRouteCurry =
+  /** @param {FastifyInstanceType} */
+  (fastify) =>
+      /**
+       * @param {NodeTestType} t
+       * @param {string} deleteRoute - route to delete data, with delete parameters embedded
+       * @param {number} expectedDeletedCount - number of documents that should be deleted
+       */
+      async (t, deleteRoute, expectedDeletedCount) => {
+        const r = await fastify.inject({
+          method: "DELETE",
+          url: deleteRoute
+        })
+        assertDeleteValidResponse(t, r);
+        t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
+      }
+
 
 export {
   assertObjectKeys,
@@ -175,6 +192,7 @@ export {
   assertCreateValidResponse,
   assertUpdateValidResponse,
   assertDeleteValidResponse,
-  testPostRouteCurry
+  testPostRouteCurry,
+  testDeleteRouteCurry
 }
 

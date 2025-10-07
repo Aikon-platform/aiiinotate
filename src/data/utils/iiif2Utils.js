@@ -18,7 +18,7 @@ import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUti
 // Content 	                 {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
 /**
- * extract a manifest's short ID from an URI (not just a IIIF uri).
+ * extract a manifest's short ID from a IIIF URI.
  * NOTE if the `iiifUri` doesn' follow IIIF 2.x  recommendations, the quality of geneated IDs is really degraded : 2 canvases URI from the same manifest will generate a different hash.
  * inspired by : https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/data/Manifest.java#L123C16-L123C26
  * @param {string} iiifUri
