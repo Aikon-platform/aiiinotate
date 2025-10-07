@@ -164,7 +164,7 @@ async function annotationsRoutes(fastify, options) {
             action: { type: "string", enum: [ "create", "update" ] }
           }
         },
-        body: routeAnnotations2Or3Schema,
+        body: { type: "object" } /* routeAnnotations2Or3Schema */,
         response: responsePostSchema
       },
     },

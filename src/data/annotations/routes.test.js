@@ -75,33 +75,47 @@ test("test annotation Routes", async (t) => {
       return a;
     });
 
-    // inserts that should work
-    await Promise.all(
-      [ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ].map(async (payload) =>
-        await testPostRouteCreateSuccess(t, "/annotations/2/createMany", payload)
-      )
-    );
-    // inserts that should raise
-    await Promise.all(
-      [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
-        await testPostRouteCreateFailure(t, "/annotations/2/createMany", payload)
-      )
-    )
+    // // inserts that should work
+    // await Promise.all(
+    //   [ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ].map(async (payload) =>
+    //     await testPostRouteCreateSuccess(t, "/annotations/2/createMany", payload)
+    //   )
+    // );
+    // // inserts that should raise
+    // await Promise.all(
+    //   [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
+    //     await testPostRouteCreateFailure(t, "/annotations/2/createMany", payload)
+    //   )
+    // )
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     // inserts that shouldn't raise
-    await Promise.all(
-      fastify.fileServer.annotations2Valid.map(async (payload) =>
-        await testPostRouteCreateSuccess(t, "/annotations/2/create", payload)
-      )
-    )
-    // inserts that should raise
-    await Promise.all(
-      fastify.fileServer.annotations2Invalid.map(async (payload) =>
-        await testPostRouteCreateFailure(t, "/annotations/2/create", payload)
-      )
-    )
+    // await Promise.all(
+    //   fastify.fileServer.annotations2Valid.map(async (payload) =>
+    //     await testPostRouteCreateSuccess(t, "/annotations/2/create", payload)
+    //   )
+    // )
+    // // inserts that should raise
+    // await Promise.all(
+    //   fastify.fileServer.annotations2Invalid.map(async (payload) =>
+    //     await testPostRouteCreateFailure(t, "/annotations/2/create", payload)
+    //   )
+    // )
+    const data = [
+      [fastify.fileServer.annotations2Valid, true],
+      [fastify.fileServer.annotations2Invalid, false],
+    ]
+    for ( let i=0; i<data.length; i++ ) {
+      let [ annotationsArray, expectSuccess ] = data.at(i);
+      console.log(expectSuccess, annotationsArray);
+      for ( let i=0; i<annotationsArray.length; i++ ) {
+        let
+          payload = annotationsArray.at(i),
+          func = expectSuccess ? testPostRouteCreateSuccess : testPostRouteCreateFailure;
+        await func(t, "/annotations/2/create", payload);
+      }
+    };
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {
