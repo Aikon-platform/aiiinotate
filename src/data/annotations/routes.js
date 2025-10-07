@@ -5,6 +5,8 @@ import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").Annotations2InstanceType} Annotations2InstanceType */
+/** @typedef {import("#types").Annotations3InstanceType} Annotations3InstanceType */
 
 /**
  * validate an annotation, annotationPage or annotationList: that is, ensure it fits the IIIF presentation API
@@ -57,7 +59,9 @@ const reduceInsertResponseArray = (insertResponseArray) => ({
  */
 function annotationsRoutes(fastify, options, done) {
   const
+    /** @type {Annotations2InstanceType} */
     annotations2 = fastify.annotations2,
+    /** @type {Annotations3InstanceType} */
     annotations3 = fastify.annotations3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
@@ -265,11 +269,11 @@ function annotationsRoutes(fastify, options, done) {
       const
         { iiifPresentationVersion } = request.params,
         // 'deleteBy' is the type of id ("uri|manifestShortId|canvasUri"), `deleteId` is the id to use for deletion.
-        [ deleteBy, deleteId ] = getFirstNonEmptyPair(request.query);// Object.entries(request.query).find(([k,v]) => v != null);
+        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);// Object.entries(request.query).find(([k,v]) => v != null);
 
       try {
         if ( iiifPresentationVersion === 2 ) {
-          return await annotations2.deleteAnnotations(deleteId, deleteBy);
+          return await annotations2.deleteAnnotations(deleteKey, deleteVal);
         } else {
           annotations3.notImplementedError();
         }

@@ -19,7 +19,7 @@ import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, can
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
-/** @typedef {import("#types").AnnotationsDeleteByType } AnnotationsDeleteByType */
+/** @typedef {import("#types").AnnotationsDeleteKeyType } AnnotationsDeleteKeyType */
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
 
@@ -243,23 +243,23 @@ class Annotations2 extends CollectionAbstract {
   // delete
 
   /**
-   * @param {string} deleteId - deletion key
-   * @param {AnnotationsDeleteByType} deleteBy - what deleteId describes: an annotation's '@id', a manifest's URI...
+   * @param {AnnotationsDeleteKeyType} deleteKey - what deleteVal describes: an annotation's '@id', a manifest's URI...
+   * @param {string} deleteVal - deletion key
    * @returns {Promise<DeleteResponseType>}
    */
-  async deleteAnnotations(deleteId, deleteBy) {
+  async deleteAnnotations(deleteKey, deleteVal) {
 
-    const allowedDeleteBy = [ "uri", "manifestShortId", "canvasUri" ];
-    if ( !allowedDeleteBy.includes(deleteBy) ) {
-      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteBy} for param 'deleteBy', got '${deleteBy}'`)
+    const allowedDeleteKey = [ "uri", "manifestShortId", "canvasUri" ];
+    if ( !allowedDeleteKey.includes(deleteKey) ) {
+      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteKey} for param 'deleteKey', got '${deleteKey}'`)
     }
 
     const deleteFilter =
-      deleteBy==="uri"
-        ? { "@id": deleteId }
-        : deleteBy==="canvasUri"
-          ? { "on.full": deleteId }
-          : { "on.manifestShortId": deleteId };
+      deleteKey==="uri"
+        ? { "@id": deleteVal }
+        : deleteKey==="canvasUri"
+          ? { "on.full": deleteVal }
+          : { "on.manifestShortId": deleteVal };
 
     return this.delete(deleteFilter);
   }

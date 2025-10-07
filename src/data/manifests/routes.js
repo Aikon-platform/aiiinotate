@@ -89,11 +89,11 @@ function manifestsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
-        [ deleteBy, deleteId ] = getFirstNonEmptyPair(request.query);
+        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
 
       try {
         return iiifPresentationVersion === 2
-          ? await manifests2.deleteManifest(deleteId, deleteBy)
+          ? await manifests2.deleteManifest(deleteKey, deleteVal)
           : manifests3.notImplementedError();
       } catch (err) {
         returnError(request, reply, err, request.body);

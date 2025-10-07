@@ -14,7 +14,7 @@ import { inspectObj, ajv } from "#utils/utils.js";
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
-/** @typedef {import("#types").AnnotationsDeleteByType } AnnotationsDeleteByType */
+/** @typedef {import("#types").AnnotationsDeleteKeyType } AnnotationsDeleteKeyType */
 /** @typedef {import("#types").ManifestType } ManifestType */
 /** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
 
@@ -224,20 +224,20 @@ class Manifests2 extends CollectionAbstract {
   // delete
 
   /**
-   * @param {string} deleteId - deletion key
-   * @param {"manifestShortId"|"uri"} deleteBy = what deleteId describes: a manifest URI or its short ID
+   * @param {"manifestShortId"|"uri"} deleteKey = what deleteId describes: a manifest URI or its short ID
+   * @param {string} deleteVal - data to delete
    * @returns {Promise<DeleteResponseType>}
    */
-  async deleteManifest(deleteId, deleteBy) {
-    const allowedDeleteBy = ["uri", "manifestShortId"];
-    if ( !allowedDeleteBy.includes(deleteBy) ) {
-      throw this.deleteError(`${this.funcName(this.deleteManifest)}: expected one of ${allowedDeleteBy}, got '${deleteBy}'`);
+  async deleteManifest(deleteKey, deleteVal) {
+    const allowedDeleteKey = ["uri", "manifestShortId"];
+    if ( !allowedDeleteKey.includes(deleteKey) ) {
+      throw this.deleteError(`${this.funcName(this.deleteManifest)}: expected one of ${allowedDeleteKey}, got '${deleteKey}'`);
     }
 
     const deleteFilter =
-      deleteBy==="uri"
-        ? { "@id": deleteId }
-        : { manifestShortId: deleteId };
+      deleteKey==="uri"
+        ? { "@id": deleteVal }
+        : { manifestShortId: deleteVal };
 
     return this.delete(deleteFilter);
   }

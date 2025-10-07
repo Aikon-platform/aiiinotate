@@ -15,7 +15,7 @@
 
 /** @typedef {import("ajv").ValidateFunction} AjvValidateFunctionType */
 
-/** @typedef {"uri"|"manifestShortId"|"canvasUri"} AnnotationsDeleteByType */
+/** @typedef {"uri"|"manifestShortId"|"canvasUri"} AnnotationsDeleteKeyType */
 
 /** @typedef {2|3} IiifPresentationVersionType */
 /** @typedef {"manifests2"|"manifests3"|"annotations2"|"annotations3"} CollectionNamesType */
