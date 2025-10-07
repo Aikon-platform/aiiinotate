@@ -75,18 +75,7 @@ test("test annotation Routes", async (t) => {
       return a;
     });
 
-    // // inserts that should work
-    // await Promise.all(
-    //   [ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ].map(async (payload) =>
-    //     await testPostRouteCreateSuccess(t, "/annotations/2/createMany", payload)
-    //   )
-    // );
-    // // inserts that should raise
-    // await Promise.all(
-    //   [ annotationListUriInvalid, annotationListUriArrayInvalid ].map(async (payload) =>
-    //     await testPostRouteCreateFailure(t, "/annotations/2/createMany", payload)
-    //   )
-    // )
+    //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     const data = [
       [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
       [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
