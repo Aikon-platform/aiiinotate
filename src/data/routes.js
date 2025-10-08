@@ -1,13 +1,39 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl } from "#utils/utils.js";
+import { pathToUrl, ajv, inspectObj, getFirstNonEmptyPair } from "#utils/utils.js";
+import { returnError, makeResponsePostSchena } from "#utils/routeUtils.js";
 
-async function commonRoutes(fastify) {
+/** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
+/** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
+/** @typedef {import("#types").Annotations2InstanceType} Annotations2InstanceType */
+/** @typedef {import("#types").Annotations3InstanceType} Annotations3InstanceType */
+
+/**
+ * @param {FastifyInstanceType} fastify
+ * @param {object} options
+ * @param {Function} done
+ */
+function commonRoutes(fastify, options, done) {
   const
+    /** @type {Annotations2InstanceType} */
     annotations2 = fastify.annotations2,
+    /** @type {Annotations3InstanceType} */
     annotations3 = fastify.annotations3,
-    iiifSearchApiVersion = fastify.schemasBase.getSchema("search"),
-    iiifAnnotationList = fastify.schemasPresentation2.getSchema("annotationList");
+    /** @type {Manifests2InstanceType} */
+    manifests2 = fastify.manifests2,
+    /** @type {Manifests3InstanceType} */
+    manifests3 = fastify.manifests3,
+
+    iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
+    iiifSearchApiVersionSchema = fastify.schemasBase.getSchema("search"),
+    iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
+    routeAnnotationDeleteSchema = fastify.schemasRoutes.getSchema("routeAnnotationDelete"),
+    routeManifestDeleteSchema = fastify.schemasRoutes.getSchema("routeManifestDelete"),
+    routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
+    responsePostSchema = makeResponsePostSchena(fastify),
+
+    validatorRouteAnnotationDeleteSchema = ajv.compile(routeAnnotationDeleteSchema),
+    validatorRouteManifestDeleteSchema = ajv.compile(routeManifestDeleteSchema);
 
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
@@ -16,7 +42,7 @@ async function commonRoutes(fastify) {
         params: {
           type: "object",
           properties: {
-            iiifSearchVersion: iiifSearchApiVersion,
+            iiifSearchVersion: iiifSearchApiVersionSchema,
             manifestShortId: { type: "string" },
           },
         },
@@ -31,7 +57,7 @@ async function commonRoutes(fastify) {
           }
         },
         response: {
-          200: iiifAnnotationList
+          200: iiifAnnotationListSchema
         }
       }
     },
@@ -47,8 +73,67 @@ async function commonRoutes(fastify) {
         annotations3.notImplementedError();
       }
     }
+  );
+
+  fastify.delete(
+    "/:collectionName/:iiifPresentationVersion/delete",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            collectionName: { type: "string", enum: [ "annotations", "manifests" ] },
+            iiifPresentationVersion: iiifPresentationVersionSchema
+          }
+        },
+        queryString: routeDeleteSchema,
+        response: responsePostSchema,
+      },
+      // preHandler: (request, reply, done) => {
+      //   // implement a custom validation hook: depending on the value of `collectionName`, run different schema validations.
+      //   const
+      //     { collectionName } = request.params,
+      //     query = request.query,
+      //     validator =
+      //       collectionName==="annotations"
+      //         ? validatorRouteAnnotationDeleteSchema
+      //         : validatorRouteManifestDeleteSchema,
+      //     error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
+      //
+      //   console.log("_".repeat(100));
+      //   console.log("collectionName", collectionName);
+      //   console.log("query", query);
+      //   console.log("_".repeat(100));
+      //
+      //   if ( !validator(query) ) {
+      //     reply.code(400).send(returnError(request, reply, error));
+      //   }
+      //   done();
+      // }
+    },
+    async (request, reply) => {
+      const
+        { collectionName, iiifPresentationVersion } = request.params,
+        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
+
+      try {
+        if ( collectionName==="annotations" ) {
+          return iiifPresentationVersion === 2
+            ? await annotations2.deleteAnnotations(deleteKey, deleteVal)
+            : annotations3.notImplementedError();
+        } else {
+          return iiifPresentationVersion === 2
+            ? await manifests2.deleteManifest(deleteKey, deleteVal)
+            : manifests3.notImplementedError();
+        }
+      } catch (err) {
+        returnError(request, reply, err, request.body);
+      }
+
+    }
   )
 
+  done();
 }
 
 export default fastifyPlugin(commonRoutes);

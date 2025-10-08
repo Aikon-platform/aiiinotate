@@ -228,6 +228,7 @@ class Manifests2 extends CollectionAbstract {
    * @param {string} deleteVal - data to delete
    * @returns {Promise<DeleteResponseType>}
    */
+  // NOTE: could be refactored with `annotations2.delete`: both functions are the same, only the filter changes
   async deleteManifest(deleteKey, deleteVal) {
     const allowedDeleteKey = ["uri", "manifestShortId"];
     if ( !allowedDeleteKey.includes(deleteKey) ) {

@@ -7,6 +7,11 @@ import { objectHasKey, getFirstNonEmptyPair } from "#utils/utils.js";
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
 
+/**
+ * @param {FastifyInstanceType} fastify
+ * @param {object} options
+ * @param {Function} done
+ */
 function manifestsRoutes(fastify, options, done) {
   const
     /** @type {Manifests2InstanceType} */
@@ -16,7 +21,8 @@ function manifestsRoutes(fastify, options, done) {
     /** @type {object} */
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     /** @type {object} */
-    responsePostSchema = makeResponsePostSchena(fastify);
+    responsePostSchema = makeResponsePostSchena(fastify),
+    routeManifestDeleteSchema = fastify.schemasRoutes.getSchema("routeManifestDelete");
 
   ///////////////////////////////////////////////
   // insert routes
@@ -58,48 +64,35 @@ function manifestsRoutes(fastify, options, done) {
   ///////////////////////////////////////////////
   // delete routes
 
-  fastify.delete(
-    "/manifests/:iiifPresentationVersion/delete",
-    {
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            iiifPresentationVersion: iiifPresentationVersionSchema
-          }
-        }
-      },
-      queryString: {
-        oneOf: [
-          {
-            type: "object",
-            required: ["uri"],
-            properties: { uri: { type: "string" } }
-          },
-          {
-            type: "object",
-            required: ["manifestShortId"],
-            properties: { manifestShortId: { type: "string" } }
-          }
-        ]
-      },
-      response: responsePostSchema
-    },
-    // NOTE: this is strictly the same query as `delete` in `annotations2.routes` => mutualize ?
-    async (request, reply) => {
-      const
-        { iiifPresentationVersion } = request.params,
-        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
-
-      try {
-        return iiifPresentationVersion === 2
-          ? await manifests2.deleteManifest(deleteKey, deleteVal)
-          : manifests3.notImplementedError();
-      } catch (err) {
-        returnError(request, reply, err, request.body);
-      }
-    }
-  )
+  // fastify.delete(
+  //   "/manifests/:iiifPresentationVersion/delete",
+  //   {
+  //     schema: {
+  //       params: {
+  //         type: "object",
+  //         properties: {
+  //           iiifPresentationVersion: iiifPresentationVersionSchema
+  //         }
+  //       }
+  //     },
+  //     queryString: routeManifestDeleteSchema,
+  //     response: responsePostSchema
+  //   },
+  //   // NOTE: this is strictly the same query as `delete` in `annotations2.routes` => mutualize ?
+  //   async (request, reply) => {
+  //     const
+  //       { iiifPresentationVersion } = request.params,
+  //       [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
+  //
+  //     try {
+  //       return iiifPresentationVersion === 2
+  //         ? await manifests2.deleteManifest(deleteKey, deleteVal)
+  //         : manifests3.notImplementedError();
+  //     } catch (err) {
+  //       returnError(request, reply, err, request.body);
+  //     }
+  //   }
+  // )
 
   done();
 }

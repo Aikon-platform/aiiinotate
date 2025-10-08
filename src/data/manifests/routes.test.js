@@ -2,23 +2,10 @@ import test from "node:test";
 
 import build from "#src/app.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, testDeleteRouteCurry, injectPost } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest } from "#utils/testUtils.js";
 
-
-/**
- * inject a manifest into the database for test purposes
- * @param {FastifyInstanceType} fastify
- * @param {NodeTestType} t
- * @param {object} data - the manifest to insert
- * @returns {Promise<Array<number, Array<string>>>}
- */
-const injectDummyData = async (fastify, t, data) => {
-  const
-    r = await injectPost(fastify, "/manifests/2/create", data),
-    { insertedCount, insertedIds } = JSON.parse(r.body);
-  t.assert.deepStrictEqual(insertedCount, 1);
-  return [ insertedCount, insertedIds ];
-}
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").NodeTestType} NodeTestType */
 
 test("test manifests Routes", async (t) => {
   const
@@ -34,6 +21,8 @@ test("test manifests Routes", async (t) => {
       manifest2ValidUri,
       manifest2InvalidUri,
     } = fastify.fileServer;
+
+  await fastify.ready();
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
@@ -62,22 +51,6 @@ test("test manifests Routes", async (t) => {
         // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a JSONSchema validation error.
         await fastify.emptyCollections();
       }
-    }
-  })
-
-  await t.test("test route /manifests/:iiifPresentationVersion/delete", async (t) => {
-    const
-      manifest = manifest2Valid,
-      deleteQuery = [
-        [ "uri", manifest["@id"] ],
-        [ "manifestShortId", getManifestShortId(manifest["@id"]) ]
-      ]
-
-    for ( let i=0; i<deleteQuery.length; i++ ) {
-      const [deleteBy, deleteKey] = deleteQuery.at(i);
-      await injectDummyData(fastify, t, manifest);
-      await testDeleteRoute(t, `/manifests/2/delete?${deleteBy}=${deleteKey}`, 1);
-      await fastify.emptyCollections();
     }
   })
 

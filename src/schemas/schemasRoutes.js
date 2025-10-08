@@ -28,56 +28,6 @@ const getSchema = (fastify, slug) =>
 function addSchemas(fastify, options, done) {
 
   ////////////////////////////////////////////////////////
-  // GENERIC STUFF
-
-  fastify.addSchema({
-    $id: makeSchemaUri("routeResponseInsert"),
-    type: "object",
-    required: [ "insertedCount", "insertedIds" ],
-    properties: {
-      insertedCount: { type: "integer", minimum: 0 },
-      insertedIds: {
-        type: "array",
-        items: { type: "string" }
-      }
-    }
-  });
-
-  fastify.addSchema({
-    $id: makeSchemaUri("routeResponseUpdate"),
-    type: "object",
-    required: ["matchedCount", "modifiedCount", "upsertedCount"],
-    properties: {
-      matchedCount: { type: "integer" },
-      modifiedCount: { type: "integer" },
-      upsertedCount: { type: "integer" },
-      upsertedId: { type: [ "string", "null" ] }  // string|null => the field is nullable !
-    }
-  })
-
-  fastify.addSchema({
-    $id: makeSchemaUri("routeResponseDelete"),
-    type: "object",
-    required: [ "deletedCount" ],
-    properties: {
-      deletedCount: { type: "integer", minimum: 0 }
-    }
-  });
-
-  fastify.addSchema({
-    $id: makeSchemaUri("routeResponseError"),
-    type: "object",
-    required: [],// [ "message", "info", "method", "url" ],
-    properties: {
-      message: { type: "string" },
-      info: {},  // only using `{}` equates to JS "Any" type
-      method: { type: "string" },
-      url: { type: "string" },
-      postBody: {}
-    }
-  })
-
-  ////////////////////////////////////////////////////////
   // ANNOTATIONS ROUTES
 
   fastify.addSchema({
@@ -187,6 +137,27 @@ function addSchemas(fastify, options, done) {
     ]
   })
 
+  fastify.addSchema({
+    $id: makeSchemaUri("routeAnnotationDelete"),
+    oneOf: [
+      {
+        type: "object",
+        required: ["uri"],
+        properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } }
+      },
+      {
+        type: "object",
+        required: ["manifestShortId"],
+        properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } }
+      },
+      {
+        type: "object",
+        required: ["canvasUri"],
+        properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } }
+      }
+    ]
+  })
+
   ////////////////////////////////////////////////////////
   // MANIFESTS ROUTES
 
@@ -203,14 +174,88 @@ function addSchemas(fastify, options, done) {
     ]
   });
 
+  fastify.addSchema({
+    $id: makeSchemaUri("routeManifestDelete"),
+    oneOf: [
+      {
+        type: "object",
+        required: ["uri"],
+        properties: { uri: { type: "string" } }
+      },
+      {
+        type: "object",
+        required: ["manifestShortId"],
+        properties: { manifestShortId: { type: "string" } }
+      }
+    ]
+  });
+
+  ////////////////////////////////////////////////////////
+  // GENERIC STUFF
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeDelete"),
+    oneOf: [
+      { $ref: makeSchemaUri("routeAnnotationDelete") },
+      { $ref: makeSchemaUri("routeManifestDelete") },
+    ]
+  });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseInsert"),
+    type: "object",
+    required: [ "insertedCount", "insertedIds" ],
+    properties: {
+      insertedCount: { type: "integer", minimum: 0 },
+      insertedIds: {
+        type: "array",
+        items: { type: "string" }
+      }
+    }
+  });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseUpdate"),
+    type: "object",
+    required: ["matchedCount", "modifiedCount", "upsertedCount"],
+    properties: {
+      matchedCount: { type: "integer" },
+      modifiedCount: { type: "integer" },
+      upsertedCount: { type: "integer" },
+      upsertedId: { type: [ "string", "null" ] }  // string|null => the field is nullable !
+    }
+  });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseDelete"),
+    type: "object",
+    required: [ "deletedCount" ],
+    properties: {
+      deletedCount: { type: "integer", minimum: 0 }
+    }
+  });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseError"),
+    type: "object",
+    required: [],// [ "message", "info", "method", "url" ],
+    properties: {
+      message: { type: "string" },
+      info: {},  // only using `{}` equates to JS "Any" type
+      method: { type: "string" },
+      url: { type: "string" },
+      postBody: {}
+    }
+  });
+
   ////////////////////////////////////////////////////////
 
   fastify.decorate("schemasRoutes", {
     makeSchemaUri: makeSchemaUri,
     getSchema: (slug) => getSchema(fastify, slug)
-  })
+  });
 
-  done()
+  done();
 }
 
 

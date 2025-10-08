@@ -36,8 +36,8 @@ test("test Manifests2 module", async (t) => {
   t.afterEach(async () => await fastify.emptyCollections());
 
   await t.test("test Manifests2.insertManifest", async (t) => {
-    const rSuccess = await fastify.manifests2.insertManifest(manifest2Valid);
-    assertObjectKeysInsert(t, rSuccess);
+    const r = await fastify.manifests2.insertManifest(manifest2Valid);
+    assertObjectKeysInsert(t, r);
 
     // insertion should fail. since we are not inserting through HTTPs, we can't test error response keys
     await t.assert.rejects(fastify.manifests2.insertManifest(manifest2Invalid));

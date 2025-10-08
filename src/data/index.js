@@ -20,9 +20,9 @@ function data(fastify, options, done) {
   fastify.register(Manifests3);
   fastify.register(Annotations2);
   fastify.register(Annotations3);
-  fastify.register(commonRoutes);
   fastify.register(annotationsRoutes);
   fastify.register(manifestsRoutes);
+  fastify.register(commonRoutes);
 
   done();
 }

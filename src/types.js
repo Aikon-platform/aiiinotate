@@ -67,7 +67,7 @@
  * type of an instance of the Manifests2 class.
  */
 /**
- * @typedef {import("#manifests/annotations2.js").Annotations2InstanceType} Annotations2InstanceType
+ * @typedef {import("#annotations/annotations2.js").Annotations2InstanceType} Annotations2InstanceType
  * type of an instance of the Annotations2 class.
  */
 /**
@@ -75,7 +75,7 @@
  * type of an instance of the Manifests3 class.
  */
 /**
- * @typedef {import("#manifests/annotations3.js").Annotations3InstanceType} Annotations3InstanceType
+ * @typedef {import("#annotations/annotations3.js").Annotations3InstanceType} Annotations3InstanceType
  * type of an instance of the Annotations3 class.
  */
 

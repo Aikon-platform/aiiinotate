@@ -178,6 +178,38 @@ const testDeleteRouteCurry =
       t.assert.deepStrictEqual(JSON.parse(r.body).deletedCount, expectedDeletedCount);
     }
 
+/**
+ * inject a manifest into the database for test purposes
+ * @param {FastifyInstanceType} fastify
+ * @param {NodeTestType} t
+ * @param {object} manifest - the manifest to insert
+ * @returns {Promise<Array<number, Array<string>>>}
+ */
+const injectTestManifest = async (fastify, t, manifest) => {
+  const
+    r = await injectPost(fastify, "/manifests/2/create", manifest),
+    { insertedCount, insertedIds } = JSON.parse(r.body);
+  t.assert.deepStrictEqual(insertedCount, 1);
+  return [ insertedCount, insertedIds ];
+}
+
+/**
+ * inject an annotationList into the database for test purposes
+ * @param {FastifyInstanceType} fastify
+ * @param {NodeTestType} t
+ * @param {object} annotationList
+ * @returns {Promise<Array<number, Array<string>>>}
+ */
+const injectTestAnnotations = async (fastify, t, annotationList) => {
+  const
+    r = await injectPost(fastify, "/annotations/2/createMany", annotationList),
+    rBody = JSON.parse(r.body),
+    expectedInsertedCount = annotationList.resources.length,
+    { insertedCount, insertedIds } = rBody;
+  t.assert.deepStrictEqual(insertedCount, expectedInsertedCount);
+  return [insertedCount, insertedIds];
+}
+
 
 export {
   assertObjectKeys,
@@ -193,6 +225,8 @@ export {
   assertUpdateValidResponse,
   assertDeleteValidResponse,
   testPostRouteCurry,
-  testDeleteRouteCurry
+  testDeleteRouteCurry,
+  injectTestManifest,
+  injectTestAnnotations
 }
 
