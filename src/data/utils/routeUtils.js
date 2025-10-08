@@ -88,22 +88,21 @@ const makeResponsePostSchena = (fastify) => ({
  * @param {import("fastify").FastifyRequest} request
  * @param {import("fastify").FastifyReply} reply
  * @param {Error} err: the error we're returning
- * @param {any?} data: the data on which the error occurred, for POST requests
+ * @param {number} statusCode - the status code (defaults to 500)
+ * @param {any?} requestBody: the data on which the error occurred, for POST requests
  */
-const returnError = (request, reply, err, data) => {
-  console.error(err);
-
+const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
     info: err.info || {},
     method: request.method,
     url: request.url
   };
-  if ( data !== undefined ) {
-    error.postBody = data
+  if ( requestBody !== undefined ) {
+    error.requestBody = requestBody
   }
   reply
-    .status(500)
+    .status(statusCode)
     .header("Content-Type", "application/json; charset=utf-8")
     .send(error);
 }

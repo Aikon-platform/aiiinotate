@@ -244,7 +244,7 @@ function addSchemas(fastify, options, done) {
       info: {},  // only using `{}` equates to JS "Any" type
       method: { type: "string" },
       url: { type: "string" },
-      postBody: {}
+      requestBody: {}
     }
   });
 

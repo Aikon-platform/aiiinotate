@@ -48,7 +48,7 @@ const assertObjectKeysDelete = (t, obj) =>
  * @returns {void}
  */
 const assertObjectKeysError = (t, obj) =>
-  assertObjectKeys(t, obj, ["message", "info", "method", "url", "postBody"]);
+  assertObjectKeys(t, obj, ["message", "info", "method", "url", "requestBody"]);
 
 /**
  * @param {NodeTestType} t
@@ -58,6 +58,16 @@ const assertObjectKeysError = (t, obj) =>
  */
 const assertStatusCode = (t, r, expectedStatusCode) =>
   t.assert.deepStrictEqual(r.statusCode, expectedStatusCode);
+
+/**
+ * @param {NodeTestType} t
+ * @param {FastifyReplyType} r
+ * @param {number} expectedStatusCode
+ */
+const assertError = (t, r, expectedStatusCode=500) => {
+  assertObjectKeysError(t, JSON.parse(r.body));
+  assertStatusCode(t, r, expectedStatusCode);
+};
 
 /**
  * @param {NodeTestType} t
@@ -134,7 +144,7 @@ const assertDeleteValidResponse = (t,r) => {
 const testPostRouteCurry = (fastify) =>
   /** @param {DataOperationsType} op */
   (op) =>
-    /** @param {boolean} success: if `true` test that the query succeeds. else, test that it fails */
+    /** @param {boolean} success - if `true` test that the query succeeds. else, test that it fails */
     (success) =>
       /**
        * @param {NodeTestType} t
@@ -219,6 +229,7 @@ export {
   assertObjectKeysDelete,
   assertStatusCode,
   assertResponseKeys,
+  assertError,
   injectPost,
   assertPostInvalidResponse,
   assertCreateValidResponse,

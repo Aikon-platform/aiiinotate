@@ -96,7 +96,7 @@ function commonRoutes(fastify, options, done) {
         queryString: routeDeleteSchema,
         response: responsePostSchema,
       },
-      preHandler: async (request, reply) => {
+      preValidation: async (request, reply) => {
         // implement a custom validation hook: depending on the value of `collectionName`, run different schema validations.
         const
           { collectionName } = request.params,
@@ -108,7 +108,7 @@ function commonRoutes(fastify, options, done) {
           error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
 
         if ( !validator(query) ) {
-          reply.code(400).send(returnError(request, reply, error));
+          returnError(request, reply, error, {}, 400);
         }
         return;
       }
