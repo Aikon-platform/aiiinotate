@@ -158,6 +158,19 @@ const ajv = new Ajv({
   allErrors: true
 })
 
+/**
+ * wrapper for `ajv.compile`. `schema` must be a schema resolved using `fastify.schemasToMongo()`
+ * NOTE: this function exists because using the native `ajv.compile` on fastify schemas (with `$id`, `$ref`...) causes tests to fail WITHOUT launching an error., making it very hard to debug
+ * @param {object} schema - jsonSchema
+ * @returns {import("#types").AjvValidateFunctionType}
+ */
+const ajvCompile = (schema) => {
+  if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
+    throw new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasToMongo()' to resolve the schema before compiling it`, { info: schema });
+  }
+  return ajv.compile(schema);
+}
+
 export {
   maybeToArray,
   pathToUrl,
@@ -172,5 +185,5 @@ export {
   arrayEqualsShallow,
   throwIfKeyUndefined,
   throwIfValueError,
-  ajv
+  ajvCompile
 }

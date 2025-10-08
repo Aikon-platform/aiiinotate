@@ -23,7 +23,6 @@ function data(fastify, options, done) {
   fastify.register(annotationsRoutes);
   fastify.register(manifestsRoutes);
   fastify.register(commonRoutes);
-
   done();
 }
 

@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
 import { toInsertResponse } from "#src/data/utils/routeUtils.js";
-import { inspectObj, ajv } from "#utils/utils.js";
+import { inspectObj, ajvCompile } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -35,9 +35,12 @@ class Manifests2 extends CollectionAbstract {
     super(fastify, "manifests2");
 
     /** @type {AjvValidateFunctionType} */
-    this.validatorManifest = ajv.compile(fastify.schemasToMongo(
+    this.validatorManifest = ajvCompile(fastify.schemasToMongo(
       fastify.schemasPresentation2.getSchema("manifestPublic")
     ));
+    // this.validatorManifest = ajvCompile(
+    //   fastify.schemasPresentation2.getSchema("manifestPublic")
+    // );
   }
 
   /////////////////////////////////////////////

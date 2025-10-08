@@ -2,6 +2,8 @@
 
 We mostly talk about which routes are done here
 
+---
+
 ## Done 
 
 ### Routes 
@@ -49,3 +51,36 @@ This means that we can't have a uniqueness constraint on `@id` or `id` fields of
 For clients, concurrency/parrallelization (i.e., with JS `Promise.all()`) on insert/update should be avoided because it can cause a data race: several processes can attempt to write the same thing in parrallel. 
 
 For example, when inserting annotations, the manifests related to each annotation are inserted in parrallel. Since this is a side effect, 2 processes may unknowingly try to insert the same manifest in the database, which causes a uniqueness constraint to fail. This error can be hard to debug, so it's best to avoid concurrency.
+
+---
+
+## Quirks
+
+### Error swallowing at app build
+
+Errors that happen when a plugin is being registered will cause the app's startup to fail, without necessarily throwing an error.
+
+This is especially true for test cases that build the fastify app:
+
+```
+test 
+=> build fastify app
+=> build step fails silently
+=> test fails
+```
+
+#### Troubleshooting
+
+- normal behaviour: when a runtime error happens, the failing test will log the error on the console
+- what this error looks like: 
+    - tests fail **very quickly**, 
+    - without throwing an error, seemingly without even running the test suite
+    - the proces doesn't exit, although all tests have failed
+- when `npm run test` fails like this, run `npm run start`. See if normal startup throws an error
+    - NOTE: normal startup not throwing does NOT mean that the build step necessarily worked
+
+#### Possible help/solutions
+
+- find a way to stisfyingly use `try...catch` at plugin registration.
+- look into these issues: [2694](https://github.com/fastify/fastify/issues/2694)
+    - in particular, it may be an issue specific to async plugins ?

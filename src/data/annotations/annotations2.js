@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajv, objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -50,7 +50,7 @@ class Annotations2 extends CollectionAbstract {
     /** @type {Manifests2InstanceType} */
     this.manifestsPlugin = this.fastify.manifests2;
     /** @type {AjvValidateFunctionType} */
-    this.validatorAnnotationList = ajv.compile(fastify.schemasToMongo(
+    this.validatorAnnotationList = ajvCompile(fastify.schemasToMongo(
       fastify.schemasPresentation2.getSchema("annotationList")
     ));
   }

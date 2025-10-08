@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, ajv, inspectObj, getFirstNonEmptyPair } from "#utils/utils.js";
+import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair } from "#utils/utils.js";
 import { returnError, makeResponsePostSchena } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
@@ -28,10 +28,10 @@ function commonRoutes(fastify, options, done) {
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
     responsePostSchema = makeResponsePostSchena(fastify),
-    validatorRouteAnnotationDeleteSchema = ajv.compile(fastify.schemasToMongo(
+    validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasToMongo(
       fastify.schemasRoutes.getSchema("routeAnnotationDelete")
     )),
-    validatorRouteManifestDeleteSchema = ajv.compile(fastify.schemasToMongo(
+    validatorRouteManifestDeleteSchema = ajvCompile(fastify.schemasToMongo(
       fastify.schemasRoutes.getSchema("routeManifestDelete")
     ));
 
