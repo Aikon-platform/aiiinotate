@@ -54,12 +54,23 @@
  */
 
 /**
- * @typedef ManifestType
+ * @typedef Manifest2InternalType
  *   app and database-side structure of IIIF manifests
  * @type {object}
  * @property {string} ["@id"] - the manifest's '@id'
  * @property {string} manifestShortId
  * @property {string[]} canvasIds
+ */
+
+/**
+ * @typedef IiifCollection2Type
+ *    IIIF manifests collection
+ * @type {object}
+ * @property {string} ["@context"]
+ * @property {string} ["@id"]
+ * @property {"sc:Collection"} ["@type"]
+ * @property {string?} label
+ * @property {Array<{ "@type": "sc:Manifest", "@id": string }>} members
  */
 
 /**

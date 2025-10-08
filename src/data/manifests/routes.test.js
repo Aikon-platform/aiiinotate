@@ -1,6 +1,7 @@
 import test from "node:test";
 
 import build from "#src/app.js";
+import { visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest } from "#utils/testUtils.js";
 
@@ -50,6 +51,16 @@ test("test manifests Routes", async (t) => {
         await fastify.emptyCollections();
       }
     }
+  })
+
+  await t.test("test route /manifests/:iiifPresentationVersion/collection", async (t) => {
+    await injectTestManifest(fastify, t, manifest2Valid);
+    const r = await fastify.inject({
+      method: "GET",
+      url: "/manifests/2"
+    });
+    visibleLog(JSON.parse(r.body));
+    t.assert.deepStrictEqual(r.statusCode, 200);
   })
 
 })

@@ -24,6 +24,34 @@ function manifestsRoutes(fastify, options, done) {
     responsePostSchema = makeResponsePostSchena(fastify);
 
   ///////////////////////////////////////////////
+  // read routes
+
+  fastify.get(
+    "/manifests/:iiifPresentationVersion",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema
+          }
+        },
+        response: { /** TODO: response schema for a IIIF 2.x collection */ }
+      }
+    },
+    async (request, reply) => {
+      const { iiifPresentationVersion } = request.params;
+      try {
+        return iiifPresentationVersion === 2
+          ? await manifests2.getManifests()
+          : manifests3.notImplementedError();
+      } catch (err) {
+        returnError(request, reply, err);
+      }
+    }
+  )
+
+  ///////////////////////////////////////////////
   // insert routes
 
   fastify.post(

@@ -174,6 +174,18 @@ const ajvCompile = (schema) => {
   return ajv.compile(schema);
 }
 
+/**
+ * print in a box for debug purposes
+ * @param {any} data
+ * @param {string} prefix
+ */
+const visibleLog = (data, prefix) => {
+  console.log("<".repeat(100));
+  if ( prefix ) console.log(prefix);
+  console.log(inspectObj(data));
+  console.log(">".repeat(100));
+}
+
 export {
   maybeToArray,
   pathToUrl,
@@ -188,5 +200,6 @@ export {
   arrayEqualsShallow,
   throwIfKeyUndefined,
   throwIfValueError,
-  ajvCompile
+  ajvCompile,
+  visibleLog
 }

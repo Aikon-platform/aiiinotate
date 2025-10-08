@@ -3,7 +3,8 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
 import { toInsertResponse } from "#src/data/utils/routeUtils.js";
-import { inspectObj, ajvCompile } from "#utils/utils.js";
+import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
+import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -15,8 +16,9 @@ import { inspectObj, ajvCompile } from "#utils/utils.js";
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 /** @typedef {import("#types").AnnotationsDeleteKeyType } AnnotationsDeleteKeyType */
-/** @typedef {import("#types").ManifestType } ManifestType */
+/** @typedef {import("#types").Manifest2InternalType } Manifest2InternalType */
 /** @typedef {import("#types").AjvValidateFunctionType} AjvValidateFunctionType */
+/** @typedef {import("#types").IiifCollection2Type} IiifCollection2Type */
 
 /** @typedef {Manifests2} Manifests2InstanceType */
 
@@ -62,7 +64,7 @@ class Manifests2 extends CollectionAbstract {
    * see: https://iiif.io/api/presentation/2.1/#sequence
    *
    * @param {object} manifest
-   * @returns {ManifestType}
+   * @returns {Manifest2InternalType}
    */
   #cleanManifest(manifest) {
     return {
@@ -272,6 +274,23 @@ class Manifests2 extends CollectionAbstract {
     return r === null
       ? undefined
       : r.index !== -1 ? r.index : undefined;
+  }
+
+  /**
+   * @returns {Promise<IiifCollection2Type>}
+   */
+  async getManifests() {
+    const manifestIndex = await this.collection.find(
+      {},
+      { projection: { "@id": 1, _id: 0 } }
+    ).toArray();
+    return {
+      ...IIIF_PRESENTATION_2_CONTEXT,
+      "@type": "sc:Collection",
+      "@id": "TODO",
+      label: "Collection of all manifests indexed in the annotation server",
+      members: manifestIndex
+    }
   }
 }
 
