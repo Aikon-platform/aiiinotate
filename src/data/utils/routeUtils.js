@@ -83,6 +83,11 @@ const makeResponsePostSchena = (fastify) => ({
   500: fastify.schemasRoutes.getSchema("routeResponseError")
 });
 
+const makeResponseSchema = (fastify, okResponseSchema) => ({
+  200: okResponseSchema,
+  500: fastify.schemasRoutes.getSchema("routeResponseError")
+})
+
 /**
  *
  * @param {import("fastify").FastifyRequest} request
@@ -116,5 +121,6 @@ export {
   formatDeleteResponse,
   toInsertResponse,
   makeResponsePostSchena,
+  makeResponseSchema,
   returnError
 }

@@ -320,11 +320,30 @@ function addSchemas(fastify, options, done) {
   /////////////////////////////////////////////
   // COLLETION
 
-  // fastify.addSchema({
-  //   $id: makeSchemaUri("collection"),
-  //   type: "object",
-  //   required: [ "@id", "@type", "@context", "" ]
-  // })
+  fastify.addSchema({
+    $id: makeSchemaUri("collection"),
+    type: "object",
+    required: [ "@id", "@type", "@context", "members" ],
+    properties: {
+      "@context": { $ref: makeSchemaUri("context") },
+      "@type": { type: "string", enum: [ "sc:Collection" ] },
+      "@id": { type: "string" },
+      label: { type: "string" },
+      members: {
+        type: "array",
+        items: [
+          {
+            type: "object",
+            required: ["@id"],
+            properties: {
+              "@id": { type: "string" },
+              "@type": { type: "string", enum: [ "sc:Manifest" ] },
+            }
+          }
+        ]
+      }
+    }
+  });
 
   /////////////////////////////////////////////
   // DONE

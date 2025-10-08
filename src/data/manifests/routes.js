@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin";
 
-import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
+import { makeResponsePostSchena, returnError, makeResponseSchema } from "#utils/routeUtils.js";
 import { objectHasKey, getFirstNonEmptyPair } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -18,10 +18,9 @@ function manifestsRoutes(fastify, options, done) {
     manifests2 = fastify.manifests2,
     /** @type {Manifests3InstanceType} */
     manifests3 = fastify.manifests3,
-    /** @type {object} */
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
-    /** @type {object} */
-    responsePostSchema = makeResponsePostSchena(fastify);
+    responsePostSchema = makeResponsePostSchena(fastify),
+    collectionSchema = makeResponseSchema(fastify, fastify.schemasPresentation2.getSchema("collection"));
 
   ///////////////////////////////////////////////
   // read routes
@@ -36,7 +35,7 @@ function manifestsRoutes(fastify, options, done) {
             iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
-        response: { /** TODO: response schema for a IIIF 2.x collection */ }
+        response: collectionSchema,
       }
     },
     async (request, reply) => {
