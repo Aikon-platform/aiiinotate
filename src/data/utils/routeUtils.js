@@ -92,6 +92,9 @@ const makeResponsePostSchena = (fastify) => ({
  * @param {any?} requestBody: the data on which the error occurred, for POST requests
  */
 const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
+  // otherwise, the error is not logged, bad for debugging.
+  console.error(err);
+
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
     info: err.info || {},
