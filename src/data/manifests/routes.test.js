@@ -58,6 +58,7 @@ test("test manifests Routes", async (t) => {
       method: "GET",
       url: "/manifests/2"
     });
+    visibleLog(JSON.parse(r.body));
     assertStatusCode(t, r, 200);
     assertObjectKeys(
       t,

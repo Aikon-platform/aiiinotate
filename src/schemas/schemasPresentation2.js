@@ -318,6 +318,15 @@ function addSchemas(fastify, options, done) {
   })
 
   /////////////////////////////////////////////
+  // COLLETION
+
+  // fastify.addSchema({
+  //   $id: makeSchemaUri("collection"),
+  //   type: "object",
+  //   required: [ "@id", "@type", "@context", "" ]
+  // })
+
+  /////////////////////////////////////////////
   // DONE
 
 
