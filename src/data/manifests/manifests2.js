@@ -245,7 +245,6 @@ class Manifests2 extends CollectionAbstract {
     return this.delete(deleteFilter);
   }
 
-
   /////////////////////////////////////////////
   // read
 
@@ -277,9 +276,13 @@ class Manifests2 extends CollectionAbstract {
   }
 
   /**
+   * return a collection of all manifests in the database.
    * @returns {Promise<IiifCollection2Type>}
    */
   async getManifests() {
+
+    //TODO: each manifest (`members` item) should have `@type="sc:Manifest"`.
+
     const manifestIndex = await this.collection.find(
       {},
       { projection: { "@id": 1, _id: 0 } }
@@ -287,7 +290,7 @@ class Manifests2 extends CollectionAbstract {
     return {
       ...IIIF_PRESENTATION_2_CONTEXT,
       "@type": "sc:Collection",
-      "@id": "TODO",
+      "@id": `${process.env.APP_BASE_URL}/manifests/2`,
       label: "Collection of all manifests indexed in the annotation server",
       members: manifestIndex
     }
