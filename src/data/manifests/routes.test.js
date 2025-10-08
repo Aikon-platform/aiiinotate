@@ -3,7 +3,7 @@ import test from "node:test";
 import build from "#src/app.js";
 import { visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest } from "#utils/testUtils.js";
+import { testPostRouteCurry, injectPost, injectTestManifest, assertStatusCode, assertObjectKeys} from "#utils/testUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -15,7 +15,6 @@ test("test manifests Routes", async (t) => {
     testPostRouteCreate = testPostRoute("insert"),
     testPostRouteCreateSuccess = testPostRouteCreate(true),
     testPostRouteCreateFailure = testPostRouteCreate(false),
-    testDeleteRoute = testDeleteRouteCurry(fastify),
     {
       manifest2Valid,
       manifest2Invalid,
@@ -59,8 +58,12 @@ test("test manifests Routes", async (t) => {
       method: "GET",
       url: "/manifests/2"
     });
-    visibleLog(JSON.parse(r.body));
-    t.assert.deepStrictEqual(r.statusCode, 200);
+    assertStatusCode(t, r, 200);
+    assertObjectKeys(
+      t,
+      JSON.parse(r.body),
+      [ "@context", "@id", "@type", "members", "label" ]
+    );
   })
 
 })
