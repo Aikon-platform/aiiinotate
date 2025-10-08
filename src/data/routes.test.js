@@ -5,7 +5,7 @@ import { v4 as uuid4 } from "uuid";
 import build from "#src/app.js";
 import { getRandomItem } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest, injectTestAnnotations, assertError } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -37,13 +37,22 @@ test("test common routes", async (t) => {
 
   await t.test("test route /:collectionName/:iiifPresentationVersion/delete", async (t) => {
 
-    await t.test("test conditional schema validation in preHandler", async (t) => {
-      const r = await fastify.inject({
-        method: "DELETE",
-        url: `/manifests/2/delete?canvasUri=xxx`  // canvasUri is only allowed if `collectionName==="annotations"`
-      })
-      assertError(t, r, 400);
-    })
+    await t.test("test preValidation hook for queryString validation", async (t) => {
+      const data = [
+        ["/manifests/2/delete?canvasUri=xxx", false],    // canvasUri is only allowed if `collectionName==="annotations"` => will fail.
+        ["/manifests/2/delete?manifestShortId=xxx", true]
+      ];
+      for ( let i=0; i<data.length; i++ ) {
+        const [url, expectSuccess] = data.at(i);
+        const r = await fastify.inject({
+          method: "DELETE",
+          url: url
+        })
+        expectSuccess
+          ? assertDeleteValidResponse(t, r)
+          : assertErrorValidResponse(t, r, 400);
+      }
+    });
 
     await t.test("test route /manifests/:iiifPresentationVersion/delete", async (t) => {
       const
@@ -59,7 +68,7 @@ test("test common routes", async (t) => {
         await testDeleteRoute(t, `/manifests/2/delete?${deleteBy}=${deleteKey}`, 1);
         await fastify.emptyCollections();
       }
-    })
+    });
 
     await t.test("test route /annotations/:iiifPresentationVersion/delete", async (t) => {
       const deletePipeline = async (validFilter) =>

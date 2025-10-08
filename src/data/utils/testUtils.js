@@ -62,16 +62,6 @@ const assertStatusCode = (t, r, expectedStatusCode) =>
 /**
  * @param {NodeTestType} t
  * @param {FastifyReplyType} r
- * @param {number} expectedStatusCode
- */
-const assertError = (t, r, expectedStatusCode=500) => {
-  assertObjectKeysError(t, JSON.parse(r.body));
-  assertStatusCode(t, r, expectedStatusCode);
-};
-
-/**
- * @param {NodeTestType} t
- * @param {FastifyReplyType} r
  * @param {"insert"|"update"|"delete"|"error"} expectedResponse: keyword to define the response schema to test against.
  * @returns {void}
  */
@@ -136,6 +126,16 @@ const assertDeleteValidResponse = (t,r) => {
   assertStatusCode(t, r, 200);
   assertResponseKeys(t, r, "delete");
 }
+
+/**
+ * @param {NodeTestType} t
+ * @param {FastifyReplyType} r
+ * @param {number} expectedStatusCode
+ */
+const assertErrorValidResponse = (t, r, expectedStatusCode=500) => {
+  assertObjectKeysError(t, JSON.parse(r.body));
+  assertStatusCode(t, r, expectedStatusCode);
+};
 
 /**
  * curried function to test  different operations with a post route.
@@ -229,7 +229,7 @@ export {
   assertObjectKeysDelete,
   assertStatusCode,
   assertResponseKeys,
-  assertError,
+  assertErrorValidResponse,
   injectPost,
   assertPostInvalidResponse,
   assertCreateValidResponse,
