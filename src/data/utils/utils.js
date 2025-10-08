@@ -148,7 +148,7 @@ const getRandomItem = (arr) =>
 
 /**
  * AJV instance to run JsonSchema compilation/validation anywhere in the app
- * (not just in Fastify routes and at Mongo interactions).
+ * (not just in Fastify route definition and Mongo interactions).
  * NOTE: this is a workaround since i could not get to access fastify's AJV instance, although fastify uses AJV internally.
  */
 const ajv = new Ajv({
@@ -166,7 +166,10 @@ const ajv = new Ajv({
  */
 const ajvCompile = (schema) => {
   if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
-    throw new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasToMongo()' to resolve the schema before compiling it`, { info: schema });
+    const err = new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasToMongo()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
+    // `console.error` is necessary to be sure that the error will be displayed
+    console.error(err);
+    throw err;
   }
   return ajv.compile(schema);
 }
