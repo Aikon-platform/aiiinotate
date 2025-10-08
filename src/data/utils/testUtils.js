@@ -197,7 +197,7 @@ const injectTestManifest = async (fastify, t, manifest) => {
  * inject an annotationList into the database for test purposes
  * @param {FastifyInstanceType} fastify
  * @param {NodeTestType} t
- * @param {object} annotationList
+ * @param {object} annotationList - a IIIF 2.x annotation list
  * @returns {Promise<Array<number, Array<string>>>}
  */
 const injectTestAnnotations = async (fastify, t, annotationList) => {

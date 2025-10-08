@@ -69,8 +69,7 @@ function annotationsRoutes(fastify, options, done) {
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
-    responsePostSchema = makeResponsePostSchena(fastify),
-    routeAnnotationDeleteSchema = fastify.schemasRoutes.getSchema("routeAnnotationDelete");
+    responsePostSchema = makeResponsePostSchena(fastify);
 
   /////////////////////////////////////////////////////////
   // get routes
@@ -228,44 +227,6 @@ function annotationsRoutes(fastify, options, done) {
       }
     }
   )
-
-  /////////////////////////////////////////////////////////
-  // delete routes
-
-  /**
-   * delete an annotation, all annotations for a canvas or all annotations for a manifest
-   */
-  // fastify.delete(
-  //   "/annotations/:iiifPresentationVersion/delete",
-  //   {
-  //     schema: {
-  //       params: {
-  //         type: "object",
-  //         properties: {
-  //           iiifPresentationVersion: iiifPresentationVersionSchema,
-  //         }
-  //       },
-  //       querystring: routeAnnotationDeleteSchema,
-  //       response: responsePostSchema
-  //     },
-  //   },
-  //   async (request, reply) => {
-  //     const
-  //       { iiifPresentationVersion } = request.params,
-  //       // 'deleteBy' is the type of id ("uri|manifestShortId|canvasUri"), `deleteId` is the id to use for deletion.
-  //       [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);// Object.entries(request.query).find(([k,v]) => v != null);
-  //
-  //     try {
-  //       if ( iiifPresentationVersion === 2 ) {
-  //         return await annotations2.deleteAnnotations(deleteKey, deleteVal);
-  //       } else {
-  //         annotations3.notImplementedError();
-  //       }
-  //     } catch (err) {
-  //       returnError(request, reply, err, request.body);
-  //     }
-  //   }
-  // )
 
   done();
 

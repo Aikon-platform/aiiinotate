@@ -23,6 +23,10 @@ test("test manifests Routes", async (t) => {
     } = fastify.fileServer;
 
   await fastify.ready();
+  // close the app after running the tests
+  t.after(async () => await fastify.close());
+  // after each subtest has run, delete all database records
+  t.afterEach(async() => fastify.emptyCollections());
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
@@ -31,12 +35,6 @@ test("test manifests Routes", async (t) => {
     console.log("FASTIFY ERROR", err);
     throw err;
   }
-
-  // close the app after running the tests
-  t.after(async () => await fastify.close());
-
-  // after each subtest has run, delete all database records
-  t.afterEach(async() => await fastify.emptyCollections());
 
   await t.test("test route /manifests/:iiifPresentationVersion/create", async (t) => {
     const data = [

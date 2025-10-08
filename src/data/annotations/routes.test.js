@@ -7,12 +7,10 @@ import { v4 as uuid4 } from "uuid";
 import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
 import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations } from "#utils/testUtils.js";
 
-
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
 /** @typedef {import("#types").DataOperationsType} DataOperationsType */
-
 
 test("test annotation Routes", async (t) => {
 
@@ -36,6 +34,10 @@ test("test annotation Routes", async (t) => {
     } = fastify.fileServer;
 
   await fastify.ready();
+  // close the app after running the tests
+  t.after(async () => await fastify.close());
+  // after each subtest has run, delete all database records
+  t.afterEach(async() => fastify.emptyCollections());
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
@@ -44,12 +46,6 @@ test("test annotation Routes", async (t) => {
     console.log("FASTIFY ERROR", err);
     throw err;
   }
-
-  // close the app after running the tests
-  t.after(async () => await fastify.close());
-
-  // after each subtest has run, delete all database records
-  t.afterEach(async() => fastify.emptyCollections());
 
   await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
     // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error
@@ -117,7 +113,8 @@ test("test annotation Routes", async (t) => {
 
     await updatePipeline(annotation, true);
     await updatePipeline(annotation, false);
-  })
+    return;
+  });
 
   return
 })

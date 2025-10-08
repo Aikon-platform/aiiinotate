@@ -20,6 +20,10 @@ test("test Manifests2 module", async (t) => {
     } = fastify.fileServer;
 
   await fastify.ready();
+  // close the app after running the tests
+  t.after(async () => await fastify.close());
+  // after each subtest has run, delete all database records
+  t.afterEach(async() => fastify.emptyCollections());
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
@@ -28,12 +32,6 @@ test("test Manifests2 module", async (t) => {
     console.log("FASTIFY ERROR", err);
     throw err;
   }
-
-  // close the app after running the tests
-  t.after(async () => await fastify.close());
-
-  // after each subtest has run, delete all database records
-  t.afterEach(async () => await fastify.emptyCollections());
 
   await t.test("test Manifests2.insertManifest", async (t) => {
     const r = await fastify.manifests2.insertManifest(manifest2Valid);

@@ -23,17 +23,17 @@ function commonRoutes(fastify, options, done) {
     manifests2 = fastify.manifests2,
     /** @type {Manifests3InstanceType} */
     manifests3 = fastify.manifests3,
-
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     iiifSearchApiVersionSchema = fastify.schemasBase.getSchema("search"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
-    routeAnnotationDeleteSchema = fastify.schemasRoutes.getSchema("routeAnnotationDelete"),
-    routeManifestDeleteSchema = fastify.schemasRoutes.getSchema("routeManifestDelete"),
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
     responsePostSchema = makeResponsePostSchena(fastify),
-
-    validatorRouteAnnotationDeleteSchema = ajv.compile(routeAnnotationDeleteSchema),
-    validatorRouteManifestDeleteSchema = ajv.compile(routeManifestDeleteSchema);
+    validatorRouteAnnotationDeleteSchema = ajv.compile(fastify.schemasToMongo(
+      fastify.schemasRoutes.getSchema("routeAnnotationDelete")
+    )),
+    validatorRouteManifestDeleteSchema = ajv.compile(fastify.schemasToMongo(
+      fastify.schemasRoutes.getSchema("routeManifestDelete")
+    ));
 
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
@@ -89,27 +89,22 @@ function commonRoutes(fastify, options, done) {
         queryString: routeDeleteSchema,
         response: responsePostSchema,
       },
-      // preHandler: (request, reply, done) => {
-      //   // implement a custom validation hook: depending on the value of `collectionName`, run different schema validations.
-      //   const
-      //     { collectionName } = request.params,
-      //     query = request.query,
-      //     validator =
-      //       collectionName==="annotations"
-      //         ? validatorRouteAnnotationDeleteSchema
-      //         : validatorRouteManifestDeleteSchema,
-      //     error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
-      //
-      //   console.log("_".repeat(100));
-      //   console.log("collectionName", collectionName);
-      //   console.log("query", query);
-      //   console.log("_".repeat(100));
-      //
-      //   if ( !validator(query) ) {
-      //     reply.code(400).send(returnError(request, reply, error));
-      //   }
-      //   done();
-      // }
+      preHandler: (request, reply, done) => {
+        // implement a custom validation hook: depending on the value of `collectionName`, run different schema validations.
+        const
+          { collectionName } = request.params,
+          query = request.query,
+          validator =
+            collectionName==="annotations"
+              ? validatorRouteAnnotationDeleteSchema
+              : validatorRouteManifestDeleteSchema,
+          error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
+
+        if ( !validator(query) ) {
+          reply.code(400).send(returnError(request, reply, error));
+        }
+        done();
+      }
     },
     async (request, reply) => {
       const

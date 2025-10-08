@@ -19,12 +19,18 @@ test("test common routes", async (t) => {
     { manifest2Valid, annotationList } = fastify.fileServer;
 
   await fastify.ready();
-
   // close the app after running the tests
   t.after(async () => await fastify.close());
-
   // after each subtest has run, delete all database records
-  t.afterEach(async() => await fastify.emptyCollections());
+  t.afterEach(async () => fastify.emptyCollections());
+
+  // NOTE: it is necessary to run the app because internally there are fetches to external data.
+  try {
+    await fastify.listen({ port: process.env.APP_PORT });
+  } catch (err) {
+    console.log("FASTIFY ERROR", err);
+    throw err;
+  }
 
   ////////////////////////////////////////////////
   // DELETE routes
