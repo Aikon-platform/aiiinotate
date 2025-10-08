@@ -75,6 +75,13 @@ function commonRoutes(fastify, options, done) {
     }
   );
 
+  /////////////////////////////////////////////
+  // DELETE routes
+
+  /**
+   * manifest and annotations work in the same manner, so we group them here.
+   * we add a custom `preHandler` to ensure that `queryString` follows the proper schema.
+   */
   fastify.delete(
     "/:collectionName/:iiifPresentationVersion/delete",
     {
@@ -89,7 +96,7 @@ function commonRoutes(fastify, options, done) {
         queryString: routeDeleteSchema,
         response: responsePostSchema,
       },
-      preHandler: (request, reply, done) => {
+      preHandler: async (request, reply) => {
         // implement a custom validation hook: depending on the value of `collectionName`, run different schema validations.
         const
           { collectionName } = request.params,
@@ -103,7 +110,7 @@ function commonRoutes(fastify, options, done) {
         if ( !validator(query) ) {
           reply.code(400).send(returnError(request, reply, error));
         }
-        done();
+        return;
       }
     },
     async (request, reply) => {
