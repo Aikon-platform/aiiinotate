@@ -28,6 +28,7 @@ Routes are only implemented with IIIF Presentation API 2.x, not with the 3.0 ver
 
 - `POST /manifests/:iiifPresentationVersion/create`: create a single manifest, either by including the manifest in the body or its URI
 - `DELETE /manifests/:iiifPresentationVersion/delete`: delete a single manifest
+- `GET /manifests/:iiifPresentationVersion`: return an index of all manifests as a collection
 
 ### Non-routes
 
