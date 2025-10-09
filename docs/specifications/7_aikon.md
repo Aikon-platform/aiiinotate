@@ -117,7 +117,7 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 - unindex a manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L769))
 - remove all annotations for a single manifest in 1 query ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L798)). currently, we need to 
     - loop over each canvas in a manifest
-    - loop over each annotation in a manifest
+    - loop over each annotation in the canvas
     - delete that annotation in an HTTP request => tons of HTTP requests
 
 ### Other
@@ -125,12 +125,13 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 - annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
 - store rectangular annotations (bounding boxes) as well as polygonal annotations
 - canvas number management:
-    - annotation should have their canvas number as standard metdata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
+    - annotation should have their canvas number as standard metadata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
     - make annotations ordered not alphabetically (137 arriving before 14) but by canvas order
     - technically, this means that, when saving an annotation, you need to:
         - fetch the manifest of the `annotation.on`
         - index it (minimally, as a manifest URL + ordered array of canvases)
         - extract the proper canvas number for the current annotation
         - save in the annotation the canvas number
+- Create a pipeline to import SAS annotation inside new server easily
 
 
