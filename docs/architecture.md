@@ -34,9 +34,7 @@ As you can see, the `data` plugin stores the vast majority of the app's logic. I
 
 Each `route` and `class` is a fastify plugin. Since the `data` plugin is registered last, it can access functionalities from all other root plugins defined above.
 
-### Architecture and inheritence
-
-At a high level, `route` files receive data and relegate internal mongoJS interaction to the `collection classes`. Once these processes are finished, the `collection classes` return data to the `routes`, which send the response to the users.
+### Structure and inheritence
 
 ```
 ├── index.js               // `data` plugin root
@@ -51,6 +49,11 @@ At a high level, `route` files receive data and relegate internal mongoJS intera
     ├── manifests3.js      // plugin for IIIF presentation 3 manifests
     ├── routes.js          // routes for both plugins
 ```
+
+At a high level, `route` files receive data and relegate internal mongoJS interaction to the `collection classes`. Once these processes are finished, the `collection classes` return data to the `routes`, which send the response to the users. So:
+
+- the work of `routes` is to define input/output JsonSchemas and delegate to the proper `collection classes`
+- the work of `classes` is to do the database interaction, data formatting etc.
 
 Our 5 `collection classes` (`collectionAbstract`, `annotations2`, `annotations3`, `manifests2`, `manifests3`) use class inheritence: all classes inherit from `collectionAbstract`
 - `collectionAbstract` defines collection-agnostic processes that can be used by all other classes.
