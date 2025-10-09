@@ -1,6 +1,6 @@
 # aiiinotate
 
-Lightweight and fast annotation server for IIIF and Mirador 3
+aiiinotate is a fast and lightweight annotations server for IIIF. It relies on `nodejs/fastify` and `mongodb` and provides an API to read/write/update/delete IIIF annotations and index manifests.
 
 ---
 
@@ -41,7 +41,7 @@ npm cli
 Process migrations:
 
 ```
-npm migrate-(init|make|apply|revert|revert_all)
+npm migrate-(init|make|apply|revert|revert-all)
 ```
 
 ---
