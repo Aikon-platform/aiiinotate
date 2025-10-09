@@ -41,21 +41,23 @@ Routes are only implemented with IIIF Presentation API 2.x, not with the 3.0 ver
 
 ### Uniqueness
 
-As of writing (25.09.25), there are no uniqueness constraints on collections. Ideally, we would want to avoid having duplicate annotations or manifests in the database. 
+As of writing (09.10.25), there are no uniqueness constraints on annotations. There is only a uniqueness constraint on collection `manifest2` on field `manifest2.@id` (the ID of a manifest). 
 
-This is more complicated in practice: at least for `annotions2`, an annotation's `@id` field is re-generated and a random part (an UUID) is generated at insert time. This means that, when trying to store the same annotation (with the same `@id`), the `@id` is changed, and so a different value is inserted. 
+Ideally, we would want to avoid having duplicate annotations in the database. This is more complicated in practice: at least for `annotions2`, an annotation's `@id` field is re-generated and a random part (an UUID) is generated at insert time. This means that, when trying to store the same annotation (with the same `@id`), the `@id` is changed, and so a different value is inserted. 
 
-This means that we can't have a uniqueness constraint on `@id` or `id` fields of our collections. Another option would be to have a uniqueness constraint on annotation targets (no 2 annotations can annotate the same region), but this behaviour seems brittle in practice, so it's not yet implemented.
+This means that we can't have a uniqueness constraint on `@id` or `id` fields of annotations. Another option would be to have a uniqueness constraint on annotation targets (no 2 annotations can annotate the same region), but this behaviour seems brittle in practice, so it's not yet implemented.
 
 ### Concurrency
 
 For clients, concurrency/parrallelization (i.e., with JS `Promise.all()`) on insert/update should be avoided because it can cause a data race: several processes can attempt to write the same thing in parrallel. 
 
-For example, when inserting annotations, the manifests related to each annotation are inserted in parrallel. Since this is a side effect, 2 processes may unknowingly try to insert the same manifest in the database, which causes a uniqueness constraint to fail. This error can be hard to debug, so it's best to avoid concurrency.
+For example, when inserting annotations, the manifests related to each annotation are inserted in parrallel. Since this is a side effect, 2 processes may unknowingly try to insert the same manifest in the database, which causes a uniqueness constraint to fail. This error can be hard to debug, so it's best to avoid concurrency at write time.
 
 ---
 
-## Quirks
+## Dev quirks
+
+Sometimes, node/fastify can be weird. When scratching your head at dev errors, look here:)
 
 ### Error swallowing at app build
 
