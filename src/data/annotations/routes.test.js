@@ -1,0 +1,120 @@
+import test from "node:test";
+
+import build from "#src/app.js";
+
+import { v4 as uuid4 } from "uuid";
+
+import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
+import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations } from "#utils/testUtils.js";
+
+/** @typedef {import("#types").NodeTestType} NodeTestType */
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+/** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").DataOperationsType} DataOperationsType */
+
+test("test annotation Routes", async (t) => {
+
+  const
+    fastify = await build("test"),
+    testPostRoute = testPostRouteCurry(fastify),
+    testPostRouteCreate = testPostRoute("insert"),
+    testPostRouteUpdate = testPostRoute("update"),
+    testDeleteRoute = testDeleteRouteCurry(fastify),
+    testPostRouteCreateSuccess = testPostRouteCreate(true),
+    testPostRouteCreateFailure = testPostRouteCreate(false),
+    testPostRouteUpdateSuccess = testPostRouteUpdate(true),
+    testPostRouteUpdateFailure = testPostRouteUpdate(false),
+    {
+      annotationListUri,
+      annotationListUriArray,
+      annotationList,
+      annotationListArray,
+      annotationListUriInvalid,
+      annotationListUriArrayInvalid
+    } = fastify.fileServer;
+
+  await fastify.ready();
+  // close the app after running the tests
+  t.after(async () => await fastify.close());
+  // after each subtest has run, delete all database records
+  t.afterEach(async() => fastify.emptyCollections());
+
+  // NOTE: it is necessary to run the app because internally there are fetches to external data.
+  try {
+    await fastify.listen({ port: process.env.APP_PORT });
+  } catch (err) {
+    console.log("FASTIFY ERROR", err);
+    throw err;
+  }
+
+  await t.test("test route /annotations/:iiifPresentationVersion/createMany", async (t) => {
+    // truncate the contents of `annotationListArray` to avoid an `fst_err_ctp_body_too_large` error
+    // `https://fastify.dev/docs/latest/Reference/Errors/#fst_err_ctp_body_too_large`
+    const annotationListArrayLimit = annotationListArray.map(a => {
+      a.resources = a.resources.length > 500 ? a.resources.slice(0,500) : a.resources
+      return a;
+    });
+
+    //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
+    const data = [
+      [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
+      [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
+    ];
+    for ( let i=0; i<data.length; i++ ) {
+      let [ testData, func ] = data.at(i);
+      for ( let i=0; i<testData.length; i++ ) {
+        await func(t, "/annotations/2/createMany", testData.at(i));
+      }
+    }
+  })
+
+  await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
+    //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
+    const data = [
+      [fastify.fileServer.annotations2Valid, testPostRouteCreateSuccess],
+      [fastify.fileServer.annotations2Invalid, testPostRouteCreateFailure],
+    ]
+    for ( let i=0; i<data.length; i++ ) {
+      let [ testData, func ] = data.at(i);
+      for ( let i=0; i<testData.length; i++ ) {
+        await func(t, "/annotations/2/create", testData.at(i));
+      }
+    };
+  })
+
+  await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {
+    const updatePipeline = async (annotation, success) => {
+      // update the annotation
+      const
+        newLabel = `label-${uuid4()}`,
+        newBody = {
+          "@type": "cnt:ContentAsText",
+          format: "text/html",
+          value: "<p>What a grand pleasure it is to have updated this annotation !</p>"
+        };
+      annotation.label = newLabel;
+      annotation.resource = newBody;
+      if (!success) {
+        annotation["@type"] = "invalidType";
+      }
+      success
+        ? await testPostRouteUpdateSuccess(t, "/annotations/2/update", annotation)
+        : await testPostRouteUpdateFailure(t, "/annotations/2/update", annotation);
+    }
+
+    // insert valid documents and retrieve an annotation to update.
+    const
+      [ insertedCount, insertedIds ] = await injectTestAnnotations(fastify, t, annotationList),
+      idToUpdate = getRandomItem(insertedIds),  // get a random item
+      annotation = await fastify.mongo.db.collection("annotations2").findOne(
+        { "@id": idToUpdate },
+        { projection: { _id: 0 }}
+      );
+
+    await updatePipeline(annotation, true);
+    await updatePipeline(annotation, false);
+    return;
+  });
+
+  return
+})

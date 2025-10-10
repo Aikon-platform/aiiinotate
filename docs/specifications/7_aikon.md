@@ -55,6 +55,58 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 - get all annotations for a single manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L32)).
     - this behaviour is implemented by SAS but results are paginated which requires to run several queries
 - get the total number of annotations in a single manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L648))
+- get all annotations for a specific canvas
+- get all annotations for a range of canvases
+- have several "export format" for an annotation:
+    - IIIF annotation of course
+      ```
+      {
+            "@id" : "http://aikon.enpc.fr/sas/annotation/wit69_man69_anno134_c179_23f885ed66914139ab7d67d22f8f8f46",
+            "@type" : "oa:Annotation",
+            "dcterms:created" : "2025-03-03T14:40:57",
+            "dcterms:modified" : "2025-03-03T14:40:57",
+            "resource" : {
+              "@type" : "dctypes:Text",
+              "format" : "text/html",
+              "chars" : "<p></p>",
+              "https://aikon.enpc.fr/sas/full_text" : "",
+              "https://iscd.huma-num.fr/sas/full_text" : ""
+            },
+            "on" : "https://aikon.enpc.fr/aikon/iiif/v2/wit69_man69_anno134/canvas/c179.json#xywh=52,1221,891,54",
+            "motivation" : [ "oa:tagging", "oa:commenting" ],
+            "@context" : "http://iiif.io/* TLSv1.2 (IN), TLS header, Supplemental data (23):
+        api/presentation/2/context.json",
+            "label" : ""
+      }
+      ```
+    - standardized metadata (used in application for svelte) (e.g. `https://iscd.huma-num.fr/vhs/witness/2339/regions/canvas`)
+      ```
+      r_annos[canvas][aid] = {
+            "id": aid,
+            "ref": f"{img}_{xywh}",
+            "class": "Region",
+            "type": get_name("Regions"),
+            "title": region_title(canvas, xywh),
+            "url": gen_iiif_url(img, res=f"{xywh}/full/0"),
+            "canvas": canvas,
+            "xywh": xywh.split(","),
+            "img": img,
+      }
+      ```
+    - only ids
+      ```
+      manifest_annotations.extend(
+          annotation["@id"] for annotation in annotations["resources"]
+      )
+      ```
+    - API url list (e.g. [`https://iscd.huma-num.fr/vhs/witness/2339/regions/canvas`](https://iscd.huma-num.fr/vhs/wit249_man249_anno249/list/))
+      ```
+      "wit249_man249_0021_695,1020,123,214": "https://iscd.huma-num.fr/iiif/2/wit249_man249_0021.jpg/695,1020,123,214/full/0/default.jpg",
+      "wit249_man249_0021_880,1032,421,135": "https://iscd.huma-num.fr/iiif/2/wit249_man249_0021.jpg/880,1032,421,135/full/0/default.jpg",
+      "wit249_man249_0021_167,1282,505,770": "https://iscd.huma-num.fr/iiif/2/wit249_man249_0021.jpg/167,1282,505,770/full/0/default.jpg",
+      "wit249_man249_0021_308,1179,220,236": "https://iscd.huma-num.fr/iiif/2/wit249_man249_0021.jpg/308,1179,220,236/full/0/default.jpg",
+      "wit249_man249_0021_207,1013,468,149": "https://iscd.huma-num.fr/iiif/2/wit249_man249_0021.jpg/207,1013,468,149/full/0/default.jpg"
+      ```
 
 ### Create / update data
 
@@ -65,12 +117,21 @@ Hre we desribe the functionnalities our annotation server should implement, and 
 - unindex a manifest ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L769))
 - remove all annotations for a single manifest in 1 query ([code](https://github.com/Aikon-platform/aikon/blob/cc8430c52e205e6a1c04c4ae84f69126fb5a3bda/front/app/webapp/utils/iiif/annotation.py#L798)). currently, we need to 
     - loop over each canvas in a manifest
-    - loop over each annotation in a manifest
+    - loop over each annotation in the canvas
     - delete that annotation in an HTTP request => tons of HTTP requests
 
 ### Other
 
 - annotations should be ordered by their position on the page (or have a method that returns annotations ordered)
 - store rectangular annotations (bounding boxes) as well as polygonal annotations
+- canvas number management:
+    - annotation should have their canvas number as standard metadata (for now we need to parse `canvas = anno["on"].split("/canvas/c")[1].split(".json")[0]` 😰)
+    - make annotations ordered not alphabetically (137 arriving before 14) but by canvas order
+    - technically, this means that, when saving an annotation, you need to:
+        - fetch the manifest of the `annotation.on`
+        - index it (minimally, as a manifest URL + ordered array of canvases)
+        - extract the proper canvas number for the current annotation
+        - save in the annotation the canvas number
+- Create a pipeline to import SAS annotation inside new server easily
 
 
