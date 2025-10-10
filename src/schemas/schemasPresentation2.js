@@ -110,22 +110,40 @@ function addSchemas(fastify, options, done) {
     }
   })
 
+  fastify.addSchema({
+    $id: makeSchemaUri("oaOrIiifSelector"),
+    oneOf: [
+      { $ref: makeSchemaUri("oaSelector") },
+      { $ref: makeSchemaUri("iiifImageApiSelector") },
+    ]
+  })
+
+  fastify.addSchema({
+    $id: makeSchemaUri("oaChoiceSelector"),
+    required: [ "@type", "default" ],
+    properties: {
+      "@type": { type: "string", enum: ["oa:Choice"] },
+      default: { $ref: makeSchemaUri("oaOrIiifSelector") },
+      item: { $ref: makeSchemaUri("oaOrIiifSelector") }
+    }
+  })
+
   // selector is either a string, string[], iiifImageApiSelector, iiifImageApiSelector[]. oaSelector, oaSelector[]
   fastify.addSchema({
     $id: makeSchemaUri("selector"),
     anyOf: [
       { type: "string" },
       { type: "array", items: { type: "string" } },
-      { $ref: makeSchemaUri("oaSelector") },
-      { $ref: makeSchemaUri("iiifImageApiSelector") },
+      { $ref: makeSchemaUri("oaOrIiifSelector") },
+      { $ref: makeSchemaUri("oaChoiceSelector") },
       {
         type: "array",
-        items: { $ref: makeSchemaUri("oaSelector") }
+        items: [ { $ref: makeSchemaUri("oaOrIiifSelector") } ]
       },
-      {
-        type: "array",
-        items: { $ref: makeSchemaUri("iiifImageApiSelector") }
-      }
+      // {
+      //   type: "array",
+      //   items: { $ref: makeSchemaUri("iiifImageApiSelector") }
+      // }
     ]
   })
 

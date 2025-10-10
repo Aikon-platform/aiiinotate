@@ -1,13 +1,11 @@
-/**
- * return structures for insert/updates/deletes
- * NOTE: ids should be converted to IIIF ids instead of the mongo idss returned by mongo
- */
+import { inspectObj } from "#utils/utils.js";
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+
 /**
  * TODO: update to handle nvx cas de figure (preExistingIds, rejectedIds)
  * @param {string[]} insertedIds
@@ -99,7 +97,7 @@ const makeResponsePostSchena = (fastify) => makeResponseSchema(
  */
 const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
   // otherwise, the error is not logged, bad for debugging.
-  console.error(err);
+  console.error(inspectObj(err));
 
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
