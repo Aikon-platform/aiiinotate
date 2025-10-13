@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
+import { makeResponseSchema, makeResponsePostSchema, returnError } from "#utils/routeUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -65,11 +65,11 @@ function annotationsRoutes(fastify, options, done) {
     /** @type {Annotations3InstanceType} */
     annotations3 = fastify.annotations3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
-    routeAnnotations2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
-    responsePostSchema = makeResponsePostSchena(fastify);
+    iiifAnnotation2Schema = fastify.schemasPresentation2.getSchema("annotation"),
+    responsePostSchema = makeResponsePostSchema(fastify);
 
   /////////////////////////////////////////////////////////
   // get routes
@@ -92,14 +92,15 @@ function annotationsRoutes(fastify, options, done) {
             asAnnotationList: { type: "boolean" },
           }
         },
-        response: {
-          200: {
+        response: makeResponseSchema(
+          fastify,
+          {
             oneOf: [
               fastify.schemasResolver(iiifAnnotationListSchema),
               fastify.schemasResolver(iiifAnnotation2ArraySchema)
             ]
-          }
-        }
+          },
+        )
       },
     },
     async (request, reply) => {
@@ -110,7 +111,7 @@ function annotationsRoutes(fastify, options, done) {
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
+          return await annotations2.getAnnotationByCanvasUri(queryUrl, uri, asAnnotationList);
         } else {
           annotations3.notImplementedError();
         }
@@ -119,6 +120,35 @@ function annotationsRoutes(fastify, options, done) {
       }
     }
   );
+
+  /** retrieve a single annotation by its "@id"|"id". this route defers an annotation */
+  fastify.get(
+    "/data/:iiifPresentationVersion/:manifestShortId/annotation/:annotationShortId",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema,
+            manifestShortId: { type: "string" },
+            annotationShortId: { type: "string" },
+          }
+        },
+        response: makeResponseSchema(
+          fastify,
+          fastify.schemasResolver(iiifAnnotation2Schema)
+        )
+      }
+    },
+    async (request, reply) => {
+      const
+        annotationUri =pathToUrl(request.url),
+        { iiifPresentationVersion} = request.params;
+      return iiifPresentationVersion === 2
+        ? annotations2.getAnnotationById(annotationUri)
+        : annotations3.notImplementedError();
+    }
+  )
 
   /////////////////////////////////////////////////////////
   // create/update routes

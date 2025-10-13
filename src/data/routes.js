@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair } from "#utils/utils.js";
-import { returnError, makeResponsePostSchena } from "#utils/routeUtils.js";
+import { returnError, makeResponsePostSchema } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
@@ -27,7 +27,7 @@ function commonRoutes(fastify, options, done) {
     iiifSearchApiVersionSchema = fastify.schemasBase.getSchema("search"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
-    responsePostSchema = makeResponsePostSchena(fastify),
+    responsePostSchema = makeResponsePostSchema(fastify),
     validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasResolver(
       fastify.schemasRoutes.getSchema("routeAnnotationDelete")
     )),
