@@ -135,8 +135,31 @@ const maybeToArray = (x, convertedFlag=false) =>
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`
 
-const inspectObj = (obj) =>
-  util.inspect(obj, {showHidden: false, depth: null, colors: true});
+/**
+ * display a detailed and nested view of an object. to be used with console.log.
+ * @param {any} obj - object to inspect
+ * @param {*} maxLines - maximum number of lines in string output. defaults to 100.
+ * @returns
+ */
+const inspectObj = (obj, maxLines=100) => {
+  const
+    str = util.inspect(obj, {showHidden: false, depth: null, colors: true}),
+    strArr = str.split("\n"),
+    strLen = strArr.length;
+  // remove the middle lines if `str` is too long
+  if ( strLen > maxLines ) {
+    const
+      startProportion = 0.8,
+      startSlice = strArr.slice(0, Math.round(0.8 * maxLines)),
+      endSlice = strArr.slice(-Math.round((1-startProportion) * maxLines), -1);
+    return (
+      startSlice.join("\n")
+      + `\n ... inspectObj: ${strLen - maxLines} lines omitted ... \n`
+      + endSlice.join("\n")
+    )
+  }
+  return str;
+}
 
 /**
  * return a random item from an array.

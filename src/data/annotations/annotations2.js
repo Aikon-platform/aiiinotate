@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -277,7 +277,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {object?} projectionObj - extra projection fields to tailor the reponse format
    * @returns {Promise<object[]>}
    */
-  async find(queryObj, projectionObj) {
+  async find(queryObj, projectionObj={}) {
     // 1. construct the final projection object, knowing that we can't mix exclusive and inclusive projectin.
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
@@ -285,11 +285,13 @@ class Annotations2 extends CollectionAbstract {
         .filter(([k,v]) => k !== "_id")
         .map(([k,v]) => v);
 
-    if ( projectionValues.find((x) => ![0,1].includes(x)) ) {
+    // if there are projection values defined and if they're not 0 or 1, then they're invalid => throw
+    if ( projectionValues.length && projectionValues.find((x) => ![0,1].includes(x)) ) {
       throw this.readError(`Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
     }
+    // mongo projection can be either inclusive (define only fields that will be included) or negative (define only fields that will be excluded), but not a mix of the 2. if you have more than 1 distinct values, you mixed inclusion and exclusion => throw
     const distinctProjectionValues = [...new Set(projectionValues)]
-    if ( distinctProjectionValues.length !== 1 ) {
+    if ( distinctProjectionValues.length > 1 ) {
       throw this.readError(`Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
     }
     // negative projection: all fields will be included except for those specified.

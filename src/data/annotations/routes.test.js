@@ -4,7 +4,7 @@ import build from "#src/app.js";
 
 import { v4 as uuid4 } from "uuid";
 
-import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
+import { inspectObj, isObject, getRandomItem, visibleLog } from "#utils/utils.js"
 import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -115,6 +115,34 @@ test("test annotation Routes", async (t) => {
     await updatePipeline(annotation, false);
     return;
   });
+
+  await t.test("test route /annotations/:iiifPresentationVersion/search", async (t) => {
+    await injectTestAnnotations(fastify, t, annotationList);
+    await Promise.all(
+      [false, true].map(async (asAnnotationList) => {
+        const
+          annotation = await getRandomItem(
+            await fastify.mongo.db.collection("annotations2").find().toArray()
+          ),
+          canvasId = annotation.on.full,
+          r = await fastify.inject({
+            method: "GET",
+            url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
+          }),
+          body = await r.json();
+        visibleLog([r.statusCode, body]);
+        t.assert.deepStrictEqual(r.statusCode, 200);
+        if ( asAnnotationList ) {
+          // TODO
+        } else {
+          t.assert.deepStrictEqual(Array.isArray(body), true)
+          t.assert.deepStrictEqual(body.length > 0, true);
+        }
+
+      })
+    )
+
+  })
 
   return
 })

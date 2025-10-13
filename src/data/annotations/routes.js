@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair } from "#utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponsePostSchena, returnError } from "#utils/routeUtils.js";
 
 
@@ -71,6 +71,9 @@ function annotationsRoutes(fastify, options, done) {
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
     responsePostSchema = makeResponsePostSchena(fastify);
 
+  // visibleLog(iiifAnnotationListSchema, "iiifAnnotationListSchema");
+  // visibleLog(fastify.schemasPresentation2.getSchema("annotation"), "iiifAnnotationSchema");
+
   /////////////////////////////////////////////////////////
   // get routes
 
@@ -94,7 +97,10 @@ function annotationsRoutes(fastify, options, done) {
         },
         response: {
           200: {
-            anyOf: [ iiifAnnotationListSchema, iiifAnnotation2ArraySchema ]
+            oneOf: [
+              fastify.schemasToMongo(iiifAnnotationListSchema),
+              fastify.schemasToMongo(iiifAnnotation2ArraySchema)
+            ]
           }
         }
       },
@@ -107,7 +113,7 @@ function annotationsRoutes(fastify, options, done) {
 
       try {
         if (iiifPresentationVersion === 2) {
-          const res = annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
+          const res = await annotations2.findFromCanvasUri(queryUrl, uri, asAnnotationList);
           return res;
         } else {
           annotations3.notImplementedError();

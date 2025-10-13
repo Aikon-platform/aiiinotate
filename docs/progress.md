@@ -87,3 +87,73 @@ test
 - find a way to stisfyingly use `try...catch` at plugin registration.
 - look into these issues: [2694](https://github.com/fastify/fastify/issues/2694)
     - in particular, it may be an issue specific to async plugins ?
+
+### Route response schema definition
+
+For some reason, route schema definition is much less flexible for responses than for queries. 
+
+#### The problem
+
+**Query schemas**: In queries (`schema.params` or `schema.querystring`), fastify is very permissive. You can use unresolved schemas (with `$ref`), save entire schemas as JsonSchemas ...
+
+**Response schemas**: Response schemas have more constraints.
+- **response schemas are defined at route level** and cannot be stored as full JsonSchemas: 
+    ```js
+    // this will be an invalid response schema: it is trying to store a complete response schema as a JsonSchema
+    fastify.addSchema({
+        $id: makeSchemaUri("routeResponsePost"),
+        properties: {
+            200: { ... },
+            500: { ... },
+        }
+    })
+
+    // this is a fixed version: an object containing schemas, not a full JsonSchema, to be used inside a Route definition
+    schema: {
+        response: {
+            200: { ... },
+            500: { ... }
+        }
+    }
+    // if you want to reuse a schema, store it as a JS object and import it.
+    ```
+- **unresolved response schemas (`$ref`) are forbidden**. You cannot use `$ref`. In the app, use `fastify.schemasToMongo` to resolve the schema to a plain `JsonSchema` without `$ref`.
+
+#### The fix
+
+In short, here's **how to use shared schemas in responses**:
+1. Define payload schemas for different response cases:
+    ```js
+    // in case of a POST success
+    fastify.addSchema({
+        $id: makeSchemaUri("routeResponseInsert"),
+        type: "object",
+        // ...properties
+    });
+
+    // in case of a POST error
+    fastify.addSchema({
+        $id: makeSchemaUri("routeResponseError"),
+        type: "object",
+        // ...properties
+    });
+    ```
+2. 
+2. Resolve schemas and use in responses
+    ```js
+    const routeResponseInsert = fastify.getSchema("...");
+    const routeResponseError = fastify.getSchema("...");
+    fastify.post(
+        "/annotations/:iiifPresentationVersion/create",
+        {
+            schema: {
+                body: routeAnnotations2Or3Schema,
+                response: {
+                    200: routeResponseInsert,
+                    500: routeResponseError
+               }
+            }
+        },
+        async (req, rep) => {}
+    )
+    ```
