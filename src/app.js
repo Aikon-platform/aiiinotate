@@ -47,6 +47,7 @@ async function build(mode="default") {
   // NOTE: we allow all origins => restrict ?
   fastify.register(cors, {
     origin: "*",
+    methods: ["GET", "HEAD", "POST", "DELETE"]
   });
 
   await fastify.register(db, mongoConfig);
