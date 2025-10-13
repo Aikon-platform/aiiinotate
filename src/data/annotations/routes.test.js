@@ -119,7 +119,9 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/search", async (t) => {
     await injectTestAnnotations(fastify, t, annotationList);
     await Promise.all(
+      // `asAnnotationList` is a boolean defining if we should return an array or an annotationList.
       [false, true].map(async (asAnnotationList) => {
+
         const
           annotation = await getRandomItem(
             await fastify.mongo.db.collection("annotations2").find().toArray()
@@ -130,10 +132,11 @@ test("test annotation Routes", async (t) => {
             url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
           }),
           body = await r.json();
-        visibleLog([r.statusCode, body]);
+
         t.assert.deepStrictEqual(r.statusCode, 200);
         if ( asAnnotationList ) {
-          // TODO
+          // we have aldready defined responses for both cases of `asAnnotationList`, so we just need to check that the response is of a proper type
+          t.assert.deepStrictEqual(Array.isArray(body), false);
         } else {
           t.assert.deepStrictEqual(Array.isArray(body), true)
           t.assert.deepStrictEqual(body.length > 0, true);

@@ -173,6 +173,7 @@ const canvasUriToManifestUri = (canvasUri) =>
 const toAnnotationList = (resources, annotationListId, label) => {
   const annotationList = {
     ...IIIF_PRESENTATION_2_CONTEXT,
+    "@type": "sc:AnnotationList",
     "@id": annotationListId || "",  // NOTE: MUST be defined according to IIIF presentation API (but not always defined in SAS)
     resources: resources
   }
