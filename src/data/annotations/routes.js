@@ -95,8 +95,8 @@ function annotationsRoutes(fastify, options, done) {
         response: {
           200: {
             oneOf: [
-              fastify.schemasToMongo(iiifAnnotationListSchema),
-              fastify.schemasToMongo(iiifAnnotation2ArraySchema)
+              fastify.schemasResolver(iiifAnnotationListSchema),
+              fastify.schemasResolver(iiifAnnotation2ArraySchema)
             ]
           }
         }

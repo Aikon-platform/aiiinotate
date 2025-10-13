@@ -50,7 +50,7 @@ class Annotations2 extends CollectionAbstract {
     /** @type {Manifests2InstanceType} */
     this.manifestsPlugin = this.fastify.manifests2;
     /** @type {AjvValidateFunctionType} */
-    this.validatorAnnotationList = ajvCompile(fastify.schemasToMongo(
+    this.validatorAnnotationList = ajvCompile(fastify.schemasResolver(
       fastify.schemasPresentation2.getSchema("annotationList")
     ));
   }

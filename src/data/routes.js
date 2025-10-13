@@ -28,10 +28,10 @@ function commonRoutes(fastify, options, done) {
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
     responsePostSchema = makeResponsePostSchena(fastify),
-    validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasToMongo(
+    validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasResolver(
       fastify.schemasRoutes.getSchema("routeAnnotationDelete")
     )),
-    validatorRouteManifestDeleteSchema = ajvCompile(fastify.schemasToMongo(
+    validatorRouteManifestDeleteSchema = ajvCompile(fastify.schemasResolver(
       fastify.schemasRoutes.getSchema("routeManifestDelete")
     ));
 
