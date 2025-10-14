@@ -245,10 +245,19 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("body"),
-    type: "object",
-    anyOf: [
+    oneOf: [
       { $ref: makeSchemaUri("embeddedBody") },
       { $ref: makeSchemaUri("referencedBody") },
+      {
+        type: "array",
+        items: {
+          type: "object",
+          anyOf: [
+            { $ref: makeSchemaUri("embeddedBody") },
+            { $ref: makeSchemaUri("referencedBody") },
+          ]
+        }
+      }
     ]
   })
 

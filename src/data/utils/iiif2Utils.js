@@ -90,7 +90,7 @@ const makeTarget = (annotation) => {
     // must be either string or SpecificResource
     target = annotation.on,
     // error that will raise is `target` can't be processed
-    err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI or an object with 'annotation.on.@type==="oa:SpecificResource"' and 'annotation.on.@id' must be a string URI (annotation=${annotation})`);
+    err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI or an object with 'annotation.on.@type==="oa:SpecificResource"' and 'annotation.on.@id' must be a string URI`, { info: annotation });
 
   let specificResource;
 

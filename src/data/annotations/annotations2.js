@@ -59,6 +59,44 @@ class Annotations2 extends CollectionAbstract {
   // utils
 
   /**
+   * clean the body of an annotation (annotation.resource).
+   * if `annotation.resource` is an array (there are several bodies associated to that annotation), this function must be called on each item of the array
+   * @param {object} resource
+   * @returns {object | null} - the resource, or `null` if the resource is either an empty Embedded Textual Body or has no `@id`
+   */
+  #cleanAnnotationResource(resource) {
+    if ( resource ) {
+      // 1) uniformize embedded textual body keys
+      // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
+      resource["@type"] =
+        resource["@type"] === "cnt:ContentAsText"
+          ? "dctypes:Text"
+          : resource["@type"];
+
+      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
+      resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
+      // delete the alternate keys
+      [ "value", "cnt:chars" ].map((k) => {
+        if ( Object.keys(resource).includes(k) ) {
+          delete resource[k];
+        }
+      })
+
+      // 2) return `null` if resource is empty. a body is empty if
+      //  - it's got no `@id` (=> it's not a referenced textaul body)
+      //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
+      // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
+      const
+        hasTextualBody = objectHasKey(resource, "chars"),
+        emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
+      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
+        return null
+      }
+    }
+    return resource;
+  }
+
+  /**
    * clean an annotation before saving it to database.
    * some of the work consists of translating what is defined by the OpenAnnotations standard to what is actually used by IIIF annotations.
    * if `update`, some cleaning will be skipped (especially the redefinition of "@id"), otherwise updates would fail.
@@ -98,34 +136,18 @@ class Annotations2 extends CollectionAbstract {
             : `oa:${motiv}`
         );
 
-    const resource = annotation.resource || undefined;
+    // 3) process the resource. Resource can be either undefined, an array of objects or a single object. process all objects and, if there's no resource content, delete `annotation.resource`.
+    let resource = annotation.resource || undefined;
     if ( resource ) {
-      // 3) uniformize embedded textual body keys
-      // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
-      resource["@type"] =
-        resource["@type"] === "cnt:ContentAsText"
-          ? "dctypes:Text"
-          : resource["@type"];
-      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
-      resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
-
-      [ "value", "cnt:chars" ].map((k) => {
-        if ( Object.keys(resource).includes(k) ) {
-          delete resource[k];
-        }
-      })
-
-      // 4) delete body if it's empty. a body is empty if
-      //  - it's got no `@id` and
-      //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
-      // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
-      const
-        hasTextualBody = objectHasKey(resource, "chars"),
-        emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
-
-      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
-        delete(annotation.resource);
-      }
+      resource =
+        Array.isArray(resource)
+          ? resource.map((r) => this.#cleanAnnotationResource(r)).filter((r) => r !== null)
+          : this.#cleanAnnotationResource(resource);
+    }
+    if ( resource === null || resource === undefined || !resource.length ) {
+      delete annotation.resource;
+    } else {
+      annotation.resource = resource;
     }
     return annotation;
   }
