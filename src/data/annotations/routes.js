@@ -111,7 +111,7 @@ function annotationsRoutes(fastify, options, done) {
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.findAnnotationByCanvasUri(queryUrl, uri, asAnnotationList);
+          return await annotations2.findByCanvasUri(queryUrl, uri, asAnnotationList);
         } else {
           annotations3.notImplementedError();
         }
@@ -146,7 +146,7 @@ function annotationsRoutes(fastify, options, done) {
         { iiifPresentationVersion} = request.params;
       try {
         return iiifPresentationVersion === 2
-          ? annotations2.findAnnotationById(annotationUri)
+          ? annotations2.findById(annotationUri)
           : annotations3.notImplementedError();
       } catch (err) {
         returnError(request, reply, err);

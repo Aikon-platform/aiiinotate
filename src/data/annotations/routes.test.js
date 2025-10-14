@@ -158,8 +158,8 @@ test("test annotation Routes", async (t) => {
         const
           annotationIdQuery =
             shouldExist
-            ? annotationId.replace(process.env.APP_BASE_URL, "")
-            : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+              ? annotationId.replace(process.env.APP_BASE_URL, "")
+              : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
           r = await fastify.inject({
             method: "GET",
             url: annotationIdQuery
