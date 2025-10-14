@@ -80,7 +80,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationListOrPageUriArray"),
     type: "array",
-    items: [{ $ref: "routeAnnotationListOrPageUri" }]
+    items: { $ref: "routeAnnotationListOrPageUri" }
   });
 
   fastify.addSchema({
@@ -176,6 +176,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("routeManifestDelete"),
+    type: "object",
     oneOf: [
       {
         type: "object",
@@ -195,6 +196,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("routeDelete"),
+    type: "object",
     oneOf: [
       { $ref: makeSchemaUri("routeAnnotationDelete") },
       { $ref: makeSchemaUri("routeManifestDelete") },

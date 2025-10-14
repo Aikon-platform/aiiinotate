@@ -112,6 +112,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("oaOrIiifSelector"),
+    type: "object",
     oneOf: [
       { $ref: makeSchemaUri("oaSelector") },
       { $ref: makeSchemaUri("iiifImageApiSelector") },
@@ -120,6 +121,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("oaChoiceSelector"),
+    type: "object",
     required: [ "@type", "default" ],
     properties: {
       "@type": { type: "string", enum: ["oa:Choice"] },
@@ -138,7 +140,7 @@ function addSchemas(fastify, options, done) {
       { $ref: makeSchemaUri("oaChoiceSelector") },
       {
         type: "array",
-        items: [ { $ref: makeSchemaUri("oaOrIiifSelector") } ]
+        items: { $ref: makeSchemaUri("oaOrIiifSelector") }
       },
       // {
       //   type: "array",
@@ -243,6 +245,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("body"),
+    type: "object",
     anyOf: [
       { $ref: makeSchemaUri("embeddedBody") },
       { $ref: makeSchemaUri("referencedBody") },
@@ -297,6 +300,7 @@ function addSchemas(fastify, options, done) {
   // manifests are just stored as an @id, a short ID, an array of canvas Ids. we don't need more info.
   fastify.addSchema({
     $id: makeSchemaUri("manifestMongo"),
+    type: "object",
     required: ["@id", "manifestShortId", "canvasIds"],
     properties: {
       "@id": { type: "string" },
@@ -349,16 +353,14 @@ function addSchemas(fastify, options, done) {
       label: { type: "string" },
       members: {
         type: "array",
-        items: [
-          {
-            type: "object",
-            required: ["@id"],
-            properties: {
-              "@id": { type: "string" },
-              "@type": { type: "string", enum: [ "sc:Manifest" ] },
-            }
+        items: {
+          type: "object",
+          required: ["@id"],
+          properties: {
+            "@id": { type: "string" },
+            "@type": { type: "string", enum: [ "sc:Manifest" ] },
           }
-        ]
+        }
       }
     }
   });

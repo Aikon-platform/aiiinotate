@@ -14,7 +14,7 @@ export const up = async (db, client) => {
   const
     fastify = await build(),
     fastifySchema = fastify.schemasPresentation2.getSchema("annotation"),
-    schema = fastify.schemasToMongo(fastifySchema),
+    schema = fastify.schemasResolver(fastifySchema),
     commandDoc = {
       collMod: "annotations2",
       validator: { $jsonSchema: schema }
