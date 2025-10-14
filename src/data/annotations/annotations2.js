@@ -144,7 +144,7 @@ class Annotations2 extends CollectionAbstract {
           ? resource.map((r) => this.#cleanAnnotationResource(r)).filter((r) => r !== null)
           : this.#cleanAnnotationResource(resource);
     }
-    if ( resource === null || resource === undefined || !resource.length ) {
+    if ( resource === null || resource === undefined || (Array.isArray(resource) && !resource.length) ) {
       delete annotation.resource;
     } else {
       annotation.resource = resource;
