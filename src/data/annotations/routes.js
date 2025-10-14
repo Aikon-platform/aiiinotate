@@ -111,7 +111,7 @@ function annotationsRoutes(fastify, options, done) {
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.getAnnotationByCanvasUri(queryUrl, uri, asAnnotationList);
+          return await annotations2.findAnnotationByCanvasUri(queryUrl, uri, asAnnotationList);
         } else {
           annotations3.notImplementedError();
         }
@@ -142,11 +142,15 @@ function annotationsRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        annotationUri =pathToUrl(request.url),
+        annotationUri = pathToUrl(request.url),
         { iiifPresentationVersion} = request.params;
-      return iiifPresentationVersion === 2
-        ? annotations2.getAnnotationById(annotationUri)
-        : annotations3.notImplementedError();
+      try {
+        return iiifPresentationVersion === 2
+          ? annotations2.findAnnotationById(annotationUri)
+          : annotations3.notImplementedError();
+      } catch (err) {
+        returnError(request, reply, err);
+      }
     }
   )
 

@@ -147,5 +147,34 @@ test("test annotation Routes", async (t) => {
 
   })
 
+  await t.test("test route /data/:iiifPresentationVersion/:manifestShortId/annotation/:annotationShortId", async (t) => {
+    await injectTestAnnotations(fastify, t, annotationList);
+    const annotationId = await getRandomItem(
+      await fastify.mongo.db.collection("annotations2").find().toArray()
+    )["@id"];
+    await Promise.all(
+      // if shouldExist, search an annotation that exists, otherwise, search an annotation that does not exist. test accordingly.
+      [true, false].map(async (shouldExist) => {
+        const
+          annotationIdQuery =
+            shouldExist
+            ? annotationId.replace(process.env.APP_BASE_URL, "")
+            : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+          r = await fastify.inject({
+            method: "GET",
+            url: annotationIdQuery
+          }),
+          body = await r.json();
+
+        t.assert.deepStrictEqual(r.statusCode, 200);
+        if ( shouldExist ) {
+          t.assert.deepStrictEqual(body["@id"]===annotationId, true);
+        } else {
+          t.assert.deepStrictEqual(Object.keys(body).length === 0, true);
+        }
+      })
+    )
+  })
+
   return
 })

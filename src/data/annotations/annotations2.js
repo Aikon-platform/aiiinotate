@@ -367,7 +367,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async getAnnotationByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
+  async findAnnotationByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
     const annotations = await this.find({
       "on.full": canvasUri
     });
@@ -380,7 +380,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {string} annotationUri
    * @returns {Promise<object>}  the annotation, or `{}` if none was found
    */
-  async getAnnotationById(annotationUri) {
+  async findAnnotationById(annotationUri) {
     return this.collection.findOne({ "@id": annotationUri })
   }
 
