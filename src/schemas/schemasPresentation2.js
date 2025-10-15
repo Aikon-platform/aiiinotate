@@ -261,6 +261,14 @@ function addSchemas(fastify, options, done) {
     ]
   })
 
+  // NOTE: maeData is used by `mirador-annotations-editor` (MAE) to store data specific to that mirador plugin. since MAE is external to the Aikon ecosystem, we don't define it further to avoid errors if/when its data format changes.
+  // we set additionalProperties: true, because otherwise, writing annotations to database will be fine, but sending responses will strip out the contents of maeData.
+  fastify.addSchema({
+    $id: makeSchemaUri("maeData"),
+    additionalProperties: true,
+    type: "object"
+  })
+
   fastify.addSchema({
     $id: makeSchemaUri("annotation"),
     type: "object",
@@ -273,8 +281,9 @@ function addSchemas(fastify, options, done) {
       on: { $ref: makeSchemaUri("annotationTarget") },
       // in OA, one OR the other should be use, but `oneOf` can't be used in `properties`.
       resource: { $ref: makeSchemaUri("body") },
-      bodyValue: { type: "string" }
-    }
+      bodyValue: { type: "string" },
+      maeData: { $ref: makeSchemaUri("maeData") }
+    },
   });
 
   fastify.addSchema({
