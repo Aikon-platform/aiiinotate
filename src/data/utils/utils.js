@@ -135,8 +135,31 @@ const maybeToArray = (x, convertedFlag=false) =>
 const pathToUrl = (path) =>
   `${process.env.APP_BASE_URL}${path}`
 
-const inspectObj = (obj) =>
-  util.inspect(obj, {showHidden: false, depth: null, colors: true});
+/**
+ * display a detailed and nested view of an object. to be used with console.log.
+ * @param {any} obj - object to inspect
+ * @param {number|Infinity} maxLines - maximum number of lines in string output. defaults to 100.
+ * @returns
+ */
+const inspectObj = (obj, maxLines=100) => {
+  const
+    str = util.inspect(obj, {showHidden: false, depth: null, colors: true}),
+    strArr = str.split("\n"),
+    strLen = strArr.length;
+  // remove the middle lines if `str` is too long
+  if ( strLen > maxLines ) {
+    const
+      startProportion = 0.8,
+      startSlice = strArr.slice(0, Math.round(0.8 * maxLines)),
+      endSlice = strArr.slice(-Math.round((1-startProportion) * maxLines), -1);
+    return (
+      startSlice.join("\n")
+      + `\n ... inspectObj: ${strLen - maxLines} lines omitted ... \n`
+      + endSlice.join("\n")
+    )
+  }
+  return str;
+}
 
 /**
  * return a random item from an array.
@@ -159,14 +182,14 @@ const ajv = new Ajv({
 })
 
 /**
- * wrapper for `ajv.compile`. `schema` must be a schema resolved using `fastify.schemasToMongo()`
+ * wrapper for `ajv.compile`. `schema` must be a schema resolved using `fastify.schemasResolver()`
  * NOTE: this function exists because using the native `ajv.compile` on fastify schemas (with `$id`, `$ref`...) causes tests to fail WITHOUT launching an error., making it very hard to debug
  * @param {object} schema - jsonSchema
  * @returns {import("#types").AjvValidateFunctionType}
  */
 const ajvCompile = (schema) => {
   if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
-    const err = new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasToMongo()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
+    const err = new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
     // `console.error` is necessary to be sure that the error will be displayed
     console.error(err);
     throw err;

@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin";
 
-import { makeResponsePostSchena, returnError, makeResponseSchema } from "#utils/routeUtils.js";
+import { makeResponsePostSchema, returnError, makeResponseSchema } from "#utils/routeUtils.js";
 import { objectHasKey, getFirstNonEmptyPair } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -19,7 +19,7 @@ function manifestsRoutes(fastify, options, done) {
     /** @type {Manifests3InstanceType} */
     manifests3 = fastify.manifests3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
-    responsePostSchema = makeResponsePostSchena(fastify),
+    responsePostSchema = makeResponsePostSchema(fastify),
     collectionSchema = makeResponseSchema(fastify, fastify.schemasPresentation2.getSchema("collection"));
 
   ///////////////////////////////////////////////

@@ -4,7 +4,7 @@ import build from "#src/app.js";
 
 import { v4 as uuid4 } from "uuid";
 
-import { inspectObj, isObject, getRandomItem } from "#utils/utils.js"
+import { inspectObj, isObject, getRandomItem, visibleLog } from "#utils/utils.js"
 import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -115,6 +115,66 @@ test("test annotation Routes", async (t) => {
     await updatePipeline(annotation, false);
     return;
   });
+
+  await t.test("test route /annotations/:iiifPresentationVersion/search", async (t) => {
+    await injectTestAnnotations(fastify, t, annotationList);
+    await Promise.all(
+      // `asAnnotationList` is a boolean defining if we should return an array or an annotationList.
+      [false, true].map(async (asAnnotationList) => {
+
+        const
+          annotation = await getRandomItem(
+            await fastify.mongo.db.collection("annotations2").find().toArray()
+          ),
+          canvasId = annotation.on.full,
+          r = await fastify.inject({
+            method: "GET",
+            url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
+          }),
+          body = await r.json();
+
+        t.assert.deepStrictEqual(r.statusCode, 200);
+        if ( asAnnotationList ) {
+          // we have aldready defined responses for both cases of `asAnnotationList`, so we just need to check that the response is of a proper type
+          t.assert.deepStrictEqual(Array.isArray(body), false);
+        } else {
+          t.assert.deepStrictEqual(Array.isArray(body), true)
+          t.assert.deepStrictEqual(body.length > 0, true);
+        }
+
+      })
+    )
+
+  })
+
+  await t.test("test route /data/:iiifPresentationVersion/:manifestShortId/annotation/:annotationShortId", async (t) => {
+    await injectTestAnnotations(fastify, t, annotationList);
+    const annotationId = await getRandomItem(
+      await fastify.mongo.db.collection("annotations2").find().toArray()
+    )["@id"];
+    await Promise.all(
+      // if shouldExist, search an annotation that exists, otherwise, search an annotation that does not exist. test accordingly.
+      [true, false].map(async (shouldExist) => {
+        const
+          annotationIdQuery =
+            shouldExist
+              ? annotationId.replace(process.env.APP_BASE_URL, "")
+              : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+          r = await fastify.inject({
+            method: "GET",
+            url: annotationIdQuery
+          }),
+          body = await r.json();
+
+        t.assert.deepStrictEqual(r.statusCode, 200);
+        if ( shouldExist ) {
+          t.assert.deepStrictEqual(body["@id"]===annotationId, true);
+        } else {
+          t.assert.deepStrictEqual(Object.keys(body).length === 0, true);
+        }
+      })
+    )
+  })
 
   return
 })

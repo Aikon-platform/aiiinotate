@@ -1,23 +1,22 @@
-/**
- * mongo doesn't implement the whole JSONSchema standard, contrary
- * to Fastify. since in this module, our schemas are defined according
- * to Fastify, to use the schemas in Mongo, we need to convert them.
- *
- * JSONSchema has a recursive data model in which a root schema contains
- * nested schemas in a tree structure. in turn, our conversion function
- * is recursive.
- *
- * note that our conversion function DOES NOT DO ALL CONVERSIONS, only what we need.
- * for example, we suppose that our schemas are built using $ref's to
- * external schemas, and not defining sub-schemas in the `definitions` field.
- */
-
 import fastifyPlugin from "fastify-plugin";
 
-
-/** see: https://www.mongodb.com/docs/manual/reference/operator/query/jsonSchema/#omissions */
-function schemasToMongo (fastify, schema) {
-  const funcName = schemasToMongo.name;
+/**
+ * resolve schemas: convert all references to external schemas to embedded JsonSchemas.
+ *
+ * mongo doesn't implement the whole JSONSchema standard, and in some places in fastify (i.e., routes response schemas), references (`$ref`) are not allowed.
+ * in the app and in this module, our schemas are defined according to the full Fastify implementation, to use the schemas everywhere, we need to convert them.
+ *
+ * conversion primarily means converting all `$ref` references to external schemas to the JsonSchemas referenced.
+ *
+ * JSONSchema has a recursive data model in which a root schema contains  nested schemas in a tree structure. in turn, our conversion function is recursive.
+ *
+ * NOTE: our conversion function DOES NOT DO ALL CONVERSIONS, only what we need.
+ * for example, we suppose that our schemas are built using $ref's to external schemas, and not defining sub-schemas in the `definitions` field.
+ *
+ * see: https://www.mongodb.com/docs/manual/reference/operator/query/jsonSchema/#omissions
+ */
+function schemasResolver (fastify, schema) {
+  const funcName = schemasResolver.name;
 
   // no need to process strings, booleans or numbers
   if ( typeof schema==="string" || typeof schema==="number" || typeof schema==="boolean" ) {
@@ -25,7 +24,7 @@ function schemasToMongo (fastify, schema) {
   }
   // convert each item in arrays
   else if ( Array.isArray(schema) ) {
-    return schema.map((item) => schemasToMongo(fastify, item));
+    return schema.map((item) => schemasResolver(fastify, item));
   }
   // convert each key-value pair. this is actually the main part that will delta to the above branches.
   else if ( schema.constructor === Object ) {
@@ -38,7 +37,7 @@ function schemasToMongo (fastify, schema) {
       }
       // $refs must be resolved => replace the kv pair { $ref: schemaUri } with the corresponding schemas and process convert those schemas to mongo.
       else if ( k==="$ref" ) {
-        return schemasToMongo(fastify, fastify.getSchema(v))
+        return schemasResolver(fastify, fastify.getSchema(v))
       }
       // convert JsonSchema integer types to bsonType: int
       else if ( k==="type" && v==="integer" )
@@ -52,7 +51,7 @@ function schemasToMongo (fastify, schema) {
       }
       // it's a "normal" value => process it.
       else {
-        out[k] = schemasToMongo(fastify, v);
+        out[k] = schemasResolver(fastify, v);
       }
     }
 
@@ -63,10 +62,10 @@ function schemasToMongo (fastify, schema) {
   }
 }
 
-function schemasToMongoPlugin(fastify, options, done) {
-  fastify.decorate("schemasToMongo", (schema) => schemasToMongo(fastify, schema));
+function schemasResolverPlugin(fastify, options, done) {
+  fastify.decorate("schemasResolver", (schema) => schemasResolver(fastify, schema));
   done();
 }
 
-export default fastifyPlugin(schemasToMongoPlugin);
+export default fastifyPlugin(schemasResolverPlugin);
 

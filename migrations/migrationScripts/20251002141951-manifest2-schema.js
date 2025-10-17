@@ -13,7 +13,7 @@ export const up = async (db, client) => {
   const
     fastify = await build(),
     fastifySchema = fastify.schemasPresentation2.getSchema("manifestMongo"),
-    schema = fastify.schemasToMongo(fastifySchema),
+    schema = fastify.schemasResolver(fastifySchema),
     commandDoc = {
       collMod: "manifests2",
       validator: { $jsonSchema: schema },

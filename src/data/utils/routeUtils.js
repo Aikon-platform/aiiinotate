@@ -1,13 +1,11 @@
-/**
- * return structures for insert/updates/deletes
- * NOTE: ids should be converted to IIIF ids instead of the mongo idss returned by mongo
- */
+import { inspectObj } from "#utils/utils.js";
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
 /** @typedef {import("#types").DeleteResponseType} DeleteResponseType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
+
 /**
  * TODO: update to handle nvx cas de figure (preExistingIds, rejectedIds)
  * @param {string[]} insertedIds
@@ -68,7 +66,7 @@ const toInsertResponse = (insertedIds, preExistingIds, fetchErrorIds, rejectedId
 }
 
 /**
- * NOTE: fastify only implements top-level `$ref` in responses, so doing `anyOf: [ { $ref: ... } ]` is not allowed.
+ * NOTE: fastify only implements top-level `$ref` in responses, using $ref in response schemas is not allowed.
  * in turn, we can't use `{ $ref: makeSchemaUri }` and must resolve schemas instead.
  * @param {FastifyInstanceType} fastify
  * @param {object} okResponseSchema - expected response schema
@@ -78,7 +76,7 @@ const makeResponseSchema = (fastify, okResponseSchema) => ({
   500: fastify.schemasRoutes.getSchema("routeResponseError")
 })
 
-const makeResponsePostSchena = (fastify) => makeResponseSchema(
+const makeResponsePostSchema = (fastify) => makeResponseSchema(
   fastify,
   {
     anyOf: [
@@ -99,7 +97,7 @@ const makeResponsePostSchena = (fastify) => makeResponseSchema(
  */
 const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
   // otherwise, the error is not logged, bad for debugging.
-  console.error(err);
+  console.error(inspectObj(err));
 
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,
@@ -121,7 +119,7 @@ export {
   formatUpdateResponse,
   formatDeleteResponse,
   toInsertResponse,
-  makeResponsePostSchena,
+  makeResponsePostSchema,
   makeResponseSchema,
   returnError
 }

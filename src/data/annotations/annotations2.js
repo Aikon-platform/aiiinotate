@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -50,13 +50,51 @@ class Annotations2 extends CollectionAbstract {
     /** @type {Manifests2InstanceType} */
     this.manifestsPlugin = this.fastify.manifests2;
     /** @type {AjvValidateFunctionType} */
-    this.validatorAnnotationList = ajvCompile(fastify.schemasToMongo(
+    this.validatorAnnotationList = ajvCompile(fastify.schemasResolver(
       fastify.schemasPresentation2.getSchema("annotationList")
     ));
   }
 
   ////////////////////////////////////////////////////////////////
   // utils
+
+  /**
+   * clean the body of an annotation (annotation.resource).
+   * if `annotation.resource` is an array (there are several bodies associated to that annotation), this function must be called on each item of the array
+   * @param {object} resource
+   * @returns {object | null} - the resource, or `null` if the resource is either an empty Embedded Textual Body or has no `@id`
+   */
+  #cleanAnnotationResource(resource) {
+    if ( resource ) {
+      // 1) uniformize embedded textual body keys
+      // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
+      resource["@type"] =
+        resource["@type"] === "cnt:ContentAsText"
+          ? "dctypes:Text"
+          : resource["@type"];
+
+      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
+      resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
+      // delete the alternate keys
+      [ "value", "cnt:chars" ].map((k) => {
+        if ( Object.keys(resource).includes(k) ) {
+          delete resource[k];
+        }
+      })
+
+      // 2) return `null` if resource is empty. a body is empty if
+      //  - it's got no `@id` (=> it's not a referenced textaul body)
+      //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
+      // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
+      const
+        hasTextualBody = objectHasKey(resource, "chars"),
+        emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
+      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
+        return null
+      }
+    }
+    return resource;
+  }
 
   /**
    * clean an annotation before saving it to database.
@@ -98,34 +136,18 @@ class Annotations2 extends CollectionAbstract {
             : `oa:${motiv}`
         );
 
-    const resource = annotation.resource || undefined;
+    // 3) process the resource. Resource can be either undefined, an array of objects or a single object. process all objects and, if there's no resource content, delete `annotation.resource`.
+    let resource = annotation.resource || undefined;
     if ( resource ) {
-      // 3) uniformize embedded textual body keys
-      // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
-      resource["@type"] =
-        resource["@type"] === "cnt:ContentAsText"
-          ? "dctypes:Text"
-          : resource["@type"];
-      // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
-      resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
-
-      [ "value", "cnt:chars" ].map((k) => {
-        if ( Object.keys(resource).includes(k) ) {
-          delete resource[k];
-        }
-      })
-
-      // 4) delete body if it's empty. a body is empty if
-      //  - it's got no `@id` and
-      //  - it's not an Embedded Textual Body, or it's an empty Embedded Textual Body.
-      // see: https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/0_w3c_open_annotations.md#embedded-textual-body-etb
-      const
-        hasTextualBody = objectHasKey(resource, "chars"),
-        emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
-
-      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
-        delete(annotation.resource);
-      }
+      resource =
+        Array.isArray(resource)
+          ? resource.map((r) => this.#cleanAnnotationResource(r)).filter((r) => r !== null)
+          : this.#cleanAnnotationResource(resource);
+    }
+    if ( resource === null || resource === undefined || (Array.isArray(resource) && !resource.length) ) {
+      delete annotation.resource;
+    } else {
+      annotation.resource = resource;
     }
     return annotation;
   }
@@ -277,7 +299,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {object?} projectionObj - extra projection fields to tailor the reponse format
    * @returns {Promise<object[]>}
    */
-  async find(queryObj, projectionObj) {
+  async find(queryObj, projectionObj={}) {
     // 1. construct the final projection object, knowing that we can't mix exclusive and inclusive projectin.
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
@@ -285,11 +307,13 @@ class Annotations2 extends CollectionAbstract {
         .filter(([k,v]) => k !== "_id")
         .map(([k,v]) => v);
 
-    if ( projectionValues.find((x) => ![0,1].includes(x)) ) {
+    // if there are projection values defined and if they're not 0 or 1, then they're invalid => throw
+    if ( projectionValues.length && projectionValues.find((x) => ![0,1].includes(x)) ) {
       throw this.readError(`Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
     }
+    // mongo projection can be either inclusive (define only fields that will be included) or negative (define only fields that will be excluded), but not a mix of the 2. if you have more than 1 distinct values, you mixed inclusion and exclusion => throw
     const distinctProjectionValues = [...new Set(projectionValues)]
-    if ( distinctProjectionValues.length !== 1 ) {
+    if ( distinctProjectionValues.length > 1 ) {
       throw this.readError(`Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
     }
     // negative projection: all fields will be included except for those specified.
@@ -361,17 +385,27 @@ class Annotations2 extends CollectionAbstract {
   }
 
   /**
+   * find all annotations whose target (`on.full`) is `canvasUri`.
    * @param {string} canvasUri
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async findFromCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
+  async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
     const annotations = await this.find({
       "on.full": canvasUri
     });
     return asAnnotationList
       ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;
+  }
+
+  /**
+   * find an annotation by its "@id"
+   * @param {string} annotationUri
+   * @returns {Promise<object>}  the annotation, or `{}` if none was found
+   */
+  async findById(annotationUri) {
+    return this.collection.findOne({ "@id": annotationUri })
   }
 
 }

@@ -3,6 +3,7 @@
  */
 
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 
 import fileServer from "#fileServer/index.js";
 import schemas from "#schemas/index.js";
@@ -42,6 +43,12 @@ async function build(mode="default") {
     mongoConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
     fastifyConfig = mode==="test" ? testConfig.fastify : defaultConfig.fastify,
     fastify = Fastify(fastifyConfig);
+
+  // NOTE: we allow all origins => restrict ?
+  fastify.register(cors, {
+    origin: "*",
+    methods: ["GET", "HEAD", "POST", "DELETE"]
+  });
 
   await fastify.register(db, mongoConfig);
   await fastify.register(fileServer);

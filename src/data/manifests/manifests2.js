@@ -37,7 +37,7 @@ class Manifests2 extends CollectionAbstract {
     super(fastify, "manifests2");
 
     /** @type {AjvValidateFunctionType} */
-    this.validatorManifest = ajvCompile(fastify.schemasToMongo(
+    this.validatorManifest = ajvCompile(fastify.schemasResolver(
       fastify.schemasPresentation2.getSchema("manifestPublic")
     ));
   }

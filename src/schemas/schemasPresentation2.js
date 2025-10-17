@@ -4,6 +4,8 @@ import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUti
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
+// TODO: schemas are maybe wayyy too strict.
+// convert all enums (the arrays below) to { type: string } ?
 
 const oaSelectorTypes = [
   "oa:FragmentSelector",
@@ -32,7 +34,23 @@ const motivationValues = [
   "oa:commenting",
   "oa:describing",
   "oa:tagging",
-  "oa:linking"
+  "oa:linking",
+  "painting",
+  "commenting",
+  "describing",
+  "tagging",
+  "linking",
+]
+
+const embeddedBodyTypeValues = [
+  "oa:TextualBody",
+  "cnt:ContentAsText",
+  "dctypes:Text",
+  "oa:Tag",
+  "TextualBody",
+  "ContentAsText",
+  "Text",
+  "Tag",
 ]
 
 /** @param {string} slug */
@@ -110,22 +128,38 @@ function addSchemas(fastify, options, done) {
     }
   })
 
+  fastify.addSchema({
+    $id: makeSchemaUri("oaOrIiifSelector"),
+    type: "object",
+    oneOf: [
+      { $ref: makeSchemaUri("oaSelector") },
+      { $ref: makeSchemaUri("iiifImageApiSelector") },
+    ]
+  })
+
+  fastify.addSchema({
+    $id: makeSchemaUri("oaChoiceSelector"),
+    type: "object",
+    required: [ "@type", "default" ],
+    properties: {
+      "@type": { type: "string", enum: ["oa:Choice"] },
+      default: { $ref: makeSchemaUri("oaOrIiifSelector") },
+      item: { $ref: makeSchemaUri("oaOrIiifSelector") }
+    }
+  })
+
   // selector is either a string, string[], iiifImageApiSelector, iiifImageApiSelector[]. oaSelector, oaSelector[]
   fastify.addSchema({
     $id: makeSchemaUri("selector"),
     anyOf: [
       { type: "string" },
       { type: "array", items: { type: "string" } },
-      { $ref: makeSchemaUri("oaSelector") },
-      { $ref: makeSchemaUri("iiifImageApiSelector") },
+      { $ref: makeSchemaUri("oaOrIiifSelector") },
+      { $ref: makeSchemaUri("oaChoiceSelector") },
       {
         type: "array",
-        items: { $ref: makeSchemaUri("oaSelector") }
+        items: { $ref: makeSchemaUri("oaOrIiifSelector") }
       },
-      {
-        type: "array",
-        items: { $ref: makeSchemaUri("iiifImageApiSelector") }
-      }
     ]
   })
 
@@ -207,28 +241,47 @@ function addSchemas(fastify, options, done) {
         anyOf: [
           {
             type: "string",
-            enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
+            enum: embeddedBodyTypeValues
           },
           {
             type: "array",
             items: {
               type: "string",
-              enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
+              enum: embeddedBodyTypeValues
             }
           },
         ]
       },
-      "format": { type: "string" },  // should be a MimeType
-      "chars": { type: "string" }
+      chars: { type: "string" },
+      motivation: { type: "string" },
+      format: { type: "string" },  // should be a MimeType
     }
   })
 
   fastify.addSchema({
     $id: makeSchemaUri("body"),
-    anyOf: [
+    oneOf: [
       { $ref: makeSchemaUri("embeddedBody") },
       { $ref: makeSchemaUri("referencedBody") },
+      {
+        type: "array",
+        items: {
+          type: "object",
+          anyOf: [
+            { $ref: makeSchemaUri("embeddedBody") },
+            { $ref: makeSchemaUri("referencedBody") },
+          ]
+        }
+      }
     ]
+  })
+
+  // NOTE: maeData is used by `mirador-annotations-editor` (MAE) to store data specific to that mirador plugin. since MAE is external to the Aikon ecosystem, we don't define it further to avoid errors if/when its data format changes.
+  // we set additionalProperties: true, because otherwise, writing annotations to database will be fine, but sending responses will strip out the contents of maeData.
+  fastify.addSchema({
+    $id: makeSchemaUri("maeData"),
+    additionalProperties: true,
+    type: "object"
   })
 
   fastify.addSchema({
@@ -243,8 +296,9 @@ function addSchemas(fastify, options, done) {
       on: { $ref: makeSchemaUri("annotationTarget") },
       // in OA, one OR the other should be use, but `oneOf` can't be used in `properties`.
       resource: { $ref: makeSchemaUri("body") },
-      bodyValue: { type: "string" }
-    }
+      bodyValue: { type: "string" },
+      maeData: { $ref: makeSchemaUri("maeData") }
+    },
   });
 
   fastify.addSchema({
@@ -279,6 +333,7 @@ function addSchemas(fastify, options, done) {
   // manifests are just stored as an @id, a short ID, an array of canvas Ids. we don't need more info.
   fastify.addSchema({
     $id: makeSchemaUri("manifestMongo"),
+    type: "object",
     required: ["@id", "manifestShortId", "canvasIds"],
     properties: {
       "@id": { type: "string" },
@@ -331,23 +386,20 @@ function addSchemas(fastify, options, done) {
       label: { type: "string" },
       members: {
         type: "array",
-        items: [
-          {
-            type: "object",
-            required: ["@id"],
-            properties: {
-              "@id": { type: "string" },
-              "@type": { type: "string", enum: [ "sc:Manifest" ] },
-            }
+        items: {
+          type: "object",
+          required: ["@id"],
+          properties: {
+            "@id": { type: "string" },
+            "@type": { type: "string", enum: [ "sc:Manifest" ] },
           }
-        ]
+        }
       }
     }
   });
 
   /////////////////////////////////////////////
   // DONE
-
 
   fastify.decorate("schemasPresentation2", {
     makeSchemaUri: makeSchemaUri,
