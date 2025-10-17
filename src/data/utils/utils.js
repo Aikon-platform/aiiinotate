@@ -138,7 +138,7 @@ const pathToUrl = (path) =>
 /**
  * display a detailed and nested view of an object. to be used with console.log.
  * @param {any} obj - object to inspect
- * @param {*} maxLines - maximum number of lines in string output. defaults to 100.
+ * @param {number|Infinity} maxLines - maximum number of lines in string output. defaults to 100.
  * @returns
  */
 const inspectObj = (obj, maxLines=100) => {

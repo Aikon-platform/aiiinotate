@@ -4,6 +4,8 @@ import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUti
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
+// TODO: schemas are maybe wayyy too strict.
+// convert all enums (the arrays below) to { type: string } ?
 
 const oaSelectorTypes = [
   "oa:FragmentSelector",
@@ -32,7 +34,23 @@ const motivationValues = [
   "oa:commenting",
   "oa:describing",
   "oa:tagging",
-  "oa:linking"
+  "oa:linking",
+  "painting",
+  "commenting",
+  "describing",
+  "tagging",
+  "linking",
+]
+
+const embeddedBodyTypeValues = [
+  "oa:TextualBody",
+  "cnt:ContentAsText",
+  "dctypes:Text",
+  "oa:Tag",
+  "TextualBody",
+  "ContentAsText",
+  "Text",
+  "Tag",
 ]
 
 /** @param {string} slug */
@@ -142,10 +160,6 @@ function addSchemas(fastify, options, done) {
         type: "array",
         items: { $ref: makeSchemaUri("oaOrIiifSelector") }
       },
-      // {
-      //   type: "array",
-      //   items: { $ref: makeSchemaUri("iiifImageApiSelector") }
-      // }
     ]
   })
 
@@ -227,19 +241,20 @@ function addSchemas(fastify, options, done) {
         anyOf: [
           {
             type: "string",
-            enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
+            enum: embeddedBodyTypeValues
           },
           {
             type: "array",
             items: {
               type: "string",
-              enum: [ "oa:TextualBody", "cnt:ContentAsText", "dctypes:Text" ]
+              enum: embeddedBodyTypeValues
             }
           },
         ]
       },
-      "format": { type: "string" },  // should be a MimeType
-      "chars": { type: "string" }
+      chars: { type: "string" },
+      motivation: { type: "string" },
+      format: { type: "string" },  // should be a MimeType
     }
   })
 
@@ -385,7 +400,6 @@ function addSchemas(fastify, options, done) {
 
   /////////////////////////////////////////////
   // DONE
-
 
   fastify.decorate("schemasPresentation2", {
     makeSchemaUri: makeSchemaUri,
