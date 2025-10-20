@@ -77,6 +77,7 @@ function manifestsRoutes(fastify, options, done) {
             ? await manifests2.insertManifestFromUri(manifestData.uri)
             : manifests3.notImplementedError();
         } else {
+          // visibleLog(await manifests2.insertManifest(manifestData));
           return iiifPresentationVersion === 2
             ? await manifests2.insertManifest(manifestData)
             : manifests3.notImplementedError();

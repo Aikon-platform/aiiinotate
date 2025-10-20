@@ -206,10 +206,22 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeResponseInsert"),
     type: "object",
-    required: [ "insertedCount", "insertedIds" ],
+    required: [ "insertedCount" ],
     properties: {
       insertedCount: { type: "integer", minimum: 0 },
       insertedIds: {
+        type: "array",
+        items: { type: "string" }
+      },
+      preExistingIds: {
+        type: "array",
+        items: { type: "string" }
+      },
+      fetchErrorIds: {
+        type: "array",
+        items: { type: "string" }
+      },
+      rejectedIds: {
         type: "array",
         items: { type: "string" }
       }

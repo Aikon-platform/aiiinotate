@@ -112,7 +112,7 @@ class Manifests2 extends CollectionAbstract {
     if ( !manifestExists ) {
       return this.insertOne(manifest);
     } else {
-      return toInsertResponse({ preExistingIds: [manifest["@id"]] })
+      return toInsertResponse([],[manifest["@id"]])
     }
   }
 
