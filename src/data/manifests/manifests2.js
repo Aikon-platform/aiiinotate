@@ -94,7 +94,7 @@ class Manifests2 extends CollectionAbstract {
       const r = await fetch(manifestUri);
       return await r.json();
     } catch (err) {
-      throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
+      throw this.insertError(`error fetching manifest with URI '${manifestUri}'`);
     }
   }
 
@@ -182,7 +182,7 @@ class Manifests2 extends CollectionAbstract {
       const manifest = await this.#fetchManifestFromUri(manifestUri);
       return this.insertManifest(manifest);
     } catch (err) {
-      throw this.errorInsert(`error inserting manifest with URI '${manifestUri}' because of error: ${err.message}`);
+      throw this.insertError(`error inserting manifest with URI '${manifestUri}' because of error: ${err.message}`);
     }
   }
 

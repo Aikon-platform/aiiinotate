@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import { makeResponsePostSchema, returnError, makeResponseSchema } from "#utils/routeUtils.js";
-import { objectHasKey, getFirstNonEmptyPair } from "#utils/utils.js";
+import { objectHasKey, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
