@@ -12,8 +12,13 @@ import db from "#db/index.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
+const fastifyConfigCommon = {
+  bodyLimit: 10 * 1048576  // 10 MiB
+}
+
 const testConfig = {
   fastify: {
+    ...fastifyConfigCommon
   },
   mongo: {
     test: true,
@@ -23,6 +28,7 @@ const testConfig = {
 const defaultConfig = {
   fastify: {
     logger: true,
+    ...fastifyConfigCommon
   },
   mongo: { }
 }
