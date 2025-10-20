@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
-import { toInsertResponse } from "#src/data/utils/routeUtils.js";
+import { formatInsertResponse } from "#src/data/utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
@@ -112,7 +112,7 @@ class Manifests2 extends CollectionAbstract {
     if ( !manifestExists ) {
       return this.insertOne(manifest);
     } else {
-      return toInsertResponse([],[manifest["@id"]])
+      return formatInsertResponse([],[manifest["@id"]])
     }
   }
 
@@ -163,7 +163,7 @@ class Manifests2 extends CollectionAbstract {
       return result;
 
     } else {
-      return toInsertResponse(
+      return formatInsertResponse(
         [],
         preExistingIds,
         [],
