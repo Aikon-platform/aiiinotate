@@ -69,6 +69,7 @@ class Manifests2 extends CollectionAbstract {
   #cleanManifest(manifest) {
     return {
       "@id": manifest["@id"],
+      "@type": "sc:Manifest",
       manifestShortId: getManifestShortId(manifest["@id"]),
       canvasIds: manifest.sequences[0].canvases.map((canvas) => canvas["@id"])
     };
@@ -280,8 +281,6 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<IiifCollection2Type>}
    */
   async getManifests() {
-
-    //TODO: each manifest (`members` item) should have `@type="sc:Manifest"`.
 
     const manifestIndex = await this.collection.find(
       {},

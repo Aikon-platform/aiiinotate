@@ -334,9 +334,10 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("manifestMongo"),
     type: "object",
-    required: ["@id", "manifestShortId", "canvasIds"],
+    required: ["@id", "@type", "manifestShortId", "canvasIds"],
     properties: {
       "@id": { type: "string" },
+      "@type": { type: "string", enum: ["sc:Manifest"] },
       manifestShortId: { type: "string" },
       canvasIds: { type: "array", items: { type: "string" }}
     }
