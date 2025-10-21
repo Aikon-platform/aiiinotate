@@ -284,7 +284,7 @@ class Manifests2 extends CollectionAbstract {
 
     const manifestIndex = await this.collection.find(
       {},
-      { projection: { "@id": 1, _id: 0 } }
+      { projection: { "@id": 1, "@type": 1, _id: 0 } }
     ).toArray();
     return {
       ...IIIF_PRESENTATION_2_CONTEXT,
