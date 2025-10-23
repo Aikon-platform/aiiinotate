@@ -13,7 +13,7 @@ import db from "#db/index.js";
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 const fastifyConfigCommon = {
-  bodyLimit: 10 * 1048576  // 10 MiB
+  bodyLimit: 100 * 1048576  // 100 MiB
 }
 
 const testConfig = {
