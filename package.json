@@ -8,6 +8,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "setup": "bash run.sh -s",
     "start": "bash run.sh -d",
     "prod": "bash run.sh -p",
     "test": "bash run.sh -t",

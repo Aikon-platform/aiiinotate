@@ -8,10 +8,11 @@ ENV_FILE="$SCRIPT_DIR/src/config/.env";
 print_usage() {
     cat<<EOF
 
-    USAGE bash run.sh [-d, -p, -t, -c, -h]
+    USAGE bash run.sh [-s, -d, -p, -t, -c, -h]
 
     (use from the scripts defined in 'package.json': 'npm start')
 
+    -s: setup the app
     -t: test the app
     -d: run the app in dev mode
     -p: run the app in prod mode
@@ -30,7 +31,10 @@ start () {
 
     start_mongod
 
-    if [ "$mode" = "dev" ]; then
+    if [ "$mode" = "setup" ]; then
+        dotenvx run -f "$ENV_FILE" -- \
+        node "$SCRIPT_DIR/scripts/setup.js";
+    elif [ "$mode" = "dev" ]; then
         dotenvx run -f "$ENV_FILE" -- \
         node --watch "$SCRIPT_DIR/src/server.js";
     elif [ "$mode" = "test" ]; then
@@ -43,8 +47,10 @@ start () {
     fi;
 }
 
-while getopts 'hdptc' mode_flag; do
+while getopts 'hdptcs' mode_flag; do
     case "${mode_flag}" in
+        s) MODE="setup"
+            break;;
         d) MODE="dev"
             break;;
         p) MODE="prod"

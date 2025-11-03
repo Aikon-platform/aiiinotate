@@ -75,7 +75,7 @@ async function importAnnotationList(annotations2, fileArr, iiifVersion) {
  * @param {import('commander').Command} command
  * @param {import('mongodb').MongoClient} mongoClient
  */
-async function action(dataType, options, command, mongoClient) {
+async function action(mongoClient, command, dataType, options) {
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
@@ -136,9 +136,7 @@ function makeImportCommand(mongoClient) {
     .addOption(filesOpt)
     .addOption(versionOpt)
     .addOption(listFilesOpt)
-    .action((dataType, options, command) => action(dataType, options, command, mongoClient))
+    .action((dataType, options, command) => action(mongoClient, command, dataType, options))
 }
 
-export {
-  makeImportCommand
-}
+export default makeImportCommand;

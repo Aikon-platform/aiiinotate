@@ -10,7 +10,8 @@
 import { Command } from "commander";
 
 import makeMongoClient from "#cli/mongoClient.js";
-import { makeImportCommand } from "#cli/import.js";
+import makeImportCommand from "#cli/import.js";
+import makeMigrateCommand from "#cli/migrate.js";
 
 const cli = new Command();
 
@@ -19,6 +20,7 @@ const mongoClient = await makeMongoClient();
 cli
   .name("aiiinotate-cli")
   .description("utility command line interfaces for aiiinotate")
-  .addCommand(makeImportCommand(mongoClient));
+  .addCommand(makeImportCommand(mongoClient))
+  .addCommand(makeMigrateCommand(mongoClient));
 
 cli.parse(process.argv);
