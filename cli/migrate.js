@@ -27,10 +27,10 @@ console.log(fileMigrationConfigs);
 
 function formatDate(date) {
   function pad2(n) {  // always returns a string
-    return (n < 10 ? '0' : '') + n;
-}
+    return (n < 10 ? "0" : "") + n;
+  }
 
-return date.getFullYear() +
+  return date.getFullYear() +
     pad2(date.getMonth() + 1) +
     pad2(date.getDate()) +
     pad2(date.getHours()) +
@@ -50,7 +50,7 @@ function migrateMake(migrationName) {
   }
   fs.copyFileSync(
     path.resolve(dirMigrations, "migrationTemplate.js"),
-    path.resolve(dirMigrations, "migrationScripts", `${formatDate(new Date())}-migrationName.js`)
+    path.resolve(dirMigrations, "migrationScripts", `${formatDate(new Date())}-${migrationName}.js`)
   );
 }
 
@@ -84,6 +84,7 @@ function migrateRevertAll() {
  */
 function action(mongoClient, command, migrationOp, options) {
   const { migrationName } = options;
+  console.log(">>>", migrationName, options)
 
   switch (migrationOp) {
     case ("make"):
@@ -107,7 +108,7 @@ function makeMigrateCommand(mongoClient) {
     new Argument("<migration-op>", "name of migration operation").choices(allowedMigrateOp);
 
   const migrationNameOpt =
-    new Option("-n", "--migration-name", "name of migration (for 'make' argument)");
+    new Option("-n, --migration-name <name>", "name of migration (for 'make' argument)");
 
   return new Command("migrate")
     .description("run database migrations")

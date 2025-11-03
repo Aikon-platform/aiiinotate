@@ -19,7 +19,7 @@
  */
 const validateIndexOptions = (indexOptions) => {
   if ( indexOptions.name == null ) {
-    throw new Error(`indexOptions.name must be defined !`)
+    throw new Error("indexOptions.name must be defined !")
   }
 }
 
