@@ -1,5 +1,12 @@
 /**
- * run and apply migrations
+ * run and apply migrations.
+ *
+ * the commands here are wrappers for migrate-mongo.
+ * the big particularity is that we handle 2 databases in parrallel:
+ * a dev/prod database and a test database (that will be populated
+ * by running tests, emptied after running the tests)
+ * in turn, we need to apply migrations in parrallel to both databases.
+ *
  */
 import path from "node:path";
 import fs from "node:fs";
@@ -7,8 +14,6 @@ import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process"
 
 import { Command, Option, Argument } from "commander";
-
-import { fileRead } from "#cli/io.js";
 
 
 /** @typedef {"make"|"apply"|"revert"|"revert-all"} migrateOpType */
@@ -24,7 +29,7 @@ const
   migrationsConfigTest = path.resolve(dirMigrations, "migrate-mongo-config-test.js"),
   migrationConfigs = [migrationsConfigMain, migrationsConfigTest];
 
-  /** return a date in YYYYMMDDhhmmss format */
+/** return a date in YYYYMMDDhhmmss format */
 function formatDate(date) {
   function pad2(n) {  // always returns a string
     return (n < 10 ? "0" : "") + n;
@@ -54,12 +59,12 @@ function migrateMake(migrationName) {
 
 /** apply all pending migrations */
 function migrateApply() {
-  migrationConfigs.map((migrationConfig) => execSync(`npx migrate-mongo up -f ${migrationConfig}`));
+  migrationConfigs.map((mc) => execSync(`npx migrate-mongo up -f ${mc}`));
 }
 
 /** revert the last migration */
 function migrateRevert() {
-  migrationConfigs.map((migrationConfig) => execSync(`npx migrate-mongo down -f ${migrationConfig}`));
+  migrationConfigs.map((mc) => execSync(`npx migrate-mongo down -f ${mc}`));
 }
 
 /** revert all migrations */
@@ -67,9 +72,9 @@ function migrateRevertAll() {
   // there are as many migrations as there are files in `dirMigrationsScripts`
   // => revert one migration per migration file
   // do this for each migration file (prod and test database).
-  migrationConfigs.map((migrationConfig) =>
+  migrationConfigs.map((mc) =>
     fs.readdirSync(dirMigrationsScripts).map((_) =>
-      execSync(`npx migrate-mongo down -f ${migrationConfig}`)
+      execSync(`npx migrate-mongo down -f ${mc}`)
     )
   )
 }
@@ -99,7 +104,6 @@ function action(mongoClient, command, migrationOp, options) {
       migrateRevertAll();
       break;
   }
-
 }
 
 function makeMigrateCommand(mongoClient) {

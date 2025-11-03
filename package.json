@@ -14,11 +14,10 @@
     "test": "bash run.sh -t",
     "cli": "dotenvx run -f ./src/config/.env -- node ./cli/index.js",
     "lint": "npx eslint --fix",
-    "migrate-make": "bash ./scripts/migrations.sh make",
-    "migrate-apply": "bash ./scripts/migrations.sh apply",
-    "migrate-revert": "bash ./scripts/migrations.sh revert",
-    "migrate-revert-all": "bash ./scripts/migrations.sh revertAll",
-    "migrate-reapply": "bash ./scripts/migrations.sh revertAll && bash ./scripts/migrations.sh apply"
+    "migrate-make": "npm run cli -- migrate make",
+    "migrate-apply": "npm run cli migrate apply",
+    "migrate-revert": "npm run cli migrate revert",
+    "migrate-revert-all": "npm run cli migrate revert-all"
   },
   "pre-commit": [
     "lint"

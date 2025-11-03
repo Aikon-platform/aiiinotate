@@ -40,8 +40,18 @@ npm cli
 
 Process migrations:
 
-```
-npm migrate-(init|make|apply|revert|revert-all)
+```bash
+# create a new migration. NOTE: the `--` is necessary !
+npm run migrate-make -- --migrate-name <your migration name>
+
+# apply all pending migrations
+npm run migrate-apply
+
+# revert the last migration
+npm run migrate-revert
+
+# revert all migrations
+npm run migrate-revert-all)
 ```
 
 ---
