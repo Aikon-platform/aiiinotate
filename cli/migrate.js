@@ -19,11 +19,10 @@ const
   dirCli = path.dirname(fileURLToPath(import.meta.url)),
   dirRoot = path.resolve(dirCli, ".."),
   dirMigrations = path.resolve(dirRoot, "migrations"),
-  fileMigrationsConfigMain = path.resolve(dirMigrations, "migrate-mongo-config-main.js"),
-  fileMigrationsConfigTest = path.resolve(dirMigrations, "migrate-mongo-config-test.js"),
-  fileMigrationConfigs = [fileMigrationsConfigMain, fileMigrationsConfigTest];
-
-console.log(fileMigrationConfigs);
+  dirMigrationsScripts = path.resolve(dirMigrations, "migrationScripts"),
+  migrationsConfigMain = path.resolve(dirMigrations, "migrate-mongo-config-main.js"),
+  migrationsConfigTest = path.resolve(dirMigrations, "migrate-mongo-config-test.js"),
+  migrationConfigs = [migrationsConfigMain, migrationsConfigTest];
 
 function formatDate(date) {
   function pad2(n) {  // always returns a string
@@ -43,36 +42,35 @@ function formatDate(date) {
  * @param {string} migrationName
  */
 function migrateMake(migrationName) {
-  console.log("!!!!!!!!!! migrateMake", migrationName);
-
   if ( migrationName == null ) {
     throw new Error(`migration name must be a string. got ${migrationName}`);
   }
   fs.copyFileSync(
     path.resolve(dirMigrations, "migrationTemplate.js"),
-    path.resolve(dirMigrations, "migrationScripts", `${formatDate(new Date())}-${migrationName}.js`)
+    path.resolve(dirMigrationsScripts, `${formatDate(new Date())}-${migrationName}.js`)
   );
 }
 
-/** apply a migration */
+/** apply all pending migrations */
 function migrateApply() {
-  console.log("!!!!!!!!!! migrateApply");
-
+  migrationConfigs.map((migrationConfig) => execSync(`npx migrate-mongo up -f ${migrationConfig}`));
 }
 
-function migrateApplyAll() {
-  console.log("!!!!!!!!!! migrateApplyAll");
-
-}
-
+/** revert the last migration */
 function migrateRevert() {
-  console.log("!!!!!!!!!! migrateRevert");
-
+  migrationConfigs.map((migrationConfig) => execSync(`npx migrate-mongo down -f ${migrationConfig}`));
 }
 
+/** revert all migrations */
 function migrateRevertAll() {
-  console.log("!!!!!!!!!! migrateRevertAll");
-
+  // there are as many migrations as there are files in `dirMigrationsScripts`
+  // => revert one migration per migration file
+  // do this for each migration file (prod and test database).
+  migrationConfigs.map((migrationConfig) =>
+    fs.readdirSync(dirMigrationsScripts).map((_) =>
+      execSync(`npx migrate-mongo down -f ${migrationConfig}`)
+    )
+  )
 }
 
 /**
