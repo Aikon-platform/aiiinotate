@@ -2,6 +2,8 @@
  * utilities and generally useful functions for tests.
  */
 
+import { visibleLog } from "#utils/utils.js";
+
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
@@ -19,12 +21,20 @@ const assertObjectKeys = (t, obj, expectedKeys) =>
   );
 
 /**
+ * insert responses MUST contain `insertedCount` and  MAY contain ["insertedIds", "preExistingIds", "fetchErrorIds", "rejectedIds"]
  * @param {NodeTestType} t
  * @param {object} obj
  * @returns {void}
  */
-const assertObjectKeysInsert = (t, obj) =>
-  assertObjectKeys(t, obj, ["insertedCount", "insertedIds"]);
+const assertObjectKeysInsert = (t, obj) => {
+  t.assert.deepStrictEqual(
+    Object.keys(obj).every((k) => ["insertedCount", "insertedIds", "preExistingIds", "fetchErrorIds", "rejectedIds"].includes(k)),
+    true
+  );
+  t.assert.deepStrictEqual(
+    Object.keys(obj).includes("insertedCount"), true
+  )
+}
 
 /**
  * @param {NodeTestType} t

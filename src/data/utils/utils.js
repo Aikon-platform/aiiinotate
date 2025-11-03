@@ -22,6 +22,8 @@ const isNullish = (v) => v == null || !v.length;
 /** o is an object but not an array. https://stackoverflow.com/a/44556453 */
 const isObject = (o) => o.constructor === Object;
 
+const isNonEmptyArray = (a) => Array.isArray(a) && a.length;
+
 /**
  * extend objOut with a key-value pair fron objIn if a key is in objIn
  * @param {object} objIn: the object that should contain key
@@ -224,5 +226,6 @@ export {
   throwIfKeyUndefined,
   throwIfValueError,
   ajvCompile,
-  visibleLog
+  visibleLog,
+  isNonEmptyArray
 }

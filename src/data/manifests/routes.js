@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import { makeResponsePostSchema, returnError, makeResponseSchema } from "#utils/routeUtils.js";
-import { objectHasKey, getFirstNonEmptyPair } from "#utils/utils.js";
+import { objectHasKey, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
@@ -77,6 +77,7 @@ function manifestsRoutes(fastify, options, done) {
             ? await manifests2.insertManifestFromUri(manifestData.uri)
             : manifests3.notImplementedError();
         } else {
+          // visibleLog(await manifests2.insertManifest(manifestData));
           return iiifPresentationVersion === 2
             ? await manifests2.insertManifest(manifestData)
             : manifests3.notImplementedError();

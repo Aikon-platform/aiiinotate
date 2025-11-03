@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
-import { toInsertResponse } from "#src/data/utils/routeUtils.js";
+import { formatInsertResponse } from "#src/data/utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
@@ -69,6 +69,7 @@ class Manifests2 extends CollectionAbstract {
   #cleanManifest(manifest) {
     return {
       "@id": manifest["@id"],
+      "@type": "sc:Manifest",
       manifestShortId: getManifestShortId(manifest["@id"]),
       canvasIds: manifest.sequences[0].canvases.map((canvas) => canvas["@id"])
     };
@@ -94,7 +95,7 @@ class Manifests2 extends CollectionAbstract {
       const r = await fetch(manifestUri);
       return await r.json();
     } catch (err) {
-      throw this.errorInsert(`error fetching manifest with URI '${manifestUri}'`);
+      throw this.insertError(`error fetching manifest with URI '${manifestUri}'`);
     }
   }
 
@@ -112,7 +113,7 @@ class Manifests2 extends CollectionAbstract {
     if ( !manifestExists ) {
       return this.insertOne(manifest);
     } else {
-      return toInsertResponse({ preExistingIds: [manifest["@id"]] })
+      return formatInsertResponse([],[manifest["@id"]])
     }
   }
 
@@ -163,7 +164,7 @@ class Manifests2 extends CollectionAbstract {
       return result;
 
     } else {
-      return toInsertResponse(
+      return formatInsertResponse(
         [],
         preExistingIds,
         [],
@@ -182,7 +183,7 @@ class Manifests2 extends CollectionAbstract {
       const manifest = await this.#fetchManifestFromUri(manifestUri);
       return this.insertManifest(manifest);
     } catch (err) {
-      throw this.errorInsert(`error inserting manifest with URI '${manifestUri}' because of error: ${err.message}`);
+      throw this.insertError(`error inserting manifest with URI '${manifestUri}' because of error: ${err.message}`);
     }
   }
 
@@ -281,11 +282,9 @@ class Manifests2 extends CollectionAbstract {
    */
   async getManifests() {
 
-    //TODO: each manifest (`members` item) should have `@type="sc:Manifest"`.
-
     const manifestIndex = await this.collection.find(
       {},
-      { projection: { "@id": 1, _id: 0 } }
+      { projection: { "@id": 1, "@type": 1, _id: 0 } }
     ).toArray();
     return {
       ...IIIF_PRESENTATION_2_CONTEXT,
