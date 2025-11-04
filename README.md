@@ -1,30 +1,17 @@
 # aiiinotate
 
----
-
-## RUN NPM LINK:
-
-```bash
-npm link
-npx dotenvx run -f ./config/.env -- aiiinotate serve dev
-```
-
-TODO: find why we can't juste source the dotenv variables and need to pass by dotenvx.
+aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `nodejs/fastify` and `mongodb` and provides an API to read/write/update/delete IIIF annotations and index manifests.
 
 ---
 
-aiiinotate is a fast and lightweight annotations server for IIIF. It relies on `nodejs/fastify` and `mongodb` and provides an API to read/write/update/delete IIIF annotations and index manifests.
-
----
-
-## Prod install and usage
+## PROD USAGE
 
 ### Install 
 
 TODO: install mongodb
 
 ```bash
-aiiinotate
+npm install aiiinotate
 ```
 
 ### Usage
@@ -32,7 +19,7 @@ aiiinotate
 The base command is:
 
 ```bash
-aiiinotate
+aiiinotate --env <path-to-your-env-file> -- <command>
 ```
 
 It will give full access to the CLI interface of Aiiinotate.
@@ -41,18 +28,24 @@ It will give full access to the CLI interface of Aiiinotate.
 
 0. Setup your `.env` file after [.env.template](./config/.env.template).
 
-1. Configure the database
+1. Start `mongod`
 
 ```bash
-aiiinotate migrate apply
+sudo systemctl start mongod
 ```
 
-2. Run
+2. Create and configure the database
 
 ```bash
-aiiinotate serve prod
+aiiinotate --env <path-to-your-env-file> -- migrate apply
+```
+
+3. Run
+
+```bash
+aiiinotate --env <path-to-your-env-file> -- serve prod
 # or 
-aiiinotate serve dev
+aiiinotate --env <path-to-your-env-file> -- serve dev
 ```
 
 #### Import data
@@ -61,34 +54,47 @@ TODO
 
 ---
 
-## Dev install and usage
+## DEV USAGE
 
 ### Install 
+
 ```bash
 bash setup.sh
 ```
 
 ### Usage
 
-1. Start the app:
+#### First steps
+
+0. Setup your `.env` file after [.env.template](./config/.env.template) and place it at `./config/.env`.
+
+1. Start mongod
 
 ```bash
-npm start
+sudo systemctl start mongod
 ```
 
-2. Test the app:
+#### Run commands
+
+- Start the app:
 
 ```bash
-npm test
+npm run start
 ```
 
-3. Run the CLI:
+- Test the app:
+
+```bash
+npm run test
+```
+
+- Run the CLI:
 
 ```bash
 npm cli
 ```
 
-4. Process migrations:
+- Process migrations:
 
 ```bash
 # create a new migration. NOTE: the `--` is necessary !
@@ -108,4 +114,4 @@ npm run migrate revert-all)
 
 ## License
 
-MIT License
+GNU GPL 3.0.
