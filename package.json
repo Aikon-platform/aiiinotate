@@ -1,22 +1,21 @@
 {
   "name": "aiiinotate",
-  "version": "0.2.0",
+  "version": "0.2.6",
   "description": "a fast IIIF-compliant annotation server",
-  "main": "index.js",
+  "main": "./cli/index.js",
   "type": "module",
   "directories": {
     "doc": "docs"
   },
   "bin": {
-    "migrate": "npm run cli -- migrate",
-    "run": "bash run.sh -p"
+    "test-aiiinotate": "./cli/index.js"
   },
   "scripts": {
     "setup": "bash run.sh -s",
     "start": "bash run.sh -d",
     "prod": "bash run.sh -p",
     "test": "bash run.sh -t",
-    "cli": "dotenvx run -f ./src/config/.env -- node ./cli/index.js",
+    "cli": "dotenvx run -f ./config/.env -- node ./cli/index.js",
     "lint": "npx eslint --fix",
     "migrate-make": "npm run cli -- migrate make",
     "migrate-apply": "npm run cli migrate apply",
@@ -49,7 +48,7 @@
     "#migrations/*.js": "./migrations/*.js",
     "#db/*.js": "./src/db/*.js",
     "#schemas/*.js": "./src/schemas/*.js",
-    "#config/*.js": "./src/config/*.js",
+    "#config/*.js": "./config/*.js",
     "#data/*.js": "./src/data/*.js",
     "#utils/*.js": "./src/data/utils/*.js",
     "#fileServer/*.js": "./src/fileServer/*.js",

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * command line interface. run through the package.json.
  * usage: npm run cli import -- [args] [opts]

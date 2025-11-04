@@ -3,7 +3,7 @@
 source "./scripts/utils.sh";
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-ENV_FILE="$SCRIPT_DIR/src/config/.env";
+ENV_FILE="$SCRIPT_DIR/config/.env";
 
 print_usage() {
     cat<<EOF
