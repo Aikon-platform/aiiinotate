@@ -7,6 +7,10 @@
   "directories": {
     "doc": "docs"
   },
+  "bin": {
+    "migrate": "npm run cli -- migrate",
+    "run": "bash run.sh -p"
+  },
   "scripts": {
     "setup": "bash run.sh -s",
     "start": "bash run.sh -d",
