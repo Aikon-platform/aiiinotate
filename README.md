@@ -8,23 +8,16 @@ aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `n
 
 ### Install 
 
-TODO: install mongodb
+1. **Install mongodb**.
+    - see [dev installation script for help](./scripts/setup_mongodb.sh)
+    - checkout the [official installation guide](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu)
 
+2. **Install aiiinotate**
 ```bash
 npm install aiiinotate
 ```
 
-### Usage
-
-The base command is:
-
-```bash
-aiiinotate --env <path-to-your-env-file> -- <command>
-```
-
-It will give full access to the CLI interface of Aiiinotate.
-
-####  Run the app 
+### Setup the app 
 
 0. **Setup your `.env`** file after [.env.template](./config/.env.template).
 
@@ -40,7 +33,11 @@ sudo systemctl start mongod
 aiiinotate --env <path-to-your-env-file> -- migrate apply
 ```
 
-3. **Run**
+### Usage
+
+All commands are accessible through a CLI (./src/cli).
+
+#### Run the app 
 
 ```bash
 aiiinotate --env <path-to-your-env-file> -- serve prod
@@ -48,9 +45,17 @@ aiiinotate --env <path-to-your-env-file> -- serve prod
 aiiinotate --env <path-to-your-env-file> -- serve dev
 ```
 
-#### Import data
+#### Run administration commands
 
-TODO
+The base command is:
+
+```bash
+aiiinotate --env <path-to-your-env-file> -- <command>
+```
+
+It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
+
+1. Import data - TODO
 
 ---
 
@@ -59,12 +64,22 @@ TODO
 ### Install 
 
 ```bash
-bash setup.sh
+# clone the repo
+git clone git@github.com:Aikon-platform/aiiinotate.git
+
+# move inside it
+cd aiiinotate
+
+# install mongodb
+bash ./scripts/setup_mongodb.sh
+
+# install dependencies
+npm i
 ```
 
-### Usage
+### Setup
 
-#### First steps
+After installing, some setup must be done
 
 0. **Setup your `.env`** file after [.env.template](./config/.env.template) and place it at `./config/.env`.
 
@@ -74,7 +89,15 @@ bash setup.sh
 sudo systemctl start mongod
 ```
 
-#### Run commands
+2. **Configure the database**
+
+```bash
+npm run migrate apply
+```
+
+### Usage
+
+Remember to have your `mongodb` service running: `sudo systemctl start mongod` !
 
 - **Start the app**
 
@@ -98,7 +121,7 @@ npm cli
 
 ```bash
 # create a new migration. NOTE: the `--` is necessary !
-npm run migrate make -- --migrate-name <your migration name>
+npm run migrate make -- --migration-name <your migration name>
 
 # apply all pending migrations
 npm run migrate apply
@@ -107,7 +130,7 @@ npm run migrate apply
 npm run migrate revert
 
 # revert all migrations
-npm run migrate revert-all)
+npm run migrate revert-all
 ```
 
 ---
