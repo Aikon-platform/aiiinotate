@@ -35,7 +35,7 @@ aiiinotate --env <path-to-your-env-file> -- migrate apply
 
 ### Usage
 
-All commands are accessible through a CLI (./src/cli).
+All commands are accessible through a CLI (`./src/cli`).
 
 #### Run the app 
 
