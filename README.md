@@ -37,6 +37,8 @@ aiiinotate
 
 It will give full access to the CLI interface of Aiiinotate.
 
+####  Run the app 
+
 0. Setup your `.env` file after [.env.template](./config/.env.template).
 
 1. Configure the database
@@ -52,6 +54,10 @@ aiiinotate serve prod
 # or 
 aiiinotate serve dev
 ```
+
+#### Import data
+
+TODO
 
 ---
 

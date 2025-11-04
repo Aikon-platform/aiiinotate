@@ -17,7 +17,7 @@ async function action(command, serveMode) {
 function makeServeCommand() {
   const serveModeArg =
     new Argument("<run-mode>", "mode with which to run the app")
-    .choices(serveModeValues);
+      .choices(serveModeValues);
 
   return new Command("serve")
     .description("run Aiiinotate")
