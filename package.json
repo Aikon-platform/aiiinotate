@@ -11,7 +11,7 @@
     "aiiinotate": "./cli/index.js"
   },
   "scripts": {
-    "cli": "dotenvx run -f ./config/.env -- node ./cli/index.js",
+    "cli": "node ./cli/index.js --env=./config/.env",
     "setup": "npm run cli migrate apply",
     "start": "npm run cli serve dev",
     "test": "dotenvx run -f ./config/.env -- node --test --test-isolation=none",

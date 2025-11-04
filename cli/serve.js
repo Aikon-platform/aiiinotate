@@ -11,10 +11,14 @@ const serveModeValues = ["test", "dev", "prod"];
  * @param {RerveModeType} serveMode
  */
 async function action(command, serveMode) {
+  console.log("* serve action", process.env.ENV_FILE_PATH);
   await serve(serveMode);
 }
 
 function makeServeCommand() {
+
+  console.log("* serve subcommand", process.env.ENV_FILE_PATH);
+
   const serveModeArg =
     new Argument("<run-mode>", "mode with which to run the app")
       .choices(serveModeValues);
