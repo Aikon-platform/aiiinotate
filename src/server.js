@@ -5,11 +5,14 @@
 import build from "#src/app.js";
 
 /**
- * @param {object} options
+ * @param {import("#types").RerveModeType} serveMode
  */
-async function start (options) {
+async function server (serveMode) {
+  if (["dev", "prod"].includes(serveMode)) {
+    serveMode = "default";
+  }
 
-  const fastify = await build();
+  const fastify = await build(serveMode);
 
   try {
     fastify.listen({ port: process.env.APP_PORT });
@@ -19,4 +22,4 @@ async function start (options) {
   }
 };
 
-start();
+export default server;

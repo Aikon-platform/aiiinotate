@@ -8,19 +8,15 @@
     "doc": "docs"
   },
   "bin": {
-    "test-aiiinotate": "./cli/index.js"
+    "aiiinotate": "./cli/index.js"
   },
   "scripts": {
-    "setup": "bash run.sh -s",
-    "start": "bash run.sh -d",
-    "prod": "bash run.sh -p",
-    "test": "bash run.sh -t",
     "cli": "dotenvx run -f ./config/.env -- node ./cli/index.js",
+    "setup": "npm run cli migrate apply",
+    "start": "npm run cli serve dev",
+    "test": "dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
-    "migrate-make": "npm run cli -- migrate make",
-    "migrate-apply": "npm run cli migrate apply",
-    "migrate-revert": "npm run cli migrate revert",
-    "migrate-revert-all": "npm run cli migrate revert-all"
+    "migrate": "npm run cli -- migrate"
   },
   "pre-commit": [
     "lint"

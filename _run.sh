@@ -31,10 +31,7 @@ start () {
 
     start_mongod
 
-    if [ "$mode" = "setup" ]; then
-        dotenvx run -f "$ENV_FILE" -- \
-        node "$SCRIPT_DIR/scripts/setup.js";
-    elif [ "$mode" = "dev" ]; then
+    if [ "$mode" = "dev" ]; then
         dotenvx run -f "$ENV_FILE" -- \
         node --watch "$SCRIPT_DIR/src/server.js";
     elif [ "$mode" = "test" ]; then
