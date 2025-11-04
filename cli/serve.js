@@ -21,7 +21,7 @@ function makeServeCommand() {
       .choices(serveModeValues);
 
   return new Command("serve")
-    .description("run Aiiinotate")
+    .description("run Aiiinotate. <run-mode>")
     .addArgument(serveModeArg)
     .action((serveMode, command) => action(command, serveMode));
 }

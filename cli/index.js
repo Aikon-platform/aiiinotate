@@ -22,6 +22,13 @@ import loadEnv from "#cli/utils/env.js";
 
 function makeCli() {
 
+  const desc =
+    `Command line interface for aiiinotate.\n\n`
+    + `All commands are accessible through this CLI: starting the app,
+    managing and running migrations, importing and exporting data.
+    Run individual commands to see command-specific help.
+    `.replace(/^\s+/gm, "");
+
   const envFileOpt =
     new Option("--env <env-file>", "path to .env file").makeOptionMandatory();
 
@@ -30,11 +37,13 @@ function makeCli() {
   // - we use the hook `preAction` that is called before any (sub-)command's `action` function is called.
   // - in the `preAction` hook, we call `loadEnv` that will load all env files defined in the `.env` file.
   // - this way, all env variables will be defined in the subcommand's `action` methods (and children).
+  // this is based on https://github.com/tj/commander.js/issues/563#issuecomment-520112985 but replaxes `.on` with `.action`, which works better.
   // WARNING: this means that the env variables can't be used in (sub-)commands BEFORE `action()` has been called.
   const cli = new Command();
   cli
-    .name("aiiinotate-cli")
-    .description("utility command line interfaces for aiiinotate")
+    .name("aiiinotate")
+    .description(desc)
+    .usage("--env <path-to-your-env-file> -- <command> [options]")
     .addOption(envFileOpt)
     .hook("preAction", (thisCommand, actionCommand) => {
       loadEnv(thisCommand.opts().env);
