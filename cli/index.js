@@ -23,7 +23,7 @@ import loadEnv from "#cli/utils/env.js";
 function makeCli() {
 
   const desc =
-    `Command line interface for aiiinotate.\n\n`
+    "Command line interface for aiiinotate.\n\n"
     + `All commands are accessible through this CLI: starting the app,
     managing and running migrations, importing and exporting data.
     Run individual commands to see command-specific help.
