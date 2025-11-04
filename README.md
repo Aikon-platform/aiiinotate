@@ -73,6 +73,9 @@ cd aiiinotate
 # install mongodb
 bash ./scripts/setup_mongodb.sh
 
+# install node
+bash ./scripts/setup_node.sh
+
 # install dependencies
 npm i
 ```
