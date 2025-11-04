@@ -26,21 +26,21 @@ It will give full access to the CLI interface of Aiiinotate.
 
 ####  Run the app 
 
-0. Setup your `.env` file after [.env.template](./config/.env.template).
+0. **Setup your `.env`** file after [.env.template](./config/.env.template).
 
-1. Start `mongod`
+1. **Start `mongod`**
 
 ```bash
 sudo systemctl start mongod
 ```
 
-2. Create and configure the database
+2. **Create and configure the database**
 
 ```bash
 aiiinotate --env <path-to-your-env-file> -- migrate apply
 ```
 
-3. Run
+3. **Run**
 
 ```bash
 aiiinotate --env <path-to-your-env-file> -- serve prod
@@ -66,9 +66,9 @@ bash setup.sh
 
 #### First steps
 
-0. Setup your `.env` file after [.env.template](./config/.env.template) and place it at `./config/.env`.
+0. **Setup your `.env`** file after [.env.template](./config/.env.template) and place it at `./config/.env`.
 
-1. Start mongod
+1. **Start `mongod`**
 
 ```bash
 sudo systemctl start mongod
@@ -76,25 +76,25 @@ sudo systemctl start mongod
 
 #### Run commands
 
-- Start the app:
+- **Start the app**
 
 ```bash
 npm run start
 ```
 
-- Test the app:
+- **Test the app**
 
 ```bash
 npm run test
 ```
 
-- Run the CLI:
+- **Run the CLI**
 
 ```bash
 npm cli
 ```
 
-- Process migrations:
+- **Process migrations**
 
 ```bash
 # create a new migration. NOTE: the `--` is necessary !
