@@ -13,10 +13,11 @@ import { Command, Option } from "commander";
 
 // import dotenvx from "dotenvx";
 
-import makeMongoClient from "#cli/mongoClient.js";
+import makeMongoClient from "#cli/utils/mongoClient.js";
 import makeImportCommand from "#cli/import.js";
 import makeMigrateCommand from "#cli/migrate.js";
 import makeServeCommand from "#cli/serve.js";
+import loadEnv from "#cli/utils/env.js";
 
 
 function makeCli() {
@@ -24,21 +25,23 @@ function makeCli() {
   const envFileOpt =
     new Option("--env <env-file>", "path to .env file").makeOptionMandatory();
 
-  // console.log("@@@@@@@@@@@@@@@@@@@@@@", process.env.MONGODB_DB);
-  const mongoClient = undefined; // await makeMongoClient();
-
+  // NOTE: how do we load the env variables ? it's a bit unorthodox:
+  // - the CLI requires to use a global `--env` option with a path to the .env file.
+  // - we use the hook `preAction` that is called before any (sub-)command's `action` function is called.
+  // - in the `preAction` hook, we call `loadEnv` that will load all env files defined in the `.env` file.
+  // - this way, all env variables will be defined in the subcommand's `action` methods (and children).
+  // WARNING: this means that the env variables can't be used in (sub-)commands BEFORE `action()` has been called.
   const cli = new Command();
   cli
     .name("aiiinotate-cli")
     .description("utility command line interfaces for aiiinotate")
     .addOption(envFileOpt)
     .hook("preAction", (thisCommand, actionCommand) => {
-      process.env.ENV_FILE_PATH = thisCommand.opts().env;
-      console.log("* preAction", process.env.ENV_FILE_PATH);
+      loadEnv(thisCommand.opts().env);
     })
     .addCommand(makeServeCommand())
-    .addCommand(makeImportCommand(mongoClient))
-    .addCommand(makeMigrateCommand(mongoClient));
+    .addCommand(makeImportCommand())
+    .addCommand(makeMigrateCommand());
 
   cli.parse(process.argv);
   return cli;

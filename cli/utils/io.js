@@ -4,13 +4,21 @@ import fs from "fs";
 
 const cwd = process.cwd();  // directory the script is run from
 
+/**
+ * convert a filepath to absolute if it is relative.
+ * @param {string} f
+ * @returns {string}
+ */
+const toAbsPath = (f) => path.isAbsolute(f) ? f : path.join(cwd, f);
+
 /** @returns {boolean} true if file `f` exists, false otherwise */
 const fileOk = (f) => {
+  f = toAbsPath(f);
   try {
     fs.accessSync(f, fs.constants.R_OK);
     return true;
   } catch (e) {
-    console.error(`utilsIo.fileOk: file does not exist or could not be read: ${f}`);
+    console.error(`io.fileOk: file does not exist or could not be read: ${f}`);
     return false
   }
 }
@@ -20,10 +28,11 @@ const fileOk = (f) => {
  * @return {string?}
  */
 const fileRead = (f) => {
+  f = toAbsPath(f);
   try {
     return fs.readFileSync(f, { encoding: "utf8" })
   } catch (err) {
-    console.error(`utilsIo.fileRead: could not read file: ${f}`);
+    console.error(`io.fileRead: could not read file: ${f}`);
   }
 }
 
@@ -35,10 +44,9 @@ const fileRead = (f) => {
  */
 function fileArrayValidate (fileArr) {
   // convert to absolute filepaths
-  fileArr = fileArr.map(f => path.isAbsolute(f) ? f : path.join(cwd, f));
-  const success = fileArr.every((f) => fileOk(f));
+  const success = fileArr.every(fileOk);
   if (!success) {
-    console.log("utilsIo.fileArrayValidate: some files could not be accessed. exiting...");
+    console.error("io.fileArrayValidate: some files could not be accessed. exiting...");
     process.exit(1);
   }
   return fileArr

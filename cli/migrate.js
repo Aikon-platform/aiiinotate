@@ -15,6 +15,8 @@ import { execSync } from "node:child_process"
 
 import { Command, Option, Argument } from "commander";
 
+import loadMongoClient from "#cli/utils/mongoClient.js";
+
 
 /** @typedef {"make"|"apply"|"revert"|"revert-all"} MigrateOpType */
 const allowedMigrateOp = ["make", "apply", "revert", "revert-all"];
@@ -81,14 +83,12 @@ function migrateRevertAll() {
 
 /**
  * run the cli
- * @param {import('mongodb').MongoClient} mongoClient
  * @param {import('commander').Command} command
  * @param {MigrateOpType} mongoClient
  * @param {object} options
  */
-function action(mongoClient, command, migrationOp, options) {
+async function action(command, migrationOp, options) {
   const { migrationName } = options;
-  console.log(">>>", migrationName, options)
 
   switch (migrationOp) {
     case ("make"):
@@ -106,7 +106,7 @@ function action(mongoClient, command, migrationOp, options) {
   }
 }
 
-function makeMigrateCommand(mongoClient) {
+function makeMigrateCommand() {
   const migrationOpArg =
     new Argument("<migration-op>", "name of migration operation").choices(allowedMigrateOp);
 
@@ -117,7 +117,7 @@ function makeMigrateCommand(mongoClient) {
     .description("run database migrations")
     .addArgument(migrationOpArg)
     .addOption(migrationNameOpt)
-    .action((migrationOp, options, command) => action(mongoClient, command, migrationOp, options))
+    .action((migrationOp, options, command) => action(command, migrationOp, options))
 }
 
 export default makeMigrateCommand;
