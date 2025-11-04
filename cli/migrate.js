@@ -16,7 +16,7 @@ import { execSync } from "node:child_process"
 import { Command, Option, Argument } from "commander";
 
 
-/** @typedef {"make"|"apply"|"revert"|"revert-all"} migrateOpType */
+/** @typedef {"make"|"apply"|"revert"|"revert-all"} MigrateOpType */
 const allowedMigrateOp = ["make", "apply", "revert", "revert-all"];
 
 const
@@ -83,7 +83,7 @@ function migrateRevertAll() {
  * run the cli
  * @param {import('mongodb').MongoClient} mongoClient
  * @param {import('commander').Command} command
- * @param {migrateOpType} mongoClient
+ * @param {MigrateOpType} mongoClient
  * @param {object} options
  */
 function action(mongoClient, command, migrationOp, options) {
