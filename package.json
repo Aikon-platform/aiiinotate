@@ -1,23 +1,22 @@
 {
   "name": "aiiinotate",
-  "version": "0.1.0",
+  "version": "0.2.7",
   "description": "a fast IIIF-compliant annotation server",
-  "main": "index.js",
+  "main": "./cli/index.js",
   "type": "module",
   "directories": {
     "doc": "docs"
   },
+  "bin": {
+    "aiiinotate": "./cli/index.js"
+  },
   "scripts": {
-    "start": "bash run.sh -d",
-    "prod": "bash run.sh -p",
-    "test": "bash run.sh -t",
-    "cli": "dotenvx run -f ./src/config/.env -- node ./cli/index.js",
+    "cli": "node ./cli/index.js --env=./config/.env",
+    "setup": "npm run cli migrate apply",
+    "start": "npm run cli serve dev",
+    "test": "dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
-    "migrate-make": "bash ./scripts/migrations.sh make",
-    "migrate-apply": "bash ./scripts/migrations.sh apply",
-    "migrate-revert": "bash ./scripts/migrations.sh revert",
-    "migrate-revert-all": "bash ./scripts/migrations.sh revertAll",
-    "migrate-reapply": "bash ./scripts/migrations.sh revertAll && bash ./scripts/migrations.sh apply"
+    "migrate": "npm run cli -- migrate"
   },
   "pre-commit": [
     "lint"
@@ -45,7 +44,7 @@
     "#migrations/*.js": "./migrations/*.js",
     "#db/*.js": "./src/db/*.js",
     "#schemas/*.js": "./src/schemas/*.js",
-    "#config/*.js": "./src/config/*.js",
+    "#config/*.js": "./config/*.js",
     "#data/*.js": "./src/data/*.js",
     "#utils/*.js": "./src/data/utils/*.js",
     "#fileServer/*.js": "./src/fileServer/*.js",

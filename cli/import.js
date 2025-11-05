@@ -1,8 +1,9 @@
 import { Command, Option, Argument } from "commander";
 
-import Annotations2 from "#annotations/annotations2/annotations2.js";
-import Annotations3 from "#annotations/annotations3/annotations3.js";
-import { getFilesToProcess, fileRead } from "#cli/io.js";
+import Annotations2 from "#annotations/annotations2.js";
+import Annotations3 from "#annotations/annotations3.js";
+import { getFilesToProcess, fileRead } from "#cli/utils/io.js";
+import loadMongoClient from "#cli/utils/mongoClient.js";
 
 ////////////////////////////////////////
 
@@ -70,12 +71,12 @@ async function importAnnotationList(annotations2, fileArr, iiifVersion) {
 
 /**
  * run the cli
+ * @param {import('commander').Command} command
  * @param {string} dataType: one of importTypes
  * @param {object} options
- * @param {import('commander').Command} command
- * @param {import('mongodb').MongoClient} mongoClient
  */
-async function action(dataType, options, command, mongoClient) {
+async function action(command, dataType, options) {
+  const mongoClient = loadMongoClient();
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
@@ -86,7 +87,7 @@ async function action(dataType, options, command, mongoClient) {
 
   checkAllowedImportType(iiifVersion, dataType);
 
-  const filesToProcess = await getFilesToProcess(files, listFiles);
+  const filesToProcess = getFilesToProcess(files, listFiles);
 
   const annotations2 = new Annotations2(
     mongoClient,
@@ -136,9 +137,7 @@ function makeImportCommand(mongoClient) {
     .addOption(filesOpt)
     .addOption(versionOpt)
     .addOption(listFilesOpt)
-    .action((dataType, options, command) => action(dataType, options, command, mongoClient))
+    .action((dataType, options, command) => action(mongoClient, command, dataType, options))
 }
 
-export {
-  makeImportCommand
-}
+export default makeImportCommand;
