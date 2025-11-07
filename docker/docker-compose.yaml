@@ -2,7 +2,28 @@ services:
   mongo:
     image: mongo:8
     restart: always
-    environment:
-      # MONGO_INITDB_ROOT_USERNAME: root
-      # MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - aiiinotate_network
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
 
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        PORT: ${APP_PORT}
+    env_file:
+      - ../config/.env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    depends_on:
+      - mongo
+    networks:
+      - aiiinotate_network
+    restart: always
+
+networks:
+  aiiinotate_network:
+    driver: bridge

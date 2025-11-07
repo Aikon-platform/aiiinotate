@@ -61,12 +61,13 @@ function migrateMake(migrationName) {
 
 /** apply all pending migrations */
 function migrateApply() {
-  migrationConfigs.map((mc) => execSync(`npx migrate-mongo up -f ${mc}`));
+  // NOTE: if we don't use a specific version of migrate-mongo, we get docker errors
+  migrationConfigs.map((mc) => execSync(`npx -- migrate-mongo@^12.1.3 up -f ${mc}`));
 }
 
 /** revert the last migration */
 function migrateRevert() {
-  migrationConfigs.map((mc) => execSync(`npx migrate-mongo down -f ${mc}`));
+  migrationConfigs.map((mc) => execSync(`npx migrate-mongo@^12.1.3 down -f ${mc}`));
 }
 
 /** revert all migrations */
@@ -76,7 +77,7 @@ function migrateRevertAll() {
   // do this for each migration file (prod and test database).
   migrationConfigs.map((mc) =>
     fs.readdirSync(dirMigrationsScripts).map((_) =>
-      execSync(`npx migrate-mongo down -f ${mc}`)
+      execSync(`npx migrate-mongo@^12.1.3 down -f ${mc}`)
     )
   )
 }
