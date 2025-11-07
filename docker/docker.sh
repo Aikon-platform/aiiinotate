@@ -15,6 +15,7 @@ cp "$ENV_CONFIG" "$ENV_DOCKER";
 sed -i -e s/^MONGODB_HOST=.*$/MONGODB_HOST="mongo"/ "$ENV_DOCKER";
 git
 
+#NOTE : this works !
 # build the docker compose.
 # if you provide -r, force to recreate the docker images.
 while getopts "r" opt; do
