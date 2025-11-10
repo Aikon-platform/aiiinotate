@@ -20,10 +20,11 @@ services:
       dockerfile: docker/Dockerfile
       args:
         PORT: ${APP_PORT}
+    # NOTE: be careful to point to docker/.env, not to config/.env, otherwise you will have very, very annoying errors.
     env_file:
-      - ../config/.env
+      - ../docker/.env
     ports:
-      - 4444:4444
+      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - mongo
     networks:

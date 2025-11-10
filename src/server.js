@@ -13,7 +13,6 @@ async function server (serveMode) {
   }
 
   const fastify = await build(serveMode);
-
   try {
     fastify.listen({ port: process.env.APP_PORT, host: process.env.APP_HOST });
   } catch(err) {

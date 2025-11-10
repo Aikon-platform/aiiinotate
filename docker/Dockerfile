@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:23.11 AS aiiinotate
+FROM node:23.11
 
 # aiiinotate port
 ARG PORT
@@ -10,15 +10,13 @@ ENV TERM=linux
 SHELL ["/bin/bash", "-c"]
 
 # root of the app in the docker container
-WORKDIR $ROOT_AIIINOTATE
+WORKDIR /aiiinotate
 # copy the docker .env in the docker container
 COPY ./docker/.env /aiiinotate/.env
 # for debug: install `iproute2` which provides CLI `ss` to monitor active ports
 RUN apt update && apt install iproute2 -y
-# install the app as an NPM library
+# install the app as an NPM library. we do a global install as it saves us from issues with `$PATH`.
 RUN npm i -g aiiinotate
-# migrate-mongo also needs to be manually installed it seems
-RUN npm i -g migrate-mongo@^12.1.3
 
 # expose the used port
 EXPOSE $PORT
