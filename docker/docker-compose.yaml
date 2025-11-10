@@ -1,10 +1,16 @@
+x-proxy-settings: &proxy-settings
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: "localhost,127.0.0.1,mongo,web,.aiiinotate_network"
+
 services:
   mongo:
     image: mongo:8
     restart: always
     networks:
       - aiiinotate_network
-    # environment:
+    environment:
+      <<: *proxy-settings
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: example
 
@@ -17,11 +23,13 @@ services:
     env_file:
       - ../config/.env
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - 4444:4444
     depends_on:
       - mongo
     networks:
       - aiiinotate_network
+    environment:
+      <<: *proxy-settings
     restart: always
 
 networks:

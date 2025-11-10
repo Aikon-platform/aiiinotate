@@ -10,16 +10,18 @@ ENV TERM=linux
 SHELL ["/bin/bash", "-c"]
 
 # root of the app in the docker container
-WORKDIR /aiiinotate
+WORKDIR $ROOT_AIIINOTATE
 # copy the docker .env in the docker container
 COPY ./docker/.env /aiiinotate/.env
 # install the app as an NPM library
 RUN npm i -g aiiinotate
-
+# migrate-mongo also needs to be manually installed it seems
 RUN npm i -g migrate-mongo@^12.1.3
-# migrate the database
-RUN  aiiinotate --env=/aiiinotate/.env -- migrate apply
+
 # expose the used port
 EXPOSE $PORT
-# start the app
-CMD aiiinotate --env=/aiiinotate/.env -- serve prod
+
+# run the migrations and start the app.
+# NOTE migrations must be done in CMD: they need the mongo service to be running.
+CMD aiiinotate --env=/aiiinotate/.env -- migrate apply && \
+    aiiinotate --env=/aiiinotate/.env -- serve prod;

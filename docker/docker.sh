@@ -1,29 +1,51 @@
 #!/usr/bin/env bash
 
+set -e;
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# basic / dev config
 ENV_CONFIG="$SCRIPT_DIR/../config/.env"
+# docker specific config, created by `env_to_docker`
 ENV_DOCKER="$SCRIPT_DIR/.env"
 
-if [ ! -f "$ENV_CONFIG" ];
-then echo ".env file not found at at '$ENV_CONFIG'. exiting..." && exit 1;
-fi;
+# copy config/.env file to docker/.env and adapt the file to work with docker.
+env_to_docker() {
+    # check the env file is found
+    if [ ! -f "$ENV_CONFIG" ];
+    then
+        echo ".env file not found at at '$ENV_CONFIG'. exiting...";
+        return 1;  # will exit when used with `set -e`
+    fi;
 
-# env file used for docker.
-# NOTE that the MongoDB host in Docker MUST BE the name of the Mongo docker service (defined in docker-compose)
-cp "$ENV_CONFIG" "$ENV_DOCKER";
-sed -i -e s/^MONGODB_HOST=.*$/MONGODB_HOST="mongo"/ "$ENV_DOCKER";
-git
+    # NOTE that the MongoDB host in Docker MUST BE the name of the Mongo docker service (defined in docker-compose)
+    cp "$ENV_CONFIG" "$ENV_DOCKER";
+    sed -i -e s/^MONGODB_HOST=.*$/MONGODB_HOST="mongo"/ "$ENV_DOCKER";
+}
+env_to_docker;
 
-#NOTE : this works !
-# build the docker compose.
-# if you provide -r, force to recreate the docker images.
-while getopts "r" opt; do
-    case "$opt" in
-        r) sudo docker compose --env-file ./.env up --force-recreate;
-            ;;
-        # doesn't work but whatever
-        *) sudo docker compose --env-file ./.env up;
-            ;;
-    esac;
-done
+build_containers () {
+    sudo docker compose --env-file "$ENV_DOCKER" build --no-cache;
+}
+
+start_containers() {
+    sudo docker compose --env-file "$ENV_DOCKER" up --force-recreate;
+}
+
+stop_containers() {
+    sudo docker compose --env-file "$ENV_DOCKER" down;
+}
+
+case "$1" in
+    start)
+        start_containers
+        ;;
+    build)
+        build_containers
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|build}"
+        exit 1
+        ;;
+esac;
+
