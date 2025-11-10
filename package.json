@@ -12,9 +12,9 @@
   },
   "scripts": {
     "cli": "node ./cli/index.js --env=./config/.env",
-    "setup": "npm run cli migrate apply",
-    "start": "npm run cli serve dev",
-    "test": "dotenvx run -f ./config/.env -- node --test --test-isolation=none",
+    "setup": "sudo systemctl start mongod && npm run cli migrate apply",
+    "start": "sudo systemctl start mongod && npm run cli serve dev",
+    "test": "sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate"
   },

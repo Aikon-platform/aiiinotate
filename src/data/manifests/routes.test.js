@@ -30,7 +30,7 @@ test("test manifests Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.APP_PORT });
+    await fastify.listen({ port: process.env.APP_PORT, host: process.env.APP_HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;

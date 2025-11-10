@@ -35,10 +35,16 @@ bash docker.sh start
 
 ---
 
-## Useful commands
+## Troubleshooting and useful commands
 
 Access `mongosh` within the Mongo container:
 
 ```bash
 sudo docker exec -it docker-mongo-1 mongosh
+```
+
+Check running ports in the Web container:
+
+```bash
+sudo docker exec -it docker-web-1 ss -tnl
 ```

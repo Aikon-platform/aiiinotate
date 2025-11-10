@@ -2,7 +2,7 @@
 FROM node:23.11 AS aiiinotate
 
 # aiiinotate port
-ARG PORT=4444
+ARG PORT
 ENV PORT=${PORT}
 
 # set up environment
@@ -13,6 +13,8 @@ SHELL ["/bin/bash", "-c"]
 WORKDIR $ROOT_AIIINOTATE
 # copy the docker .env in the docker container
 COPY ./docker/.env /aiiinotate/.env
+# for debug: install `iproute2` which provides CLI `ss` to monitor active ports
+RUN apt update && apt install iproute2 -y
 # install the app as an NPM library
 RUN npm i -g aiiinotate
 # migrate-mongo also needs to be manually installed it seems
