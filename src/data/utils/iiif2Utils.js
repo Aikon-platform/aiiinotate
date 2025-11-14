@@ -1,6 +1,6 @@
 import { v4 as uuid4 } from "uuid";
 
-import { maybeToArray, getHash, isNullish, isObject } from "#utils/utils.js";
+import { maybeToArray, getHash, isNullish, isObject, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
@@ -110,7 +110,7 @@ const makeTarget = (annotation) => {
     if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
       specificResource = target;
       // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-      if ( isObject(target.selector) && Object.keys(target.selector).includes("type") ) {
+      if ( target.selector && isObject(target.selector) && Object.keys(target.selector).includes("type") ) {
         target.selector["@type"] = target.selector.type;
         delete target.selector.type;
       }
