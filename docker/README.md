@@ -58,5 +58,5 @@ sudo docker exec -it docker-web-1 npm list -g --depth=0
 CURL the Web container
 
 ```bash
-sudo docker exec -it docker-web-1 curl http://0.0.0.0:4444   # change 4444 by your $APP_PORT
+sudo docker exec -it docker-web-1 curl http://0.0.0.0:4444   # change 4444 by your $AIIINOTATE_PORT
 ```

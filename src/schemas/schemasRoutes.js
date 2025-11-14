@@ -9,7 +9,7 @@ import fastifyPlugin from "fastify-plugin";
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.APP_BASE_URL}/schemas/routes/${slug}`;
+  `${process.env.AIIINOTATE_BASE_URL}/schemas/routes/${slug}`;
 
 /**
  * @param {FastifyInstanceType} fastify

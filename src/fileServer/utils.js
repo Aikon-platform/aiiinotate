@@ -25,7 +25,7 @@ const readFileToObject = (fn) => {
  * @param {string} fn
  * @returns {string}
  */
-const toUrl = (fn) => `${process.env.APP_BASE_URL}/fileServer/${fn}`;
+const toUrl = (fn) => `${process.env.AIIINOTATE_BASE_URL}/fileServer/${fn}`;
 
 
 export {

@@ -41,7 +41,7 @@ test("test annotation Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.APP_PORT, host: process.env.APP_HOST });
+    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;
@@ -158,8 +158,8 @@ test("test annotation Routes", async (t) => {
         const
           annotationIdQuery =
             shouldExist
-              ? annotationId.replace(process.env.APP_BASE_URL, "")
-              : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+              ? annotationId.replace(process.env.AIIINOTATE_BASE_URL, "")
+              : annotationId.replace(process.env.AIIINOTATE_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
           r = await fastify.inject({
             method: "GET",
             url: annotationIdQuery

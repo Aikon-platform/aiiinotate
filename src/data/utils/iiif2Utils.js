@@ -150,10 +150,10 @@ const makeAnnotationId = (annotation, manifestShortId) => {
  * @returns {string}
  */
 const annotationUri = (manifestShortId, canvasId) =>
-  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
+  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
 
 const manifestUri = (manifestShortId) =>
-  `${process.env.APP_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
+  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
 
 /**
  * if `canvasUri` follows the recommended IIIF 2.1 recommended URI pattern, convert it to a JSON manifest URI.

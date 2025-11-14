@@ -45,7 +45,7 @@ env_to_docker() {
     # NOTE that the MongoDB host in Docker MUST BE the name of the Mongo docker service (defined in docker-compose)
     cp "$ENV_CONFIG" "$ENV_DOCKER";
     sed_repl s~^MONGODB_HOST=.*$~MONGODB_HOST=mongo~ "$ENV_DOCKER";
-    sed_repl s~^APP_HOST=.*~APP_HOST=0.0.0.0~ "$ENV_DOCKER";
+    sed_repl s~^AIIINOTATE_HOST=.*~AIIINOTATE_HOST=0.0.0.0~ "$ENV_DOCKER"
 }
 env_to_docker;
 

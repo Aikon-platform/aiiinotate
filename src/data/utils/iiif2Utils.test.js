@@ -88,7 +88,7 @@ test("test 'iiif2Utils' functions", async (t) => {
     const escapeRegExp = (string) =>
       string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 
-    const rgx = new RegExp(`^${escapeRegExp(process.env.APP_BASE_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
+    const rgx = new RegExp(`^${escapeRegExp(process.env.AIIINOTATE_BASE_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
     annotations2Valid.map((annotation) =>
       t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true));
     annotations2Invalid.map((annotation) =>

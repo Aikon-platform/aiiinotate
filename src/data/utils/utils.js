@@ -135,7 +135,7 @@ const maybeToArray = (x, convertedFlag=false) =>
     : Array.isArray(x) ? x : [x];
 
 const pathToUrl = (path) =>
-  `${process.env.APP_BASE_URL}${path}`
+  `${process.env.AIIINOTATE_BASE_URL}${path}`
 
 /**
  * display a detailed and nested view of an object. to be used with console.log.

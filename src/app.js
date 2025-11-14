@@ -45,7 +45,7 @@ const defaultConfig = {
 //     },
 //     servers: [
 //       {
-//         url: process.env.APP_BASE_URL,
+//         url: process.env.AIIINOTATE_BASE_URL,
 //         description: "Aiiinotate URL"
 //       }
 //     ],
@@ -67,7 +67,7 @@ const defaultConfig = {
 //   //     url: 'https://swagger.io',
 //   //     description: 'Find more info here'
 //   //   },
-//   //   host: process.env.APP_BASE_URL.replace(/^http(s)?\:\/\//g, ""),  // process.env.APP_BASE_URL,
+//   //   host: process.env.AIIINOTATE_BASE_URL.replace(/^http(s)?\:\/\//g, ""),  // process.env.AIIINOTATE_BASE_URL,
 //   //   schemes: [ "http", "https" ],
 //   //   consumes: ['application/json'],
 //   //   produces: ['application/json'],
