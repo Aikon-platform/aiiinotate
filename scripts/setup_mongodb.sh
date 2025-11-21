@@ -5,7 +5,27 @@
 #NOTE only the mongodb installation is done here. for database creation, see `setup_mongodb_populate.sh`
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source "$SCRIPT_DIR/utils.sh";
+
+get_os() {
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)     os=Linux;;
+        Darwin*)    os=Mac;;
+        CYGWIN*)    os=Cygwin;;
+        MINGW*)     os=MinGw;;
+        MSYS_NT*)   os=Git;;
+        *)          os="UNKNOWN:${unameOut}"
+    esac
+    echo "${os}"
+}
+OS=$(get_os)
+
+# float arithmetic comparison is not supported by bash and we need to use `bc`
+# usage: if float_comparison "a >= b"; then... ; fi
+float_comparison () {
+    expr="$1"
+    (( $(echo "$expr" |bc -l) ));
+}
 
 install_mongodb_ubuntu () {
 
