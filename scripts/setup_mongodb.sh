@@ -1,24 +1,13 @@
 #!/bin/env bash
 
+set -e
+
 # mongo install guide: https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu
 
 #NOTE only the mongodb installation is done here. for database creation, see `setup_mongodb_populate.sh`
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-get_os() {
-    unameOut="$(uname -s)"
-    case "${unameOut}" in
-        Linux*)     os=Linux;;
-        Darwin*)    os=Mac;;
-        CYGWIN*)    os=Cygwin;;
-        MINGW*)     os=MinGw;;
-        MSYS_NT*)   os=Git;;
-        *)          os="UNKNOWN:${unameOut}"
-    esac
-    echo "${os}"
-}
-OS=$(get_os)
+source "$SCRIPT_DIR/utils.sh"
 
 # float arithmetic comparison is not supported by bash and we need to use `bc`
 # usage: if float_comparison "a >= b"; then... ; fi
