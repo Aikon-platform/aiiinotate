@@ -88,8 +88,8 @@ test("test common routes", async (t) => {
                       ? deleteBy==="uri"
                         ? getRandomItem(annotations.map((a) => a["@id"]))
                         : deleteBy==="canvasUri"
-                          ? getRandomItem(annotations.map((a) => a.on.full))
-                          : getRandomItem(annotations.map((a) => a.on.manifestShortId))
+                          ? getRandomItem(annotations.map((a) => getRandomItem(a.on).full))
+                          : getRandomItem(annotations.map((a) => getRandomItem(a.on).manifestShortId))
                       : `invalid-filter-${uuid4()}`,
                   expectedDeletedCount =
                     validFilter
