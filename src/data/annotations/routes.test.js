@@ -31,7 +31,7 @@ test("test annotation Routes", async (t) => {
       annotationListArray,
       annotationListUriInvalid,
       annotationListUriArrayInvalid
-    } = fastify.fileServer;
+    } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests
@@ -41,7 +41,7 @@ test("test annotation Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.APP_PORT });
+    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;
@@ -71,8 +71,8 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     const data = [
-      [fastify.fileServer.annotations2Valid, testPostRouteCreateSuccess],
-      [fastify.fileServer.annotations2Invalid, testPostRouteCreateFailure],
+      [fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess],
+      [fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure],
     ]
     for ( let i=0; i<data.length; i++ ) {
       let [ testData, func ] = data.at(i);
@@ -126,7 +126,7 @@ test("test annotation Routes", async (t) => {
           annotation = await getRandomItem(
             await fastify.mongo.db.collection("annotations2").find().toArray()
           ),
-          canvasId = annotation.on.full,
+          canvasId = getRandomItem(annotation.on).full,
           r = await fastify.inject({
             method: "GET",
             url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
@@ -158,8 +158,8 @@ test("test annotation Routes", async (t) => {
         const
           annotationIdQuery =
             shouldExist
-              ? annotationId.replace(process.env.APP_BASE_URL, "")
-              : annotationId.replace(process.env.APP_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+              ? annotationId.replace(process.env.AIIINOTATE_BASE_URL, "")
+              : annotationId.replace(process.env.AIIINOTATE_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
           r = await fastify.inject({
             method: "GET",
             url: annotationIdQuery

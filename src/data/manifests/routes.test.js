@@ -20,7 +20,7 @@ test("test manifests Routes", async (t) => {
       manifest2Invalid,
       manifest2ValidUri,
       manifest2InvalidUri,
-    } = fastify.fileServer;
+    } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests
@@ -30,7 +30,7 @@ test("test manifests Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.APP_PORT });
+    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;

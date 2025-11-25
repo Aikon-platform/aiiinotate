@@ -1,11 +1,11 @@
 /**
- * the `fileServer` plugin makes test files available to the entire fastify app, mostly for testing purposes.
+ * the `fixtures` plugin makes test files available to the entire fastify app, mostly for testing purposes.
  */
 import fastifyPlugin from "fastify-plugin";
 
-import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fileServer/annotations.js";
-import { manifest2Valid, manifest2ValidUri, manifest2Invalid, manifest2InvalidUri } from "#fileServer/manifests.js";
-import { readFileToObject } from "#fileServer/utils.js";
+import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fixtures/annotations.js";
+import { manifest2Valid, manifest2ValidUri, manifest2Invalid, manifest2InvalidUri } from "#fixtures/manifests.js";
+import { readFileToObject } from "#fixtures/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -15,11 +15,11 @@ import { readFileToObject } from "#fileServer/utils.js";
  * @param {FastifyInstanceType} fastify  Encapsulated Fastify Instance
  * @param {object} options
  */
-async function fileServer(fastify, options) {
+async function fixtures(fastify, options) {
 
   /** route to return a file in `dataDir` */
   fastify.get(
-    "/fileServer/:fileName",
+    "/fixtures/:fileName",
     {
       schema: {
         params: {
@@ -45,7 +45,7 @@ async function fileServer(fastify, options) {
     }
   )
 
-  fastify.decorate("fileServer", {
+  fastify.decorate("fixtures", {
     annotationListUri: annotationListUri,
     annotationListUriArray: annotationListUriArray,
     annotationList: annotationList,
@@ -61,4 +61,4 @@ async function fileServer(fastify, options) {
   });
 }
 
-export default fastifyPlugin(fileServer);
+export default fastifyPlugin(fixtures);

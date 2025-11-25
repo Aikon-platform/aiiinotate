@@ -16,7 +16,7 @@ test("test common routes", async (t) => {
     fastify = await build("test"),
     testPostRoute = testPostRouteCurry(fastify),
     testDeleteRoute = testDeleteRouteCurry(fastify),
-    { manifest2Valid, annotationList } = fastify.fileServer;
+    { manifest2Valid, annotationList } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests
@@ -26,7 +26,7 @@ test("test common routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.APP_PORT });
+    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;
@@ -88,16 +88,16 @@ test("test common routes", async (t) => {
                       ? deleteBy==="uri"
                         ? getRandomItem(annotations.map((a) => a["@id"]))
                         : deleteBy==="canvasUri"
-                          ? getRandomItem(annotations.map((a) => a.on.full))
-                          : getRandomItem(annotations.map((a) => a.on.manifestShortId))
+                          ? getRandomItem(annotations.map((a) => getRandomItem(a.on).full))
+                          : getRandomItem(annotations.map((a) => getRandomItem(a.on).manifestShortId))
                       : `invalid-filter-${uuid4()}`,
                   expectedDeletedCount =
                     validFilter
                       ? deleteBy==="uri"
                         ? annotations.filter((a) => a["@id"]===deleteKey).length
                         : deleteBy==="canvasUri"
-                          ? annotations.filter((a) => a.on.full===deleteKey).length
-                          : annotations.filter((a) => a.on.manifestShortId===deleteKey).length
+                          ? annotations.filter((a) => a.on.some((x) => x.full===deleteKey)).length
+                          : annotations.filter((a) => a.on.some((x) => x.manifestShortId===deleteKey)).length
                       : 0;
 
                 await testDeleteRoute(t, `/annotations/2/delete?${deleteBy}=${deleteKey}`, expectedDeletedCount);

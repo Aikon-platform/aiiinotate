@@ -6,7 +6,7 @@ import { IIIF_PRESENTATION_3, IIIF_PRESENTATION_3_CONTEXT } from "#utils/iiifUti
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.APP_BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_3}/${slug}`
+  `${process.env.AIIINOTATE_BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_3}/${slug}`
 
 /**
  * @param {FastifyInstanceType} fastify

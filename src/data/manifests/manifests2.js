@@ -289,7 +289,7 @@ class Manifests2 extends CollectionAbstract {
     return {
       ...IIIF_PRESENTATION_2_CONTEXT,
       "@type": "sc:Collection",
-      "@id": `${process.env.APP_BASE_URL}/manifests/2`,
+      "@id": `${process.env.AIIINOTATE_BASE_URL}/manifests/2`,
       label: "Collection of all manifests indexed in the annotation server",
       members: manifestIndex
     }

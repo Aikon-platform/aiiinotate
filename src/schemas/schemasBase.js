@@ -4,7 +4,7 @@ import fastifyPlugin from "fastify-plugin"
 
 /** @param {"search"|"presentation"} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.APP_BASE_URL}/schemas/${slug}/version`;
+  `${process.env.AIIINOTATE_BASE_URL}/schemas/${slug}/version`;
 
 /**
  * @param {FastifyInstanceType} fastify

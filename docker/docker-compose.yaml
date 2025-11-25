@@ -1,0 +1,38 @@
+x-proxy-settings: &proxy-settings
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: "localhost,127.0.0.1,mongo,web,.aiiinotate_network"
+
+services:
+  mongo:
+    image: mongo:8
+    restart: always
+    networks:
+      - aiiinotate_network
+    environment:
+      <<: *proxy-settings
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        PORT: ${AIIINOTATE_PORT}
+    # NOTE: be careful to point to docker/.env, not to config/.env, otherwise you will have very, very annoying errors.
+    env_file:
+      - ../docker/.env
+    ports:
+      - "${AIIINOTATE_PORT}:${AIIINOTATE_PORT}"
+    depends_on:
+      - mongo
+    networks:
+      - aiiinotate_network
+    environment:
+      <<: *proxy-settings
+    restart: always
+
+networks:
+  aiiinotate_network:
+    driver: bridge

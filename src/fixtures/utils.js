@@ -4,13 +4,13 @@ import fs from "node:fs";
 
 // path to dirctory of curent file
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-// path to fileServer/data
+// path to fixtures/data
 const dataDir = path.join(__dirname, "data");
 
 const availableFiles = fs.readdirSync(dataDir);
 
 /**
- * for simplicity, `readFileToObject` is synchronous. given that `fileServer` should only be used in tests, there is no performance downgrade for the prod server.
+ * for simplicity, `readFileToObject` is synchronous. given that `fixtures` should only be used in tests, there is no performance downgrade for the prod server.
  * @param {string} fn: the filename
  * @returns {object}
  */
@@ -25,7 +25,7 @@ const readFileToObject = (fn) => {
  * @param {string} fn
  * @returns {string}
  */
-const toUrl = (fn) => `${process.env.APP_BASE_URL}/fileServer/${fn}`;
+const toUrl = (fn) => `${process.env.AIIINOTATE_BASE_URL}/fixtures/${fn}`;
 
 
 export {

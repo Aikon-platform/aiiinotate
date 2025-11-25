@@ -9,7 +9,7 @@ import fastifyPlugin from "fastify-plugin";
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.APP_BASE_URL}/schemas/routes/${slug}`;
+  `${process.env.AIIINOTATE_BASE_URL}/schemas/routes/${slug}`;
 
 /**
  * @param {FastifyInstanceType} fastify
@@ -41,7 +41,20 @@ function addSchemas(fastify, options, done) {
         { type: "string", enum: [ "oa:Annotation" ] },
         { type: "array", items: { type: "string" }}
       ]},
-      on: { anyOf: [{ type: "string" }, { type: "object" }]}
+      on: {
+        anyOf: [
+          { type: "string" },
+          { type: "object" },
+          {
+            type: "array",
+            items: [
+              { type: "string" },
+              { type: "object" }
+            ],
+            minItems: 1
+          }
+        ]
+      }
     }
   });
 
@@ -56,7 +69,20 @@ function addSchemas(fastify, options, done) {
         { type: "string" },
         { type: "array", items: { type: "string" } },
       ]},
-      target: { anyOf: [{ type: "string" }, { type: "object" }]}
+      target: {
+        anyOf: [
+          { type: "string" },
+          { type: "object" },
+          {
+            type: "array",
+            items: [
+              { type: "string" },
+              { type: "object" }
+            ],
+            minItems: 1
+          }
+        ]
+      }
     }
   })
 

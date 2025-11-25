@@ -55,7 +55,7 @@ const embeddedBodyTypeValues = [
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.APP_BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
+  `${process.env.AIIINOTATE_BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
 
 /**
  * @param {FastifyInstanceType} fastify
@@ -201,12 +201,15 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("annotationTarget"),
-    anyOf: [
-      // URI
-      { type: "string" },
-      // SpecificResource
-      { $ref: makeSchemaUri("specificResource") }
-    ]
+    type: "array",
+    items: {
+      anyOf: [
+        // URI
+        { type: "string" },
+        // SpecificResource
+        { $ref: makeSchemaUri("specificResource") }
+      ]
+    }
   })
 
   fastify.addSchema({
