@@ -1,4 +1,4 @@
-import { readFileToObject, toUrl } from "#fileServer/utils.js";
+import { readFileToObject, toUrl } from "#fixtures/utils.js";
 
 const manifest2ValidUri = { uri: toUrl("bnf_valid_manifest.json") };
 const manifest2Valid = readFileToObject("bnf_valid_manifest.json");

@@ -6,7 +6,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 // import swagger from "@fastify/swagger";
 
-import fileServer from "#fileServer/index.js";
+import fixtures from "#fixtures/index.js";
 import schemas from "#schemas/index.js";
 import data from "#data/index.js";
 import db from "#db/index.js";
@@ -101,7 +101,7 @@ async function build(mode="default") {
   });
 
   await fastify.register(db, mongoConfig);
-  await fastify.register(fileServer);
+  await fastify.register(fixtures);
   fastify.register(schemas);
   fastify.register(data);
   await fastify.ready();

@@ -31,7 +31,7 @@ test("test annotation Routes", async (t) => {
       annotationListArray,
       annotationListUriInvalid,
       annotationListUriArrayInvalid
-    } = fastify.fileServer;
+    } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests
@@ -71,8 +71,8 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     const data = [
-      [fastify.fileServer.annotations2Valid, testPostRouteCreateSuccess],
-      [fastify.fileServer.annotations2Invalid, testPostRouteCreateFailure],
+      [fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess],
+      [fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure],
     ]
     for ( let i=0; i<data.length; i++ ) {
       let [ testData, func ] = data.at(i);

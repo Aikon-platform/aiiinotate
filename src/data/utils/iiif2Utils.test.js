@@ -12,7 +12,7 @@ const
 test("test 'iiif2Utils' functions", async (t) => {
   const
     fastify = await build("test"),
-    { annotations2Valid, annotations2Invalid } = fastify.fileServer;
+    { annotations2Valid, annotations2Invalid } = fastify.fixtures;
 
   await fastify.ready();
 

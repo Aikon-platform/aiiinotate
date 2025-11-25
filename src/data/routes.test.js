@@ -16,7 +16,7 @@ test("test common routes", async (t) => {
     fastify = await build("test"),
     testPostRoute = testPostRouteCurry(fastify),
     testDeleteRoute = testDeleteRouteCurry(fastify),
-    { manifest2Valid, annotationList } = fastify.fileServer;
+    { manifest2Valid, annotationList } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests

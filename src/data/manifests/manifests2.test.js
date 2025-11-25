@@ -17,7 +17,7 @@ test("test Manifests2 module", async (t) => {
       manifest2ValidUri,
       manifest2Invalid,
       manifest2InvalidUri
-    } = fastify.fileServer;
+    } = fastify.fixtures;
 
   await fastify.ready();
   // close the app after running the tests
