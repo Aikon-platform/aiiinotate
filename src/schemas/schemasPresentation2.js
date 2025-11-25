@@ -201,12 +201,15 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("annotationTarget"),
-    anyOf: [
-      // URI
-      { type: "string" },
-      // SpecificResource
-      { $ref: makeSchemaUri("specificResource") }
-    ]
+    type: "array",
+    items: {
+      anyOf: [
+        // URI
+        { type: "string" },
+        // SpecificResource
+        { $ref: makeSchemaUri("specificResource") }
+      ]
+    }
   })
 
   fastify.addSchema({
