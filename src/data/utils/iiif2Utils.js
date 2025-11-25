@@ -1,6 +1,6 @@
 import { v4 as uuid4 } from "uuid";
 
-import { maybeToArray, getHash, isNullish, isObject, visibleLog } from "#utils/utils.js";
+import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
@@ -106,21 +106,25 @@ const makeTarget = (annotation) => {
       }
     }
   } else if ( isObject(target) ) {
-    // if 'target' is an object but not a specificresource, raise.
     if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
       specificResource = target;
       // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-      if ( target.selector && isObject(target.selector) && Object.keys(target.selector).includes("type") ) {
-        target.selector["@type"] = target.selector.type;
-        delete target.selector.type;
+      if ( specificResource.selector !== undefined && isObject(specificResource.selector) && Object.keys(specificResource.selector).includes("type") ) {
+        specificResource.selector["@type"] = specificResource.selector.type;
+        delete specificResource.selector.type;
       }
+    // if 'target' is an object but not a specificresource, raise.
     } else {
       throw err
     }
+  // if target is neither a string nor an object, raise
   } else {
     throw err
   }
-
+  if ( objectHasKey(specificResource, "full") ) {
+    specificResource.manifestShortId = getManifestShortId(specificResource.full);
+    specificResource.manifestUri = manifestUri(specificResource.manifestShortId);
+  }
   return specificResource
 }
 

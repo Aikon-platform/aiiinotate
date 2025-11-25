@@ -106,18 +106,18 @@ class Annotations2 extends CollectionAbstract {
    * @returns {object}
    */
   #cleanAnnotation(annotation, update=false) {
-    // 1) extract ids and targets
+    // 1) extract ids and targets. convert the target to an array.
     const
-      annotationTarget = makeTarget(annotation),
-      manifestShortId = getManifestShortId(annotationTarget.full);
+      annotationTargetArray = maybeToArray(annotation).map(makeTarget),
+      // we assume that all values of `annotationTargetArray` point to the same manifest => take the manifest of the 1st target
+      manifestShortId = annotationTargetArray[0].manifestShortId;
 
     // in updates, "@id" has aldready been extracted
     if ( !update ) {
       annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
     }
     annotation["@context"] = IIIF_PRESENTATION_2_CONTEXT["@context"];
-    annotation.on = annotationTarget;
-    annotation.on.manifestShortId = manifestShortId;
+    annotation.on = annotationTargetArray;
 
     // 2) process motivations.
     // - motivations are an array of strings
@@ -170,26 +170,25 @@ class Annotations2 extends CollectionAbstract {
   /**
    * handle all side effects on the `manifests2` collection. this does 2 things:
    * - insert all manifests referenced by `annotationData`, and set a key `on.manifestId` on all annotations.
-   * - set a key `on.canvasIdx`, containing the position of the annotation's target canvas in the manifest,
+   * - set a key `canvasIdx` in all values of `annotation.on`, containing the position of the annotation's target canvas in the manifest,
    *    (or undefined if the manifest or canvas were not found).
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
    */
   async #insertManifestsAndGetCanvasIdx(annotationData) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     // convert objects to array to get a uniform interface.
-    let converted, manifestUris;
+    let converted
     [ annotationData, converted ] = maybeToArray(annotationData, true);
 
-    // extract all manifest URIs and add them to `annotationData`
-    annotationData = annotationData.map((ann) => {
-      ann.on.manifestUri = canvasUriToManifestUri(ann.on.full);
-      return ann;
-    })
+    // 1. get all distinct manifest URIs
+    const manifestUris = [];
+    annotationData.map((ann) => ann.on.map((target) => {
+      if ( target.manifestUri !== undefined && !manifestUris.includes(target.manifestUri) ) {
+        manifestUris.push(target.manifestUri);
+      }
+    }));
 
-    // get all distinct manifest URIs, and insert them.
-    manifestUris = [...new Set(
-      annotationData.map((ann) => ann.on.manifestUri)
-    )];
+    // 2. insert the manifests
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
       insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, false),
@@ -197,19 +196,25 @@ class Annotations2 extends CollectionAbstract {
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
 
     // 3. update annotations with 2 things:
-    //  - where manifest insertion has failed, set `annotation.on.manifestUri` to undefined
+    //  - where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
     //  - set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
     annotationData = await Promise.all(
       annotationData.map(async (ann) => {
-        ann.on.manifestUri =
-          // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
-          insertedManifestsIds.find((x) => x === ann.on.manifestUri)
-            ? ann.on.manifestUri
-            : undefined;
-        ann.on.canvasIdx =
-          ann.on.manifestUri
-            ? await this.manifestsPlugin.getCanvasIdx(ann.on.manifestUri, ann.on.full)
-            : undefined;
+        ann.on = await Promise.all(
+          ann.on.map(async (target) => {
+            target.manifestUri =
+              // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
+              insertedManifestsIds.find((x) => x === target.manifestUri)
+                ? target.manifestUri
+                : undefined;
+            target.canvasIdx =
+              target.manifestUri
+                ? await this.manifestsPlugin.getCanvasIdx(target.manifestUri, target.full)
+                : undefined;
+            console.log(">>> #insertManifestsAndGetCanvasIdx: target", target);
+            return target;
+          })
+        )
         return ann;
       })
     );
@@ -280,9 +285,8 @@ class Annotations2 extends CollectionAbstract {
       deleteKey==="uri"
         ? { "@id": deleteVal }
         : deleteKey==="canvasUri"
-          ? { "on.full": deleteVal }
-          : { "on.manifestShortId": deleteVal };
-
+          ? { "on": { full: deleteVal } }
+          : { "on": { manifestShortId: deleteVal } };
     return this.delete(deleteFilter);
   }
 
@@ -391,9 +395,7 @@ class Annotations2 extends CollectionAbstract {
    * @returns
    */
   async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
-    const annotations = await this.find({
-      "on.full": canvasUri
-    });
+    const annotations = await this.find({ on: { full: canvasUri } });
     return asAnnotationList
       ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;

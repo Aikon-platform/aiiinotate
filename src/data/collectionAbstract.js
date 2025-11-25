@@ -202,6 +202,7 @@ class CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertMany(docArr) {
+    console.log("docArr", docArr)
     try {
       const result = await this.collection.insertMany(docArr);
       return this.makeInsertResponse(result);
