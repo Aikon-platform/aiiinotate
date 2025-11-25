@@ -285,8 +285,8 @@ class Annotations2 extends CollectionAbstract {
       deleteKey==="uri"
         ? { "@id": deleteVal }
         : deleteKey==="canvasUri"
-          ? { "on": { full: deleteVal } }
-          : { "on": { manifestShortId: deleteVal } };
+          ? { "on.full": deleteVal }
+          : { "on.manifestShortId": deleteVal };
     return this.delete(deleteFilter);
   }
 
@@ -395,7 +395,7 @@ class Annotations2 extends CollectionAbstract {
    * @returns
    */
   async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
-    const annotations = await this.find({ on: { full: canvasUri } });
+    const annotations = await this.find({ "on.full": canvasUri });
     return asAnnotationList
       ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
       : annotations;
