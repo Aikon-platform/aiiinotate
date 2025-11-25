@@ -84,48 +84,52 @@ const getAnnotationTarget = (annotation) => {
 /**
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
+ * @param {object} annotation
+ * @returns {object[]} - the array of targets extracted from 'annotation.on'
  */
 const makeTarget = (annotation) => {
-  const
-    // must be either string or SpecificResource
-    target = annotation.on,
-    // error that will raise is `target` can't be processed
-    err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI or an object with 'annotation.on.@type==="oa:SpecificResource"' and 'annotation.on.@id' must be a string URI`, { info: annotation });
+  const err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, an object or an array of objects containing { on: {@id: "<string URI>", @type: "oa:SpecificResource"} }`, { info: annotation });
 
-  let specificResource;
+  /** annotation.on is converted to an array => this function creates a target from a single item of that array */
+  const makeSingleTarget = (_target) => {
+    let specificResource;
 
-  // convert to SpecificResource if it's not aldready the case
-  if ( typeof(target) === "string" && !isNullish(target) ) {
-    let [full, fragment] = target.split("#");
-    specificResource = {
-      "@type": "oa:SpecificResource",
-      full: full,
-      selector: {
-        "@type": "oa:FragmentSelector",
-        value: fragment
+    // convert to SpecificResource if it's not aldready the case
+    if ( typeof(_target) === "string" && !isNullish(_target) ) {
+      let [full, fragment] = _target.split("#");
+      specificResource = {
+        "@id": _target,
+        "@type": "oa:SpecificResource",
+        full: full,
+        selector: {
+          "@type": "oa:FragmentSelector",
+          value: fragment
+        }
       }
-    }
-  } else if ( isObject(target) ) {
-    if ( target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
-      specificResource = target;
-      // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-      if ( specificResource.selector !== undefined && isObject(specificResource.selector) && Object.keys(specificResource.selector).includes("type") ) {
-        specificResource.selector["@type"] = specificResource.selector.type;
-        delete specificResource.selector.type;
+    } else if ( isObject(_target) ) {
+      if ( _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
+        specificResource = _target;
+        // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
+        if ( specificResource.selector !== undefined && isObject(specificResource.selector) && Object.keys(specificResource.selector).includes("type") ) {
+          specificResource.selector["@type"] = specificResource.selector.type;
+          delete specificResource.selector.type;
+        }
+      // if '_target' is an object but not a specificresource, raise.
+      } else {
+        throw err
       }
-    // if 'target' is an object but not a specificresource, raise.
+    // if _target is neither a string nor an object, raise
     } else {
       throw err
     }
-  // if target is neither a string nor an object, raise
-  } else {
-    throw err
+    if ( objectHasKey(specificResource, "full") ) {
+      specificResource.manifestShortId = getManifestShortId(specificResource.full);
+      specificResource.manifestUri = manifestUri(specificResource.manifestShortId);
+    }
+    return specificResource
   }
-  if ( objectHasKey(specificResource, "full") ) {
-    specificResource.manifestShortId = getManifestShortId(specificResource.full);
-    specificResource.manifestUri = manifestUri(specificResource.manifestShortId);
-  }
-  return specificResource
+
+  return maybeToArray(annotation.on).map(makeSingleTarget);
 }
 
 /**

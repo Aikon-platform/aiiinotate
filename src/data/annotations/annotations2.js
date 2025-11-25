@@ -108,7 +108,7 @@ class Annotations2 extends CollectionAbstract {
   #cleanAnnotation(annotation, update=false) {
     // 1) extract ids and targets. convert the target to an array.
     const
-      annotationTargetArray = maybeToArray(annotation).map(makeTarget),
+      annotationTargetArray = makeTarget(annotation),
       // we assume that all values of `annotationTargetArray` point to the same manifest => take the manifest of the 1st target
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
@@ -211,7 +211,7 @@ class Annotations2 extends CollectionAbstract {
               target.manifestUri
                 ? await this.manifestsPlugin.getCanvasIdx(target.manifestUri, target.full)
                 : undefined;
-            console.log(">>> #insertManifestsAndGetCanvasIdx: target", target);
+            // console.log(">>> #insertManifestsAndGetCanvasIdx: target", target);
             return target;
           })
         )
