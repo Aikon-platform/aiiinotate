@@ -96,8 +96,8 @@ test("test common routes", async (t) => {
                       ? deleteBy==="uri"
                         ? annotations.filter((a) => a["@id"]===deleteKey).length
                         : deleteBy==="canvasUri"
-                          ? annotations.filter((a) => a.on.full===deleteKey).length
-                          : annotations.filter((a) => a.on.manifestShortId===deleteKey).length
+                          ? annotations.filter((a) => a.on.some((x) => x.full===deleteKey)).length
+                          : annotations.filter((a) => a.on.some((x) => x.manifestShortId===deleteKey)).length
                       : 0;
 
                 await testDeleteRoute(t, `/annotations/2/delete?${deleteBy}=${deleteKey}`, expectedDeletedCount);
