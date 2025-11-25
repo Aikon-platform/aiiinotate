@@ -41,7 +41,20 @@ function addSchemas(fastify, options, done) {
         { type: "string", enum: [ "oa:Annotation" ] },
         { type: "array", items: { type: "string" }}
       ]},
-      on: { anyOf: [{ type: "string" }, { type: "object" }]}
+      on: {
+        anyOf: [
+          { type: "string" },
+          { type: "object" },
+          {
+            type: "array",
+            items: [
+              { type: "string" },
+              { type: "object" }
+            ],
+            minItems: 1
+          }
+        ]
+      }
     }
   });
 
@@ -56,7 +69,20 @@ function addSchemas(fastify, options, done) {
         { type: "string" },
         { type: "array", items: { type: "string" } },
       ]},
-      target: { anyOf: [{ type: "string" }, { type: "object" }]}
+      target: {
+        anyOf: [
+          { type: "string" },
+          { type: "object" },
+          {
+            type: "array",
+            items: [
+              { type: "string" },
+              { type: "object" }
+            ],
+            minItems: 1
+          }
+        ]
+      }
     }
   })
 

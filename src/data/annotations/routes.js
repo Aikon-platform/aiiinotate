@@ -65,6 +65,7 @@ function annotationsRoutes(fastify, options, done) {
     /** @type {Annotations3InstanceType} */
     annotations3 = fastify.annotations3,
     iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
+    routeAnnotation2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
@@ -169,7 +170,7 @@ function annotationsRoutes(fastify, options, done) {
             action: { type: "string", enum: [ "create", "update" ] }
           }
         },
-        body: { type: "object" } /* routeAnnotations2Or3Schema */,
+        body: routeAnnotation2Or3Schema,
         response: responsePostSchema
       },
     },
