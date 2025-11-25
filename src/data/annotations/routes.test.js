@@ -126,7 +126,7 @@ test("test annotation Routes", async (t) => {
           annotation = await getRandomItem(
             await fastify.mongo.db.collection("annotations2").find().toArray()
           ),
-          canvasId = annotation.on.full,
+          canvasId = getRandomItem(annotation.on).full,
           r = await fastify.inject({
             method: "GET",
             url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
