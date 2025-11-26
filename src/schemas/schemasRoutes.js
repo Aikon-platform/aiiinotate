@@ -47,10 +47,10 @@ function addSchemas(fastify, options, done) {
           { type: "object" },
           {
             type: "array",
-            items: [
+            items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ],
+            ]},
             minItems: 1
           }
         ]
@@ -75,10 +75,10 @@ function addSchemas(fastify, options, done) {
           { type: "object" },
           {
             type: "array",
-            items: [
+            items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ],
+            ]},
             minItems: 1
           }
         ]
