@@ -58,27 +58,31 @@ const getCanvasShortId = (canvasUri) =>
  * get the `on` of an annotation.
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L147
  * @param {object} annotation
- * @returns {string}
+ * @returns {string[]}
  */
 const getAnnotationTarget = (annotation) => {
-  const target = annotation.on;  // either string or SpecificResource
-  let targetOut;
+  /** annotation.on is converted to an array of targets => extract the target for each item of the array */
+  const getSingleAnnotationTarget = (_target) => {
+    let _targetOut;
 
-  if ( typeof(target) === "string" ) {
-    // remove the fragment if necesary to get the full Canvas Id
-    const hashIdx = target.indexOf("#");
-    targetOut = hashIdx === -1
-      ? target
-      : target.substring(0, hashIdx);
+    if ( typeof(_target) === "string" ) {
+      // remove the fragment if necesary to get the full Canvas Id
+      const hashIdx = _target.indexOf("#");
+      _targetOut = hashIdx === -1
+        ? _target
+        : _target.substring(0, hashIdx);
 
-  } else {
-    // it's a SpecificResource => get the full image's id.
-    targetOut = target["full"];
+    } else {
+      // it's a SpecificResource => get the full image's id.
+      _targetOut = _target["full"];
+    }
+    if ( isNullish(_targetOut) ) {
+      throw new Error(`${getAnnotationTarget.name}: 'annotation.on' is not a valid IIIF 2.1 annotation target (with annotation=${_target})`)
+    }
+    return _targetOut;
   }
-  if ( isNullish(targetOut) ) {
-    throw new Error(`${getAnnotationTarget.name}: 'annotation.on' is not a valid IIIF 2.1 annotation target (with annotation=${target})`)
-  }
-  return targetOut;
+
+  return maybeToArray(annotation.on).map(getSingleAnnotationTarget);
 }
 
 /**
@@ -138,11 +142,16 @@ const makeTarget = (annotation) => {
  * NOTE this should never fail, but results will only be reliable if the `annotation.on` follows the IIIF 2.1 canvas URI scheme
  */
 const makeAnnotationId = (annotation, manifestShortId) => {
+  // we consider that all targets point to the same canvas and manifest => extract canvas and manifest info from the 1st target.
+  const targetArray = getAnnotationTarget(annotation);
+  if ( targetArray.length < 1 ) {
+    throw new Error(`${makeAnnotationId.name}: could not extract target from annotation`)
+  }
   const
-    target = getAnnotationTarget(annotation),
-    canvasId = getCanvasShortId(target);
+    firstTarget = targetArray[0],
+    canvasId = getCanvasShortId(firstTarget);
   // if manifestShortId hasn't aldready been extracted, re-extract it
-  manifestShortId = manifestShortId || getManifestShortId(target);
+  manifestShortId = manifestShortId || getManifestShortId(firstTarget);
 
   if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
     throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)

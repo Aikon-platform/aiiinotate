@@ -8,7 +8,7 @@ curdir = pathlib.Path(__file__).parent.resolve()
 pkg_file = curdir.parent.joinpath("package.json").resolve()
 pkg_lock_file = curdir.parent.joinpath("package-lock.json").resolve()
 
-usage = "\nupdate_version.py: cli to update NPM version.\nUSAGE: \n\tpython3 update_version.py [VERSION]\n"
+usage = "\nupdate_version.py: CLI to update NPM version.\nUSAGE: \n\tpython3 update_version.py [VERSION]\n"
 
 if len(sys.argv) != 2:
     print(usage)
@@ -26,3 +26,5 @@ for fp in [pkg_file, pkg_lock_file]:
     data["version"] = version
     with open(fp, mode="w") as fh:
         json.dump(data, fh, indent=2)
+
+print(f"\nUpdated NPM package to version: {version}.")
