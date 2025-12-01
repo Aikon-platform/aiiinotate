@@ -4,7 +4,7 @@
 
 **aiiinotate** is meant to be able to handle both IIIF presentation APIs: the most common [2.x](https://iiif.io/api/presentation/2.1) and the more recent [3.x](https://iiif.io/api/presentation/3.0). Both APIs define a data structure for manifests, annotations, lists of annotations and collections of manifests.
 
-HOWEVER, in **aiiinotate**, the 2 standards are isolated: IIIF annotations 2 and 3 form two separate collections, and no conversion is done between IIIF 2.x and 3.x data. This means that:
+**HOWEVER, in aiiinotate, IIIF Presentation v2 and v3 data are isolated**: they form two separate collections, and no conversion is done between IIIF 2.x and 3.x data. This means that:
 - **when communicating with aiiinotate**, you must specify a **IIIF presentation version in the query URL**. In the docs, this is described by the  `iiif_version` keyword.
 - **when inserting/updating data**, the data structure you provide must match the URL's `iiif_version`: you can't insert an annotation in v3 if your `iiif_version` is `2`.
 - **when searching for data**, if you inserted an annotation in v3, you must search for it with `iiif_version = 3`.
