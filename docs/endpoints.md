@@ -58,15 +58,41 @@ Returns a JSON. If `iiif_version` is `1`, an AnnotationList is returned. Otherwi
 - if `q` and `motivation` are unused, it will return all annotations for the manifest
 - only exact matches are allowed for `q` and `motivation`
 
----
+### Delete an annotation or a manifest
 
-## Annotation routes
+```
+DELETE /{collection_name}/{iiif_version}/delete
+```
+
+#### Query
+
+- Variables
+    - `collection_name` (`annotations | manifests`): delete an annotation or a manifest
+    - `iiif_version` (`2 | 3`): IIIF presentation version
+- Parameters:
+    - if `collection_name = manifests`:
+        - `uri`: the full URI of the manifest to delete
+        - `manifestShortId`: the manifest's identifier
+    - if `collection_name = annotation`:
+        - `uri`: the full URI of the annotation to delete
+        - `manifestShortId`: a manifest's identifier, to delete all annotations for a manifest
+        - `canvasUri`: the full URI to an annotation's target canvas, to delete all annotatons for the canvas
+
+#### Reply
+
+```
+{ deletedCount: <integer> }
+```
 
 --- 
 
 ## Manifests routes
 
 
+
+---
+
+## Annotation routes
 
 ---
 
