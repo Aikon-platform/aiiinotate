@@ -1,6 +1,6 @@
 {
   "name": "aiiinotate",
-  "version": "0.3.2",
+  "version": "0.0.0",
   "description": "a fast IIIF-compliant annotation server",
   "main": "./cli/index.js",
   "type": "module",
@@ -16,8 +16,7 @@
     "start": "sudo systemctl start mongod && npm run cli serve dev",
     "test": "sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
-    "migrate": "npm run cli -- migrate",
-    "update_version": "python3 scripts/update_version.py"
+    "migrate": "npm run cli -- migrate"
   },
   "pre-commit": [
     "lint"
