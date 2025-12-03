@@ -86,6 +86,26 @@ const getAnnotationTarget = (annotation) => {
 }
 
 /**
+ * @example "127.0.0.1:3000/data/2/wit9_man11_anno165/annotation/c26_abda6e3c-2926-4495-9787-cb3f3588e47c"
+ * @param {string} manifestShortId
+ * @param {string} canvasId
+ * @returns {string}
+ */
+const toAiiinotateAnnotationUri = (manifestShortId, canvasId) =>
+  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
+
+const toAiiinotateManifestUri = (manifestShortId) =>
+  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
+
+/**
+ * if `canvasUri` follows the recommended IIIF 2.1 recommended URI pattern, convert it to a JSON manifest URI.
+ * @param {string} canvasUri
+ * @returns {string} : the manifest URI
+ */
+const canvasUriToManifestUri = (canvasUri) =>
+  canvasUri.split("/").slice(0,-2).join("/") + "/manifest.json";
+
+/**
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
  * @param {object} annotation
@@ -128,7 +148,7 @@ const makeTarget = (annotation) => {
     }
     if ( objectHasKey(specificResource, "full") ) {
       specificResource.manifestShortId = getManifestShortId(specificResource.full);
-      specificResource.manifestUri = manifestUri(specificResource.manifestShortId);
+      specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
     }
     return specificResource
   }
@@ -157,28 +177,8 @@ const makeAnnotationId = (annotation, manifestShortId) => {
     throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)
   }
 
-  return annotationUri(manifestShortId, canvasId);
+  return toAiiinotateAnnotationUri(manifestShortId, canvasId);
 }
-
-/**
- * @example "127.0.0.1:3000/data/2/wit9_man11_anno165/annotation/c26_abda6e3c-2926-4495-9787-cb3f3588e47c"
- * @param {string} manifestShortId
- * @param {string} canvasId
- * @returns {string}
- */
-const annotationUri = (manifestShortId, canvasId) =>
-  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
-
-const manifestUri = (manifestShortId) =>
-  `${process.env.AIIINOTATE_BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
-
-/**
- * if `canvasUri` follows the recommended IIIF 2.1 recommended URI pattern, convert it to a JSON manifest URI.
- * @param {string} canvasUri
- * @returns {string} : the manifest URI
- */
-const canvasUriToManifestUri = (canvasUri) =>
-  canvasUri.split("/").slice(0,-2).join("/") + "/manifest.json";
 
 /**
  *
@@ -203,8 +203,8 @@ const toAnnotationList = (resources, annotationListId, label) => {
 export {
   makeTarget,
   makeAnnotationId,
-  annotationUri,
-  manifestUri,
+  toAiiinotateAnnotationUri,
+  toAiiinotateManifestUri,
   toAnnotationList,
   getManifestShortId,
   getCanvasShortId,

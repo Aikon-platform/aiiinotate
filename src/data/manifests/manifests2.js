@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
-import { getManifestShortId, manifestUri } from "#utils/iiif2Utils.js";
+import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { formatInsertResponse } from "#src/data/utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
@@ -147,9 +147,11 @@ class Manifests2 extends CollectionAbstract {
     const
       mongoResponse =
         await this.collection.find(
-          { "@id": {
-            $in: cleanManifestArray.map((manifest) => manifest["@id"])
-          }},
+          {
+            "@id": {
+              $in: cleanManifestArray.map((manifest) => manifest["@id"])
+            }
+          },
           { projection: { "@id": 1 } }
         )
           .toArray(),
@@ -206,7 +208,12 @@ class Manifests2 extends CollectionAbstract {
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
-          manifestArray.push(await this.#fetchManifestFromUri(manifestUri));
+          const r = await this.#fetchManifestFromUri(manifestUri);
+          if ( ! r.error ) {
+            manifestArray.push(r);
+          } else {
+            fetchErrorIds.push(r);
+          }
         } catch (err) {
           if ( throwOnError ) {
             throw err;
@@ -218,6 +225,9 @@ class Manifests2 extends CollectionAbstract {
     const result = await this.insertManifestArray(manifestArray, throwOnError);
     // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
     if ( !throwOnError ) {
+      if ( fetchErrorIds.length ) {
+        console.error(`${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds} manifests`, fetchErrorIds);
+      }
       result.fetchErrorIds = fetchErrorIds;
     }
     return result;

@@ -201,7 +201,7 @@ class Annotations2 extends CollectionAbstract {
     // 1. get all distinct manifest URIs
     const manifestUris = [];
     annotationData.map((ann) => ann.on.map((target) => {
-      if ( target.manifestUri !== undefined && !manifestUris.includes(target.manifestUri) ) {
+      if ( target.manifestUri != null && !manifestUris.includes(target.manifestUri) ) {
         manifestUris.push(target.manifestUri);
       }
     }));
@@ -229,7 +229,6 @@ class Annotations2 extends CollectionAbstract {
               target.manifestUri
                 ? await this.manifestsPlugin.getCanvasIdx(target.manifestUri, target.full)
                 : undefined;
-            // console.log(">>> #insertManifestsAndGetCanvasIdx: target", target);
             return target;
           })
         )
