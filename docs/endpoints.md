@@ -148,6 +148,29 @@ GET /annotations/{iiif_version}/search
 
 ---
 
+### Count annotations
+
+```
+GET /annotations/{iiif_version}/count
+```
+
+#### Request
+
+- Variables:
+    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
+- Parameters:
+    - `uri` (`string`): the annotation's `@id`
+    - `canvasUri` (`string`): the annotation's target canvas (`on.full`)
+    - `manifestShortId` (`string`): the short ID of the annotation's target manifest (`on.manifestShortId`)
+
+#### Response
+
+```
+{ count: integer }
+```
+
+---
+
 ### Get a single annotation
 
 ```
