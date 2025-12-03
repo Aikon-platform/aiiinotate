@@ -20,8 +20,8 @@ class CollectionAbstractError extends Error {
    */
   constructor(collectionName, operation, message, errInfo) {
     const
-      collInfo = collectionName ? `on collection '${collectionName}',` : "",
-      operationInfo = operation ? `when performing operation '${operation.toLocaleLowerCase()}'`: "";
+      collInfo = collectionName ? `on collection '${collectionName}'` : "",
+      operationInfo = operation ? `, when performing operation '${operation.toLocaleLowerCase()}'`: "";
     super(`CollectionAbstractError: ${collInfo} ${operationInfo}: ${message}`);
     this.info = errInfo;
   }
@@ -174,6 +174,10 @@ class CollectionAbstract {
    */
   throwMongoError(operation, err) {
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
+  }
+
+  notImplementedError() {
+    throw this.errorNoAction(`not implemented`);
   }
 
   //////////////////////////////////////
