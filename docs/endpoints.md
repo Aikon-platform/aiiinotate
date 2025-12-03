@@ -38,7 +38,7 @@ Implementation of the [IIIF Search API](https://iiif.io/api/search/2.0/), to sea
         - if `iiif_version=1`, `q` is searched in the fields: `@id`, `resource.@id` or `resource.chars` fields
     - `motivation` (`painting | non-painting | commenting | describing | tagging | linking`): values for the `motivation` field of an annotation
 
-#### Reply
+#### Response
 
 Returns a JSON. If `iiif_version` is `1`, an `AnnotationList` is returned. Otherwise, an `AnnotationPage` is returned.
 
@@ -69,7 +69,7 @@ DELETE /{collection_name}/{iiif_version}/delete
         - `manifestShortId`: a manifest's identifier, to delete all annotations for a manifest
         - `canvasUri`: the full URI to an annotation's target canvas, to delete all annotatons for the canvas
 
-#### Reply
+#### Response
 
 ```
 { deletedCount: <integer> }
@@ -92,7 +92,7 @@ Returns a Collection of all manifests in your **aiiinotate** instance.
 - Variables:
     - `iiif_version` (`2 | 3`): the IIIF Presentation API version
 
-#### Reply
+#### Response
 
 A IIIF `Collection`, following the IIIF Presentation API 2 or 3, depending of the value of `iiif_version`.
 
@@ -110,7 +110,7 @@ POST /manifests/{iiif_version}/create
     - `iiif_version` (`2 | 3`): the IIIF Presentation API version of your manifest
 - Body (`JSON`): the manifest  to index in the database
 
-#### Reply
+#### Response
 
 ```
 { 
@@ -142,9 +142,32 @@ GET /annotations/{iiif_version}/search
     - `uri` (`string`): the URI of the target canvas
     - `asAnnotationList` (`true | false`):  format of the response
 
-#### Reply
+#### Response
 
 `Object[] | Object`: if `true`, return an array of annotations. Otherwise, return an `AnnotationList`.
+
+---
+
+### Count annotations
+
+```
+GET /annotations/{iiif_version}/count
+```
+
+#### Request
+
+- Variables:
+    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
+- Parameters:
+    - `uri` (`string`): the annotation's `@id`
+    - `canvasUri` (`string`): the annotation's target canvas (`on.full`)
+    - `manifestShortId` (`string`): the short ID of the annotation's target manifest (`on.manifestShortId`)
+
+#### Response
+
+```
+{ count: integer }
+```
 
 ---
 
@@ -163,7 +186,7 @@ This route allows to query an annotation by its ID by defering its `@id | id` fi
     - `manifest_short_id` (`string`): the identifier of the manifest the annotation is related to
     - `annotation_short_id`: the unique part of the annotation URL
 
-#### Reply
+#### Response
 
 `Object`: the annotation. Its format follows the IIIF Presentation specification 2 or 3, based on the value of `iiif_version`.
 
@@ -184,7 +207,7 @@ Create or update a single annotation
     - `action` (`create | update`): the action to perform: create or update an annotation
 - Body (`Object`): a IIIF annotation that follows the IIIF Presentation API 2 or 3 (depending on the value of `iiif_version`)
 
-#### Reply
+#### Response
 
 ```
 { 
@@ -226,7 +249,7 @@ Batch insert multiple annotations.
     - `{ uri: string }`: an object containing a reference to an `AnnotationList` or `AnnotationPage`
     - `{ uri: string }[]`: an array of objects containing a reference to an `AnnotationList` or `AnnotationPage`.
 
-#### Reply
+#### Response
 
 ```
 { 
