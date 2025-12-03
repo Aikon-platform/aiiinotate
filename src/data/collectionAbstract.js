@@ -177,7 +177,7 @@ class CollectionAbstract {
   }
 
   notImplementedError() {
-    throw this.errorNoAction(`not implemented`);
+    throw this.errorNoAction("not implemented");
   }
 
   //////////////////////////////////////

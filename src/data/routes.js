@@ -69,10 +69,9 @@ function commonRoutes(fastify, options, done) {
         }
       },
       preValidation: async (request, reply) => {
-        const
-          { collectionName } = request.params,
-          { canvasMin, canvasMax } = request.query,
-          error = new Error(`Error validating GET search-api route on collection ${collectionName}: 'canvasMin' must be smaller than 'canvasMax'. If 'canvasMax' is defined, 'canvasMin' must be defined as well. Got canvasMin=${canvasMin}, canvasMax=${canvasMax}`);
+        const { canvasMin, canvasMax } = request.query,
+          error = new Error(`Error validating GET search-api route: 'canvasMin' must be smaller than 'canvasMax'. If 'canvasMax' is defined, 'canvasMin' must be defined as well. Got canvasMin=${canvasMin}, canvasMax=${canvasMax}`);
+        console.log(">>>>>>>>>>>>>>>>>", canvasMin, canvasMax);
         if (
           (canvasMin == null && canvasMax != null)
           || (canvasMin > canvasMax)
