@@ -346,7 +346,8 @@ class Annotations2 extends CollectionAbstract {
   }
 
   /**
-   * implementation of the IIIF Search API 1.0
+   * implementation of the IIIF Search API 1.0.
+   * function arguments have been validated by JSONSchemas at route-level so they're clean.
    *
    * NOTE:
    *  - only `motivation` and `q` search params are implemented
@@ -354,6 +355,7 @@ class Annotations2 extends CollectionAbstract {
    *    implemented for `q` and `motivation` (in the IIIF specs, you can supply
    *    multiple space-separated values and the server should return all partial
    *    matches to any of those strings.)
+   * - non-standard `canvasMin` and `canvasMax` parameters are implemented: search by annotation's target canvas position.
    *
    * see:
    *  https://iiif.io/api/search/1.0/
@@ -361,11 +363,13 @@ class Annotations2 extends CollectionAbstract {
    *
    * @param {string} queryUrl
    * @param {string} manifestShortId
-   * @param {string} q
-   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"} motivation
+   * @param {string?} q
+   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"?} motivation
+   * @param {number?} canvasMin - minimum value of `on.canvasIdx`, inclusive
+   * @param {number?} canvasMax - maximum value of `on.canvasIdx`, inclusive
    * @returns {object} annotationList containing results
    */
-  async search(queryUrl, manifestShortId, q, motivation) {
+  async search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax) {
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };
@@ -379,7 +383,7 @@ class Annotations2 extends CollectionAbstract {
           { "resource.chars": q }
         ]
       });
-    }
+    };
     if ( motivation ) {
       queryFilters.$and.push(
         motivation === "non-painting"
@@ -388,6 +392,23 @@ class Annotations2 extends CollectionAbstract {
             ? { motivation: "sc:painting" }
             : { motivation: `oa:${motivation}` }
       );
+    };
+    // TODO test
+    if ( canvasMin ) {
+      // if canvasMax is undefined, then search for canvasIdx===canvasMin
+      if ( !canvasMax ) {
+        queryFilters.$and.push({ "on.canvasIdx": canvasMin })
+      // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
+      } else {
+        queryFilters.$and.push({
+          "on.canvasIdx": {
+            $and: [
+              { $gte: canvasMin },
+              { $lte: canvasMax },
+            ]
+          }
+        })
+      }
     }
     const query =
       queryFilters.$and.length

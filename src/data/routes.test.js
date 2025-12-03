@@ -33,6 +33,19 @@ test("test common routes", async (t) => {
   }
 
   ////////////////////////////////////////////////
+  // GET routes
+
+  await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
+
+    // TODO
+    // q
+    // motivation
+    // canvasMin
+    // canvasMax
+
+  })
+
+  ////////////////////////////////////////////////
   // DELETE routes
 
   await t.test("test route /:collectionName/:iiifPresentationVersion/delete", async (t) => {

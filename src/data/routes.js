@@ -69,9 +69,9 @@ function commonRoutes(fastify, options, done) {
         }
       },
       preValidation: async (request, reply) => {
-        const { canvasMin, canvasMax } = request.query,
+        const
+          { canvasMin, canvasMax } = request.query,
           error = new Error(`Error validating GET search-api route: 'canvasMin' must be smaller than 'canvasMax'. If 'canvasMax' is defined, 'canvasMin' must be defined as well. Got canvasMin=${canvasMin}, canvasMax=${canvasMax}`);
-        console.log(">>>>>>>>>>>>>>>>>", canvasMin, canvasMax);
         if (
           (canvasMin == null && canvasMax != null)
           || (canvasMin > canvasMax)
@@ -85,10 +85,10 @@ function commonRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
-        { q, motivation } = request.query;
+        { q, motivation, canvasMin, canvasMax } = request.query;
 
       if ( iiifSearchVersion===1 ) {
-        return await annotations2.search(queryUrl, manifestShortId, q, motivation);
+        return await annotations2.search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax);
       } else {
         annotations3.notImplementedError();
       }
