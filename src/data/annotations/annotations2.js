@@ -225,6 +225,24 @@ class Annotations2 extends CollectionAbstract {
       : annotationData;
   }
 
+  /**
+   * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.
+   * @param {string} filterKey
+   * @param {string} filterVal
+   * @returns
+   */
+  #expandRouteAnnotationFilter(filterKey, filterVal) {
+    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri" ];
+    if ( !allowedFilterKeys.includes(filterKey) ) {
+      throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
+    }
+    return  filterKey==="uri"
+      ? { "@id": filterVal }
+      : filterKey==="canvasUri"
+        ? { "on.full": filterVal }
+        : { "on.manifestShortId": filterVal };
+  }
+
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -275,19 +293,12 @@ class Annotations2 extends CollectionAbstract {
    * @returns {Promise<DeleteResponseType>}
    */
   async deleteAnnotations(deleteKey, deleteVal) {
-
-    const allowedDeleteKey = [ "uri", "manifestShortId", "canvasUri" ];
-    if ( !allowedDeleteKey.includes(deleteKey) ) {
-      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: expected one of ${allowedDeleteKey} for param 'deleteKey', got '${deleteKey}'`)
+    try {
+      const deleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
+      return this.delete(deleteFilter);
+    } catch (err) {
+     throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${err.message}`)
     }
-
-    const deleteFilter =
-      deleteKey==="uri"
-        ? { "@id": deleteVal }
-        : deleteKey==="canvasUri"
-          ? { "on.full": deleteVal }
-          : { "on.manifestShortId": deleteVal };
-    return this.delete(deleteFilter);
   }
 
   ////////////////////////////////////////////////////////////////
@@ -340,7 +351,7 @@ class Annotations2 extends CollectionAbstract {
    *
    * NOTE:
    *  - only `motivation` and `q` search params are implemented
-   *  - to increase search execution, ONLY EXACT STRING MACHES are
+   *  - to increase search execution speed, ONLY EXACT STRING MACHES are
    *    implemented for `q` and `motivation` (in the IIIF specs, you can supply
    *    multiple space-separated values and the server should return all partial
    *    matches to any of those strings.)
@@ -408,6 +419,23 @@ class Annotations2 extends CollectionAbstract {
    */
   async findById(annotationUri) {
     return this.collection.findOne({ "@id": annotationUri })
+  }
+
+  /**
+   * count number of annotations.
+   * @param {string} filterKey
+   * @param {string} filterVal
+   * @returns
+   */
+  async count(filterKey, filterVal) {
+    try {
+      const
+        countFilter = this.#expandRouteAnnotationFilter(filterKey, filterVal),
+        count = await this.collection.countDocuments(countFilter);
+      return { count: count }
+    } catch (err) {
+     throw this.readError(`${this.funcName(this.count)}: ${err.message}`)
+    }
   }
 
 }
