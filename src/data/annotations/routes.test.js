@@ -176,5 +176,39 @@ test("test annotation Routes", async (t) => {
     )
   })
 
+  await t.test("test route /annotations/:iiifPresentationVersion/count", async (t) => {
+    const expectedOnCount = (annotationArray, onKey, expectedOnVal) =>
+      annotationArray.filter((anno) => anno.on.some(x => x[onKey] === expectedOnVal)).length
+
+    await injectTestAnnotations(fastify, t, annotationList);
+    const
+      annotationArray = await fastify.mongo.db.collection("annotations2").find().toArray(),
+      annotationId = getRandomItem(annotationArray)["@id"],
+      canvasUri = getRandomItem(annotationArray).on[0].full,
+      manifestShortId = getRandomItem(annotationArray).on[0].manifestShortId,
+      expectedAnnotationIdCount = 1,
+      expectedCanvasUriCount = expectedOnCount(annotationArray, "full", canvasUri),
+      expectedManifestShortIdCount = expectedOnCount(annotationArray, "manifestShortId", manifestShortId),
+      mapper = [
+        ["uri", annotationId, expectedAnnotationIdCount],
+        ["canvasUri", canvasUri, expectedCanvasUriCount],
+        ["manifestShortId", manifestShortId, expectedManifestShortIdCount]
+      ];
+
+    await Promise.all(
+      mapper.map(async ([filterKey, filterVal, expectedCount]) => {
+        const
+          r = await fastify.inject({
+            method: "GET",
+            url: `/annotations/2/count?${filterKey}=${filterVal}`
+          }),
+          body = await r.json();
+        t.assert.deepStrictEqual(r.statusCode, 200);
+        t.assert.deepStrictEqual(body.count, expectedCount);
+      })
+    )
+
+  })
+
   return
 })

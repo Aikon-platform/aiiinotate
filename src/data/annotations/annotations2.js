@@ -59,6 +59,24 @@ class Annotations2 extends CollectionAbstract {
   // utils
 
   /**
+   * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.
+   * @param {string} filterKey
+   * @param {string} filterVal
+   * @returns
+   */
+  #expandRouteAnnotationFilter(filterKey, filterVal) {
+    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri" ];
+    if ( !allowedFilterKeys.includes(filterKey) ) {
+      throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
+    }
+    return  filterKey==="uri"
+      ? { "@id": filterVal }
+      : filterKey==="canvasUri"
+        ? { "on.full": filterVal }
+        : { "on.manifestShortId": filterVal };
+  }
+
+  /**
    * clean the body of an annotation (annotation.resource).
    * if `annotation.resource` is an array (there are several bodies associated to that annotation), this function must be called on each item of the array
    * @param {object} resource
@@ -225,24 +243,6 @@ class Annotations2 extends CollectionAbstract {
       : annotationData;
   }
 
-  /**
-   * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.
-   * @param {string} filterKey
-   * @param {string} filterVal
-   * @returns
-   */
-  #expandRouteAnnotationFilter(filterKey, filterVal) {
-    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri" ];
-    if ( !allowedFilterKeys.includes(filterKey) ) {
-      throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
-    }
-    return  filterKey==="uri"
-      ? { "@id": filterVal }
-      : filterKey==="canvasUri"
-        ? { "on.full": filterVal }
-        : { "on.manifestShortId": filterVal };
-  }
-
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -297,7 +297,7 @@ class Annotations2 extends CollectionAbstract {
       const deleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
       return this.delete(deleteFilter);
     } catch (err) {
-     throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${err.message}`)
+      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${err.message}`)
     }
   }
 
@@ -434,7 +434,7 @@ class Annotations2 extends CollectionAbstract {
         count = await this.collection.countDocuments(countFilter);
       return { count: count }
     } catch (err) {
-     throw this.readError(`${this.funcName(this.count)}: ${err.message}`)
+      throw this.readError(`${this.funcName(this.count)}: ${err.message}`)
     }
   }
 
