@@ -37,7 +37,7 @@ test("test common routes", async (t) => {
 
   await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
 
-    // TODO
+    // TODO tests.
     // q
     // motivation
     // canvasMin

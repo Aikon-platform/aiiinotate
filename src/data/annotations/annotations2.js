@@ -404,7 +404,7 @@ class Annotations2 extends CollectionAbstract {
           "on.canvasIdx": {
             $and: [
               { $gte: canvasMin },
-              { $lte: canvasMax },
+              { $lte: canvasMax }
             ]
           }
         })
