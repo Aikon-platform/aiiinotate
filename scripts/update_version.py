@@ -27,4 +27,4 @@ for fp in [pkg_file, pkg_lock_file]:
     with open(fp, mode="w") as fh:
         json.dump(data, fh, indent=2)
 
-print(f"\nUpdated NPM package to version: {version}.")
+print(f"\nUpdated NPM package to version: {version}.\n")

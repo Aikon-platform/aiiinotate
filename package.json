@@ -1,6 +1,6 @@
 {
   "name": "aiiinotate",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "a fast IIIF-compliant annotation server",
   "main": "./cli/index.js",
   "type": "module",
