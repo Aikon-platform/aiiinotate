@@ -163,8 +163,9 @@ function addSchemas(fastify, options, done) {
     ]
   })
 
+  // for annotations: key-value pairs to filter a manifests collection by
   fastify.addSchema({
-    $id: makeSchemaUri("routeAnnotationDelete"),
+    $id: makeSchemaUri("routeAnnotationFilter"),
     oneOf: [
       {
         type: "object",
@@ -200,8 +201,9 @@ function addSchemas(fastify, options, done) {
     ]
   });
 
+  // for manifests: key-value pairs to filter a manifests collection by
   fastify.addSchema({
-    $id: makeSchemaUri("routeManifestDelete"),
+    $id: makeSchemaUri("routeManifestFilter"),
     type: "object",
     oneOf: [
       {
@@ -224,8 +226,8 @@ function addSchemas(fastify, options, done) {
     $id: makeSchemaUri("routeDelete"),
     type: "object",
     oneOf: [
-      { $ref: makeSchemaUri("routeAnnotationDelete") },
-      { $ref: makeSchemaUri("routeManifestDelete") },
+      { $ref: makeSchemaUri("routeAnnotationFilter") },
+      { $ref: makeSchemaUri("routeManifestFilter") },
     ]
   });
 
@@ -287,6 +289,18 @@ function addSchemas(fastify, options, done) {
       requestBody: {}
     }
   });
+
+  fastify.addSchema({
+    $id: makeSchemaUri("routeResponseCount"),
+    type: "object",
+    required: [ "count" ],
+    properties: {
+      count: {
+        type: "integer",
+        minimum: 0
+      }
+    }
+  })
 
   ////////////////////////////////////////////////////////
 

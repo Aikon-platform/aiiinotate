@@ -64,9 +64,11 @@ function annotationsRoutes(fastify, options, done) {
     annotations2 = fastify.annotations2,
     /** @type {Annotations3InstanceType} */
     annotations3 = fastify.annotations3,
-    iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     routeAnnotation2Or3Schema = fastify.schemasRoutes.getSchema("routeAnnotation2Or3"),
     routeAnnotationCreateManySchema = fastify.schemasRoutes.getSchema("routeAnnotationCreateMany"),
+    routeAnnotationFilterSchema = fastify.schemasRoutes.getSchema("routeAnnotationFilter"),
+    routeResponseCountSchema = fastify.schemasRoutes.getSchema("routeResponseCount"),
+    iiifPresentationVersionSchema = fastify.schemasBase.getSchema("presentation"),
     iiifAnnotationListSchema = fastify.schemasPresentation2.getSchema("annotationList"),
     iiifAnnotation2ArraySchema = fastify.schemasPresentation2.getSchema("annotationArray"),
     iiifAnnotation2Schema = fastify.schemasPresentation2.getSchema("annotation"),
@@ -121,6 +123,36 @@ function annotationsRoutes(fastify, options, done) {
       }
     }
   );
+
+  fastify.get(
+    "/annotations/:iiifPresentationVersion/count",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema
+          }
+        },
+        querystring: routeAnnotationFilterSchema,
+        response: makeResponseSchema(
+          fastify, routeResponseCountSchema
+        )
+      }
+    },
+    async (request, reply) => {
+      const
+        { iiifPresentationVersion } = request.params,
+        [ filterKey, filterVal ] = getFirstNonEmptyPair(request.query);
+      try {
+        return iiifPresentationVersion === 2
+          ? await annotations2.count(filterKey, filterVal)
+          : annotations3.notImplementedError();
+      } catch (err) {
+        returnError(request, reply, err);
+      }
+    }
+  )
 
   /** retrieve a single annotation by its "@id"|"id". this route defers an annotation */
   fastify.get(
