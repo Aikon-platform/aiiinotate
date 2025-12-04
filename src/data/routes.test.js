@@ -3,7 +3,7 @@ import test from "node:test";
 import { v4 as uuid4 } from "uuid";
 
 import build from "#src/app.js";
-import { getRandomItem } from "#utils/utils.js";
+import { getRandomItem, visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse } from "#utils/testUtils.js";
 
@@ -36,6 +36,9 @@ test("test common routes", async (t) => {
   // GET routes
 
   await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
+    const [manifest, annotationList] = fastify.fixtures.generateIiif2ManifestAndAnnotationsList(1000,1000);
+    await injectPost(fastify, "/manifests/2/create", manifest);
+
     // TODO tests.
     // q
     // motivation
