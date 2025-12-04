@@ -13,7 +13,8 @@
   "scripts": {
     "cli": "node ./cli/index.js --env=./config/.env",
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
-    "start": "sudo systemctl start mongod && npm run cli serve dev",
+    "dev": "sudo systemctl start mongod && nodemon --watch ./src --exec \"npm run cli serve dev\"",
+    "prod": "sudo systemctl start mongod && npm run cli serve prod",
     "test": "sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
@@ -73,6 +74,7 @@
     "@stylistic/eslint-plugin": "^5.2.3",
     "eslint": "^9.33.0",
     "globals": "^16.3.0",
+    "nodemon": "^3.1.11",
     "pre-commit": "^1.2.2"
   }
 }
