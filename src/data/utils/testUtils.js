@@ -230,7 +230,6 @@ const injectTestAnnotations = async (fastify, t, annotationList) => {
   return [insertedCount, insertedIds];
 }
 
-
 export {
   assertObjectKeys,
   assertObjectKeysError,

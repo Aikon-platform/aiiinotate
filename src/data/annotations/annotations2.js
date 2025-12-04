@@ -401,8 +401,8 @@ class Annotations2 extends CollectionAbstract {
       } else {
         queryFilters.$and.push({
           $and: [
-              { "on.canvasIdx": { $gte: canvasMin } },
-              { "on.canvasIdx": { $lte: canvasMax } }
+            { "on.canvasIdx": { $gte: canvasMin } },
+            { "on.canvasIdx": { $lte: canvasMax } }
           ]
         })
       }
