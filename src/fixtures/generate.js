@@ -1,5 +1,7 @@
 import { v4 as uuid4 } from "uuid";
 
+import { getRandomItem } from "#utils/utils.js";
+
 /**
  * generate an array of length `length` filled with values returned by `itemFunc`
  * @param {number} length
@@ -140,7 +142,32 @@ const generateIiif2Manifest = (nCanvas) => {
   )
 }
 
+/**
+ * return an array of [manifest, annotationList].
+ * manifest has `nCanvas` canvases, `annotationList` has `nAnnotations` annotation on the canvases of the generated manifest.
+ * @param {number} nCanvas
+ * @param {number} nAnnotations
+ * @returns
+ */
+const generateIiif2ManifestAndAnnotationsList = (nCanvas, nAnnotations) => {
+  const
+    manifestShortId = makeManifestShortId(),
+    manifest = makeIiif2Manifest(
+      manifestShortId,
+      fillArray(nCanvas, () => makeCanvasId(manifestShortId))
+        .map((canvasId) => makeIiif2Canvas(canvasId))
+    ),
+    canvasIdArray = fillArray(
+      nAnnotations,
+      () => getRandomItem(manifest.resources)
+    ),
+    annotationList = makeIiif2AnnotationList(canvasIdArray);
+
+  return [manifest, annotationList];
+}
+
 export {
   generateIiif2Manifest,
-  generateIiif2AnnotationList
+  generateIiif2AnnotationList,
+  generateIiif2ManifestAndAnnotationsList
 }
