@@ -393,20 +393,17 @@ class Annotations2 extends CollectionAbstract {
             : { motivation: `oa:${motivation}` }
       );
     };
-    // TODO test
-    if ( canvasMin ) {
+    if ( !isNaN(canvasMin) ) {
       // if canvasMax is undefined, then search for canvasIdx===canvasMin
       if ( !canvasMax ) {
         queryFilters.$and.push({ "on.canvasIdx": canvasMin })
       // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
       } else {
         queryFilters.$and.push({
-          "on.canvasIdx": {
-            $and: [
-              { $gte: canvasMin },
-              { $lte: canvasMax }
-            ]
-          }
+          $and: [
+              { "on.canvasIdx": { $gte: canvasMin } },
+              { "on.canvasIdx": { $lte: canvasMax } }
+          ]
         })
       }
     }
@@ -416,6 +413,7 @@ class Annotations2 extends CollectionAbstract {
         : queryBase;
 
     const annotations = await this.find(query);
+    console.log(annotations.length);
     return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
   }
 
