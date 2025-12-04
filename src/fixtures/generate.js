@@ -1,12 +1,42 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuid4 } from "uuid";
+
+/**
+ * generate an array of length `length` filled with values returned by `itemFunc`
+ * @param {number} length
+ * @param {Function} itemFunc
+ * @returns {Array}
+ */
+const fillArray = (length, itemFunc) =>
+  Array.from({length: length}, itemFunc)
 
 /** @returns {string} - matches "int,int,int.int" */
 const makeXywh = () =>
-  Array.from({length: 4}, () => Math.floor(Math.random() * 1000))
-  .sort()
-  .join(",");
+  fillArray(4, () => Math.floor(Math.random() * 1000))
+    .sort()
+    .join(",");
+
+const makeRandomNumber = (maxNum=1000) => Math.floor(Math.random() * maxNum);
+
+const makeManifestShortId = () =>
+  `wit${makeRandomNumber()}_pdf${makeRandomNumber()}_anno${makeRandomNumber()}`;
+
+const makeBaseUrl = (manifestShortId) =>
+  `${process.env.AIIINOTATE_BASE_URL}/data/2/${manifestShortId}`;
+
+const makeAnnotationId = (manifestShortId) =>
+  `${makeBaseUrl(manifestShortId)}/annotation/a_${uuid4()}`;
+
+const makeManifestId = (manifestShortId) =>
+  `${makeBaseUrl(manifestShortId)}/manifest.json`;
+
+const makeCanvasId = (manifestShortId) =>
+  `${makeBaseUrl(manifestShortId)}/canvas/c_${uuid4()}`;
+
+const makeAnnotationListId = (manifestShortId) =>
+  `${makeBaseUrl(manifestShortId)}/list/l_${uuid4()}`;
 
 const makeIiif2Manifest = (manifestId, canvasArray) => ({
+  "@context": "http://iiif.io/api/presentation/2/context.json",
   "@id": manifestId,
   "label": "test aiiinotate manifest",
   "attribution": "",
@@ -27,10 +57,10 @@ const makeIiif2Manifest = (manifestId, canvasArray) => ({
     "@id": "https://gallica.bnf.fr/ark:/12148/btv1b8490076p.thumbnail"
   },
   "@type": "sc:Manifest",
-  "@context": "http://iiif.io/api/presentation/2/context.json"
 })
 
 const makeIiif2Canvas = (canvasId) => ({
+  "@context": "http://iiif.io/api/presentation/2/context.json",
   "@id": canvasId,
   "label": "plat supérieur",
   "height": 6044,
@@ -60,11 +90,12 @@ const makeIiif2Canvas = (canvasId) => ({
 const makeIiif2AnnotationList = (annotationArray) => ({
   "@context": "http://iiif.io/api/presentation/2/context.json",
   "@type": "sc:AnnotationList",
-  "@id": `${process.env.AIIINOTATE_BASE_URL}/iiif/list/${uuidv4()}`,
+  "@id": `${process.env.AIIINOTATE_BASE_URL}/iiif/list/${uuid4()}`,
   "resources": annotationArray
 })
 
 const makeIiif2Annotation = (annotationId, canvasId) => ({
+  "@context": "http://iiif.io/api/presentation/2/context.json",
   "@id": annotationId,
   "@type": "oa:Annotation",
   "resource": {
@@ -77,7 +108,39 @@ const makeIiif2Annotation = (annotationId, canvasId) => ({
     "oa:tagging",
     "oa:commenting"
   ],
-  "@context": "http://iiif.io/api/presentation/2/context.json",
   "label": ""
 })
 
+/**
+ * @param {string} manifestShortId
+ * @param {string[]} canvasIdArray
+ * @returns {object}
+ */
+const generateIiif2AnnotationList = (manifestShortId, canvasIdArray) =>
+  makeIiif2AnnotationList(
+    canvasIdArray.map((canvasId) =>
+      makeIiif2Annotation(
+        makeAnnotationId(manifestShortId),
+        canvasId
+      )
+    )
+  );
+
+
+/**
+ * @param {number} nCanvas - integer, number of canvases in the manifest
+ * @returns {object}
+ */
+const generateIiif2Manifest = (nCanvas) => {
+  const manifestShortId = makeManifestShortId();
+  return makeIiif2Manifest(
+    manifestShortId,
+    fillArray(nCanvas, () => makeCanvasId(manifestShortId))
+      .map((canvasId) => makeIiif2Canvas(canvasId))
+  )
+}
+
+export {
+  generateIiif2Manifest,
+  generateIiif2AnnotationList
+}
