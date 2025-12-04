@@ -48,7 +48,7 @@
     "#schemas/*.js": "./src/schemas/*.js",
     "#config/*.js": "./config/*.js",
     "#data/*.js": "./src/data/*.js",
-    "#utils/*.js": "./src/data/utils/*.js",
+    "#utils/*.js": "./src/utils/*.js",
     "#fixtures/*.js": "./src/fixtures/*.js",
     "#fixtures/*.json": "./src/fixtures/*.json",
     "#manifests/*.js": "./src/data/manifests/*.js",

@@ -2,7 +2,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { formatInsertResponse } from "#src/data/utils/routeUtils.js";
+import { formatInsertResponse } from "#utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 

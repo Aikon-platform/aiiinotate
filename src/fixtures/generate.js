@@ -1,6 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 
-const iiif2ManifestTemplate = (manifestId, canvasArray) => ({
+/** @returns {string} - matches "int,int,int.int" */
+const makeXywh = () =>
+  Array.from({length: 4}, () => Math.floor(Math.random() * 1000))
+  .sort()
+  .join(",");
+
+const makeIiif2Manifest = (manifestId, canvasArray) => ({
   "@id": manifestId,
   "label": "test aiiinotate manifest",
   "attribution": "",
@@ -24,7 +30,7 @@ const iiif2ManifestTemplate = (manifestId, canvasArray) => ({
   "@context": "http://iiif.io/api/presentation/2/context.json"
 })
 
-const iiif2CanvasTemplate = (canvasId) => ({
+const makeIiif2Canvas = (canvasId) => ({
   "@id": canvasId,
   "label": "plat supérieur",
   "height": 6044,
@@ -51,14 +57,14 @@ const iiif2CanvasTemplate = (canvasId) => ({
   "@type": "sc:Canvas"
 })
 
-const iiif2AnnotationListTemplate = (annotationArray) => ({
+const makeIiif2AnnotationList = (annotationArray) => ({
   "@context": "http://iiif.io/api/presentation/2/context.json",
   "@type": "sc:AnnotationList",
   "@id": `${process.env.AIIINOTATE_BASE_URL}/iiif/list/${uuidv4()}`,
   "resources": annotationArray
 })
 
-const iiif2AnnotationTemplate = (annotationId, canvasId) => ({
+const makeIiif2Annotation = (annotationId, canvasId) => ({
   "@id": annotationId,
   "@type": "oa:Annotation",
   "resource": {
@@ -66,7 +72,7 @@ const iiif2AnnotationTemplate = (annotationId, canvasId) => ({
     "format": "text/html",
     "chars": ""
   },
-  "on": canvasId,
+  "on": `${canvasId}#xywh=${makeXywh()}`,
   "motivation": [
     "oa:tagging",
     "oa:commenting"
@@ -74,3 +80,4 @@ const iiif2AnnotationTemplate = (annotationId, canvasId) => ({
   "@context": "http://iiif.io/api/presentation/2/context.json",
   "label": ""
 })
+
