@@ -5,7 +5,7 @@ import { v4 as uuid4 } from "uuid";
 import build from "#src/app.js";
 import { getRandomItem, visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectGet, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -37,9 +37,37 @@ test("test common routes", async (t) => {
 
   await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
     const [manifest, annotationList] = fastify.fixtures.generateIiif2ManifestAndAnnotationsList(1000,1000);
-    await injectPost(fastify, "/manifests/2/create", manifest);
+    const rm = await injectPost(fastify, "/manifests/2/create", manifest);
+    t.assert.deepStrictEqual(rm.statusCode, 200);
+    const ra = await injectPost(fastify, "/annotations/2/createMany", annotationList);
+    t.assert.deepStrictEqual(ra.statusCode, 200);
 
-    // TODO tests.
+    // within annotationList, the number of annotations that are between canvases canvasMin and canvasMax
+    const
+      manifestShortId = getManifestShortId(manifest["@id"]),
+      canvasMin = 400,
+      canvasMax = 600,
+      rangeCanvasIds =
+        manifest.sequences[0].canvases
+        .slice(canvasMin, canvasMax)
+        .map((canvas) => canvas["@id"]),
+      annotationCount = annotationList.resources.filter((annotation) =>
+        rangeCanvasIds.includes(annotation.on.split("#")[0])
+      ).length;
+
+    const x = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search`);
+    console.log(visibleLog(await x.json()));
+    console.log(manifestShortId);
+
+    // now, check that search-api with canvasMin / canvasMax has the same result as annotationCount
+    const
+      rCanvasRange = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search?canvasMin=${canvasMin}&canvasMax=${canvasMax}`),
+      rCanvasRangeBody = await rCanvasRange.json(),
+      rCanvasRangeCount = rCanvasRangeBody.length;
+    console.log(rCanvasRangeBody);
+    t.assert.deepStrictEqual(rCanvasRange.statusCode, 200);
+    t.assert.deepStrictEqual(rCanvasRangeCount, annotationCount);
+
     // q
     // motivation
     // canvasMin

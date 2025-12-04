@@ -97,6 +97,13 @@ const injectPost = (fastify, route, payload) =>
     payload: payload,
   });
 
+const injectGet = (fastify, route, payload) =>
+  fastify.inject({
+    method: "GET",
+    url: route,
+    payload: payload || {}
+  });
+
 /**
  * @param {NodeTestType} t
  * @param {FastifyReplyType} r
@@ -240,6 +247,7 @@ export {
   assertResponseKeys,
   assertErrorValidResponse,
   injectPost,
+  injectGet,
   assertPostInvalidResponse,
   assertCreateValidResponse,
   assertUpdateValidResponse,

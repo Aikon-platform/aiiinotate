@@ -157,11 +157,18 @@ const generateIiif2ManifestAndAnnotationsList = (nCanvas, nAnnotations) => {
       fillArray(nCanvas, () => makeCanvasId(manifestShortId))
         .map((canvasId) => makeIiif2Canvas(canvasId))
     ),
-    canvasIdArray = fillArray(
+    canvasArray = fillArray(
       nAnnotations,
       () => getRandomItem(manifest.sequences[0].canvases)
-    ).map((canvas) => canvas["@id"]),
-    annotationList = makeIiif2AnnotationList(manifestShortId, canvasIdArray);
+    ).map((canvas) =>
+      makeIiif2Annotation(
+        makeAnnotationId(manifestShortId),
+        canvas["@id"]
+      )
+    ),
+    annotationList = makeIiif2AnnotationList(
+      manifestShortId, canvasArray
+    );
 
   return [manifest, annotationList];
 }
