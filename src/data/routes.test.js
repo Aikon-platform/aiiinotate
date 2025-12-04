@@ -49,8 +49,8 @@ test("test common routes", async (t) => {
       canvasMax = 600,
       rangeCanvasIds =
         manifest.sequences[0].canvases
-        .slice(canvasMin, canvasMax)
-        .map((canvas) => canvas["@id"]),
+          .slice(canvasMin, canvasMax)
+          .map((canvas) => canvas["@id"]),
       annotationCount = annotationList.resources.filter((annotation) =>
         rangeCanvasIds.includes(annotation.on.split("#")[0])
       ).length;

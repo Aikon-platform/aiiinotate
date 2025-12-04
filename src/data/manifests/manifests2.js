@@ -125,7 +125,7 @@ class Manifests2 extends CollectionAbstract {
    * @param {object[]} manifestArray - array of manifests
    * @returns {Promise<InsertResponseType>}
    */
-  async insertManifestArray(manifestArray, throwOnError=true) {
+  async insertManifestArray(manifestArray, throwOnError=true, seachPreExisting=true) {
     // build 2 arrays, one of the manifests that pass validation, one of the @ids of the manifests with errors, mapped to an error message.
     let
       cleanManifestArray = [],
@@ -145,17 +145,12 @@ class Manifests2 extends CollectionAbstract {
     // find which manifests are not aldready in the DB, to avoid a unique constraint error.
     // `preExistingIds` = all @ids that are in `cleanManifestArray` that are aldready in the database
     const
-      mongoResponse =
+      preExistingIds = (
         await this.collection.find(
-          {
-            "@id": {
-              $in: cleanManifestArray.map((manifest) => manifest["@id"])
-            }
-          },
+          { "@id": { $in: cleanManifestArray.map((manifest) => manifest["@id"]) } },
           { projection: { "@id": 1 } }
-        )
-          .toArray(),
-      preExistingIds = mongoResponse.map((r) => r["@id"]);
+        ).toArray()
+      ).map((r) => r["@id"]);
 
     // insert. if there has been an error but error-throwing was disabled, complete the response object with description of the errors
     cleanManifestArray = cleanManifestArray.filter((manifest) => !preExistingIds.includes(manifest["@id"]))
@@ -205,6 +200,8 @@ class Manifests2 extends CollectionAbstract {
     const
       fetchErrorIds = [],
       manifestArray = [];
+
+    // insert manifests that
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
@@ -222,7 +219,7 @@ class Manifests2 extends CollectionAbstract {
         }
       })
     );
-    const result = await this.insertManifestArray(manifestArray, throwOnError);
+    const result = await this.insertManifestArray(manifestArray, throwOnError, false);
     // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
     if ( !throwOnError ) {
       if ( fetchErrorIds.length ) {
