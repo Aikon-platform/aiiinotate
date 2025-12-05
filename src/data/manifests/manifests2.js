@@ -125,11 +125,12 @@ class Manifests2 extends CollectionAbstract {
    * @param {object[]} manifestArray - array of manifests
    * @returns {Promise<InsertResponseType>}
    */
-  async insertManifestArray(manifestArray, throwOnError=true, seachPreExisting=true) {
+  async insertManifestArray(manifestArray, throwOnError=true) {
     // build 2 arrays, one of the manifests that pass validation, one of the @ids of the manifests with errors, mapped to an error message.
     let
       cleanManifestArray = [],
-      invalidManifestArray = [];
+      invalidManifestArray = [],
+      preExistingIds = [];
     manifestArray.map((manifest) => {
       try {
         cleanManifestArray.push(this.#validateAndCleanManifest(manifest));
@@ -137,23 +138,19 @@ class Manifests2 extends CollectionAbstract {
         if ( throwOnError ) {
           throw err;
         }
-        // returns a mapping of `{manifestId: errorMessage}`
+        // returns a mapping of `{manifestUri: errorMessage}`
         invalidManifestArray.push({ [manifest["@id"]]: err.message });
       }
     });
 
-    // find which manifests are not aldready in the DB, to avoid a unique constraint error.
-    // `preExistingIds` = all @ids that are in `cleanManifestArray` that are aldready in the database
-    const
-      preExistingIds = (
-        await this.collection.find(
-          { "@id": { $in: cleanManifestArray.map((manifest) => manifest["@id"]) } },
-          { projection: { "@id": 1 } }
-        ).toArray()
-      ).map((r) => r["@id"]);
+    // filter out the manifests that are aldready in our collection
+    // NOTE: i have attempted to move this to `insertManifestsFromUriArray` but it leads to what i suspect is a data race causing unique constaints fails.
+    //  TLDR: don't move or disable this check.
+    let cleanIds = cleanManifestArray.map((manifest) => manifest["@id"]);
+    [cleanIds, preExistingIds] = await this.#filterManifestIdsInCollection(cleanManifestArray.map((manifest) => manifest["@id"]));
+    cleanManifestArray = cleanManifestArray.filter((manifestUri) => cleanIds.includes(manifestUri));
 
     // insert. if there has been an error but error-throwing was disabled, complete the response object with description of the errors
-    cleanManifestArray = cleanManifestArray.filter((manifest) => !preExistingIds.includes(manifest["@id"]))
     if ( cleanManifestArray.length ) {
       const result = await this.insertMany(cleanManifestArray);
       result.preExistingIds = preExistingIds;
@@ -201,7 +198,7 @@ class Manifests2 extends CollectionAbstract {
       fetchErrorIds = [],
       manifestArray = [];
 
-    // insert manifests that
+    // fetch which manifests. if there's a fetch error, they won't be inserted.
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
@@ -209,7 +206,7 @@ class Manifests2 extends CollectionAbstract {
           if ( ! r.error ) {
             manifestArray.push(r);
           } else {
-            fetchErrorIds.push(r);
+            fetchErrorIds.push(manifestUri);
           }
         } catch (err) {
           if ( throwOnError ) {
@@ -219,11 +216,12 @@ class Manifests2 extends CollectionAbstract {
         }
       })
     );
-    const result = await this.insertManifestArray(manifestArray, throwOnError, false);
-    // if there has been an error but error-throwing was disabled, complete the response object with description of the errors
+
+    // insert and format response
+    const result = await this.insertManifestArray(manifestArray, throwOnError, true);
     if ( !throwOnError ) {
       if ( fetchErrorIds.length ) {
-        console.error(`${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds} manifests`, fetchErrorIds);
+        console.error(`${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds.length} manifests`, fetchErrorIds);
       }
       result.fetchErrorIds = fetchErrorIds;
     }
@@ -255,6 +253,33 @@ class Manifests2 extends CollectionAbstract {
 
   /////////////////////////////////////////////
   // read
+
+  /**
+   * find which manifests in an array of manifest IDs are aldready in the manifests collection
+   * @param {string[]} manifestUriArray - array of manifest IDs
+   * @returns {Promise<Array<Array<string?>>>} 2 arrays:
+   *  - array of manifest IDs that are not aldready in this collection
+   *  - array of manifest IDs that are not in this collection
+   */
+  async #filterManifestIdsInCollection(manifestUriArray) {
+    const
+      preExistingIds = [],
+      toInsertIds = [];
+    // all manifest IDs from manifestUriArray that are aldready in our manifest collection
+    const inCollectionArray = (
+      await this.collection.find(
+        { "@id": { $in: manifestUriArray } },
+        { projection: { "@id": 1 } }
+      ).toArray()
+    ).map((r) => r["@id"]);
+    // split manifestUriArray in 2 lists.
+    manifestUriArray.map((manifestUri) =>
+      inCollectionArray.includes(manifestUri)
+        ? preExistingIds.push(manifestUri)
+        : toInsertIds.push(manifestUri)
+    );
+    return [toInsertIds, preExistingIds];
+  }
 
   /**
    * return the position of `canvasUri` within the manifest with ID `manifestUri`,
@@ -299,6 +324,24 @@ class Manifests2 extends CollectionAbstract {
       "@id": `${process.env.AIIINOTATE_BASE_URL}/manifests/2`,
       label: "Collection of all manifests indexed in the annotation server",
       members: manifestIndex
+    }
+  }
+
+  /**
+   * @param {string} manifestShortId
+   * @returns {object}
+   */
+  async findByManifestShortId(manifestShortId) {
+    try {
+      const manifestIndexArray = await this.collection
+        .find(
+          { manifestShortId: manifestShortId },
+          { limit: 1, project: {_id: 0} }
+        )
+        .limit(1);
+      return manifestIndexArray.length ? manifestIndexArray[1] : {}
+    } catch (err) {
+      throw this.readError(`${this.funcName(this.findByManifestShortId)}: error fetching manifest with manifestShortId: '${manifestShortId}'`)
     }
   }
 }

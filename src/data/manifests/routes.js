@@ -50,6 +50,34 @@ function manifestsRoutes(fastify, options, done) {
     }
   )
 
+  fastify.get(
+    "/data/:iiifPresentationVersion/:manifestShortId/index",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            iiifPresentationVersion: iiifPresentationVersionSchema,
+            manifestShortId: { type: "string" }
+          }
+        },
+        response: {
+          200: { type: "object" }
+        }
+      }
+    },
+    async (request, reply) => {
+      const { iiifPresentationVersion, manifestShortId } = request.params;
+      try {
+        return iiifPresentationVersion === 2
+          ? await manifests2.findByManifestShortId(manifestShortId)
+          : manifests3.notImplementedError();
+      } catch (err) {
+        returnError(request, reply, err);
+      }
+    }
+  )
+
   ///////////////////////////////////////////////
   // insert routes
 
