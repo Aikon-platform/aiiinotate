@@ -68,6 +68,10 @@ test("test common routes", async (t) => {
     t.assert.deepStrictEqual(rCanvasRange.statusCode, 200);
     t.assert.deepStrictEqual(rCanvasRangeCount, annotationCount);
 
+    // NOTE I THINK I'M GONNA HAVE TO DROP THE preExistingIds TESTING.
+    // it's wayyyy to convoluted to handle dummy URLs pointing to nopn existant files.
+    // in real life, canvasMin/canvasMax do seem to work.
+
     // q
     // motivation
     // canvasMin

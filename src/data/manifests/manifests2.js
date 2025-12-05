@@ -198,7 +198,7 @@ class Manifests2 extends CollectionAbstract {
       fetchErrorIds = [],
       manifestArray = [];
 
-    // fetch which manifests. if there's a fetch error, they won't be inserted.
+    // fetch the manifests. if there's a fetch error, they won't be inserted.
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {

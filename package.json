@@ -15,7 +15,7 @@
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
     "dev": "sudo systemctl start mongod && nodemon --watch ./src --exec \"npm run cli serve dev\"",
     "prod": "sudo systemctl start mongod && npm run cli serve prod",
-    "test": "sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
+    "test": "export AIIINOTATE_TESTING=true; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
     "update_version": "python3 scripts/update_version.py"
