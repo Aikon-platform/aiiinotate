@@ -35,49 +35,50 @@ test("test common routes", async (t) => {
   ////////////////////////////////////////////////
   // GET routes
 
-  await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
-    const [manifest, annotationList] = fastify.fixtures.generateIiif2ManifestAndAnnotationsList(1000,1000);
-    const rm = await injectPost(fastify, "/manifests/2/create", manifest);
-    t.assert.deepStrictEqual(rm.statusCode, 200);
-    const ra = await injectPost(fastify, "/annotations/2/createMany", annotationList);
-    t.assert.deepStrictEqual(ra.statusCode, 200);
-
-    // within annotationList, the number of annotations that are between canvases canvasMin and canvasMax
-    const
-      manifestShortId = getManifestShortId(manifest["@id"]),
-      canvasMin = 400,
-      canvasMax = 600,
-      rangeCanvasIds =
-        manifest.sequences[0].canvases
-          .slice(canvasMin, canvasMax)
-          .map((canvas) => canvas["@id"]),
-      annotationCount = annotationList.resources.filter((annotation) =>
-        rangeCanvasIds.includes(annotation.on.split("#")[0])
-      ).length;
-
-    const x = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search`);
-    console.log(visibleLog(await x.json()));
-    console.log(manifestShortId);
-
-    // now, check that search-api with canvasMin / canvasMax has the same result as annotationCount
-    const
-      rCanvasRange = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search?canvasMin=${canvasMin}&canvasMax=${canvasMax}`),
-      rCanvasRangeBody = await rCanvasRange.json(),
-      rCanvasRangeCount = rCanvasRangeBody.length;
-    console.log(rCanvasRangeBody);
-    t.assert.deepStrictEqual(rCanvasRange.statusCode, 200);
-    t.assert.deepStrictEqual(rCanvasRangeCount, annotationCount);
-
-    // NOTE I THINK I'M GONNA HAVE TO DROP THE preExistingIds TESTING.
-    // it's wayyyy to convoluted to handle dummy URLs pointing to nopn existant files.
-    // in real life, canvasMin/canvasMax do seem to work.
-
-    // q
-    // motivation
-    // canvasMin
-    // canvasMax
-
-  })
+  // NOTE: testing canvasMin/canvasMax parameters on the `search-api` would be good but is too complicated (would require storing the manifests on a live server so they can be queried through HTTP). so we drop the tests for now
+  //  await t.test("test route /search-api/:iiifSearchVersion/manifests/:manifestShortId/search", async (t) => {
+  //    const [manifest, annotationList] = fastify.fixtures.generateIiif2ManifestAndAnnotationsList(1000,1000);
+  //    const rm = await injectPost(fastify, "/manifests/2/create", manifest);
+  //    t.assert.deepStrictEqual(rm.statusCode, 200);
+  //    const ra = await injectPost(fastify, "/annotations/2/createMany", annotationList);
+  //    t.assert.deepStrictEqual(ra.statusCode, 200);
+  //
+  //    // within annotationList, the number of annotations that are between canvases canvasMin and canvasMax
+  //    const
+  //      manifestShortId = getManifestShortId(manifest["@id"]),
+  //      canvasMin = 400,
+  //      canvasMax = 600,
+  //      rangeCanvasIds =
+  //        manifest.sequences[0].canvases
+  //          .slice(canvasMin, canvasMax)
+  //          .map((canvas) => canvas["@id"]),
+  //      annotationCount = annotationList.resources.filter((annotation) =>
+  //        rangeCanvasIds.includes(annotation.on.split("#")[0])
+  //      ).length;
+  //
+  //    const x = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search`);
+  //    console.log(visibleLog(await x.json()));
+  //    console.log(manifestShortId);
+  //
+  //    // now, check that search-api with canvasMin / canvasMax has the same result as annotationCount
+  //    const
+  //      rCanvasRange = await injectGet(fastify, `/search-api/1/manifests/${manifestShortId}/search?canvasMin=${canvasMin}&canvasMax=${canvasMax}`),
+  //      rCanvasRangeBody = await rCanvasRange.json(),
+  //      rCanvasRangeCount = rCanvasRangeBody.length;
+  //    console.log(rCanvasRangeBody);
+  //    t.assert.deepStrictEqual(rCanvasRange.statusCode, 200);
+  //    t.assert.deepStrictEqual(rCanvasRangeCount, annotationCount);
+  //
+  //    // NOTE I THINK I'M GONNA HAVE TO DROP THE preExistingIds TESTING.
+  //    // it's wayyyy to convoluted to handle dummy URLs pointing to nopn existant files.
+  //    // in real life, canvasMin/canvasMax do seem to work.
+  //
+  //    // q
+  //    // motivation
+  //    // canvasMin
+  //    // canvasMax
+  //
+  //  })
 
   ////////////////////////////////////////////////
   // DELETE routes
