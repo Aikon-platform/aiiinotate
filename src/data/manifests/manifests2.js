@@ -203,6 +203,7 @@ class Manifests2 extends CollectionAbstract {
       manifestUriArray.map(async (manifestUri) => {
         try {
           const r = await this.#fetchManifestFromUri(manifestUri);
+          console.log(">>> RRRRR", r);
           if ( ! r.error ) {
             manifestArray.push(r);
           } else {
@@ -217,12 +218,18 @@ class Manifests2 extends CollectionAbstract {
       })
     );
 
+    if ( fetchErrorIds.length ){
+      const errMsg = `${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds.length} manifests: ${fetchErrorIds}`
+      if ( throwOnError ) {
+        throw this.insertError(errMsg)
+      } else if ( fetchErrorIds.length ) {
+        console.error(errMsg, fetchErrorIds);
+      }
+    }
+
     // insert and format response
     const result = await this.insertManifestArray(manifestArray, throwOnError, true);
-    if ( !throwOnError ) {
-      if ( fetchErrorIds.length ) {
-        console.error(`${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds.length} manifests`, fetchErrorIds);
-      }
+    if ( fetchErrorIds.length ) {
       result.fetchErrorIds = fetchErrorIds;
     }
     return result;

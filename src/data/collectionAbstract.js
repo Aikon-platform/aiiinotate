@@ -94,7 +94,7 @@ class CollectionAbstract {
     this.errorConstructor = errorConstructor(collectionName);
     /** @type {Function(string, object?) => Error} */
     this.errorNoAction = this.errorConstructor(undefined);
-    // create this.error(Read|Insert|Update|Delete), properties that will be used to throw the proper error.
+    // create this.(read|insert|update|delete)Error, properties that will be used to throw the proper error.
     [ "read", "insert", "update", "delete" ].forEach((op) =>
       /** @type {Function(string,object?) => Error} */
       this[`${op}Error`] = errorConstructor(collectionName)(op)
