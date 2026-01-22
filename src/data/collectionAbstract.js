@@ -148,7 +148,7 @@ class CollectionAbstract {
       // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
-    return formatInsertResponse(insertedIds);
+    return formatInsertResponse({ insertedIds });
   }
 
   /**

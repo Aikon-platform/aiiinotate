@@ -7,14 +7,15 @@ import { inspectObj, isNonEmptyArray } from "#utils/utils.js";
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 /**
- * functionnal alternative to `formatInsertResponse`, that aldready expects a formatted object
- * @param {string[]?} insertedIds
- * @param {string[]?} preExistingIds
- * @param {string[]?} fetchErrorIds
- * @param {string[]?} rejectedIds
+ * @param {{ insertedIds: string[]?, preExistingIds: string[]?, fetchErrorIds: string[]?, rejectedIds: string[]? }} insertResponseData
  * @returns {InsertResponseType}
  */
-const formatInsertResponse = (insertedIds, preExistingIds, fetchErrorIds, rejectedIds) => {
+const formatInsertResponse = ({
+  insertedIds = [],
+  preExistingIds = [],
+  fetchErrorIds = [],
+  rejectedIds = []
+}) => {
   const out = {
     insertedCount: insertedIds?.length || 0,
     insertedIds: insertedIds || [],

@@ -113,7 +113,7 @@ class Manifests2 extends CollectionAbstract {
     if ( !manifestExists ) {
       return this.insertOne(manifest);
     } else {
-      return formatInsertResponse([],[manifest["@id"]])
+      return formatInsertResponse({ preExistingIds: [manifest["@id"]] });
     }
   }
 
@@ -159,12 +159,10 @@ class Manifests2 extends CollectionAbstract {
       return result;
 
     } else {
-      return formatInsertResponse(
-        [],
-        preExistingIds,
-        [],
-        invalidManifestArray
-      );
+      return formatInsertResponse({
+        preExistingIds: preExistingIds,
+        rejectedIds: invalidManifestArray
+      });
     }
   }
 
@@ -199,7 +197,7 @@ class Manifests2 extends CollectionAbstract {
       fetchErrorIds = [],
       manifestArray = [];
 
-      // fetch the manifests. if there's a fetch error, they won't be inserted.
+    // fetch the manifests. if there's a fetch error, they won't be inserted.
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
