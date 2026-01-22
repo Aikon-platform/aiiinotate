@@ -191,8 +191,9 @@ class Annotations2 extends CollectionAbstract {
    * - set a key `canvasIdx` in all values of `annotation.on`, containing the position of the annotation's target canvas in the manifest,
    *    (or undefined if the manifest or canvas were not found).
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
+   * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be find, raise an error.
    */
-  async #insertManifestsAndGetCanvasIdx(annotationData) {
+  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     // convert objects to array to get a uniform interface.
     let converted
@@ -206,12 +207,20 @@ class Annotations2 extends CollectionAbstract {
       }
     }));
 
+    throwOnCanvasIndexError = throwOnCanvasIndexError || false;
+
     // 2. insert the manifests
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
-      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, false),
+      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, throwOnCanvasIndexError),
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
+
+    // some canvas indexes won't be able to be fetched => return an error
+    if ( throwOnCanvasIndexError && insertResponse.insertedIds.fetchErrorIds.length ) {
+      ""
+    }
+    console.log(">>> insertResponse", insertResponse);
 
     // 3. update annotations with 2 things:
     //  - where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
@@ -274,12 +283,13 @@ class Annotations2 extends CollectionAbstract {
   /**
    * validate and insert annotations from an annotation list.
    * @param {object} annotationList
+   * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotationList(annotationList) {
+  async insertAnnotationList(annotationList, throwOnCanvasIndexError) {
     let annotationArray;
     annotationArray = this.#cleanAnnotationList(annotationList);
-    annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray);
+    annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
     return this.insertMany(annotationArray);
   }
 

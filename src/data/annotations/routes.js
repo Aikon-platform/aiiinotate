@@ -176,7 +176,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         annotationUri = pathToUrl(request.url),
-        { iiifPresentationVersion} = request.params;
+        { iiifPresentationVersion } = request.params;
       try {
         return iiifPresentationVersion === 2
           ? annotations2.findById(annotationUri)
@@ -251,6 +251,12 @@ function annotationsRoutes(fastify, options, done) {
             iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
+        querystring: {
+          type: "object",
+          properties: {
+            throwOnCanvasIndexError: { type: "boolean", },
+          }
+        },
         body: routeAnnotationCreateManySchema,
         response: responsePostSchema
       }
@@ -258,6 +264,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
+        { throwOnCanvasIndexError } = request.query,
         body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
         insertResponseArray = [];
 
@@ -282,7 +289,7 @@ function annotationsRoutes(fastify, options, done) {
         if ( iiifPresentationVersion === 2 ) {
           await Promise.all(annotationsArray.map(
             async (annotationList) => {
-              const r = await annotations2.insertAnnotationList(annotationList);
+              const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError);
               insertResponseArray.push(r);
             }
           ));
