@@ -144,13 +144,14 @@ class Manifests2 extends CollectionAbstract {
     });
 
     // filter out the manifests that are aldready in our collection
-    // NOTE: i have attempted to move this to `insertManifestsFromUriArray` but it leads to what i suspect is a data race causing unique constaints fails.
+    // NOTE: i have attempted to move this to `insertManifestsFromUriArray` but it leads to what I suspect is a data race causing unique constaints fails.
     //  TLDR: don't move or disable this check.
     let cleanIds = cleanManifestArray.map((manifest) => manifest["@id"]);
-    [cleanIds, preExistingIds] = await this.#filterManifestIdsInCollection(cleanManifestArray.map((manifest) => manifest["@id"]));
+    [cleanIds, preExistingIds] = await this.#filterManifestIdsInCollection(cleanIds);
     cleanManifestArray = cleanManifestArray.filter((manifestUri) => cleanIds.includes(manifestUri));
 
-    // insert. if there has been an error but error-throwing was disabled, complete the response object with description of the errors
+    // insert. if there has been an error but throwOnError === "false", complete the response object with description of the errors
+    // no need for try..except, no errors should happen here.
     if ( cleanManifestArray.length ) {
       const result = await this.insertMany(cleanManifestArray);
       result.preExistingIds = preExistingIds;
@@ -198,12 +199,11 @@ class Manifests2 extends CollectionAbstract {
       fetchErrorIds = [],
       manifestArray = [];
 
-    // fetch the manifests. if there's a fetch error, they won't be inserted.
+      // fetch the manifests. if there's a fetch error, they won't be inserted.
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
           const r = await this.#fetchManifestFromUri(manifestUri);
-          console.log(">>> RRRRR", r);
           if ( ! r.error ) {
             manifestArray.push(r);
           } else {
@@ -229,9 +229,7 @@ class Manifests2 extends CollectionAbstract {
 
     // insert and format response
     const result = await this.insertManifestArray(manifestArray, throwOnError, true);
-    if ( fetchErrorIds.length ) {
-      result.fetchErrorIds = fetchErrorIds;
-    }
+    result.fetchErrorIds = fetchErrorIds;
     return result;
   }
 
