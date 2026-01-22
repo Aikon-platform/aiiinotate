@@ -196,8 +196,9 @@ class Annotations2 extends CollectionAbstract {
   async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     // convert objects to array to get a uniform interface.
-    let converted
+    let converted;
     [ annotationData, converted ] = maybeToArray(annotationData, true);
+    throwOnCanvasIndexError = throwOnCanvasIndexError || false;
 
     // 1. get all distinct manifest URIs
     const manifestUris = [];
@@ -206,8 +207,6 @@ class Annotations2 extends CollectionAbstract {
         manifestUris.push(target.manifestUri);
       }
     }));
-
-    throwOnCanvasIndexError = throwOnCanvasIndexError || false;
 
     // 2. insert the manifests
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
@@ -220,7 +219,6 @@ class Annotations2 extends CollectionAbstract {
     if ( throwOnCanvasIndexError && insertResponse.insertedIds.fetchErrorIds.length ) {
       ""
     }
-    console.log(">>> insertResponse", insertResponse);
 
     // 3. update annotations with 2 things:
     //  - where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
