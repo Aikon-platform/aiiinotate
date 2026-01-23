@@ -57,7 +57,7 @@ test("test annotation Routes", async (t) => {
 
     // test basic inserts
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
-    const data = [
+    let data = [
       [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
       [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
     ];
@@ -69,13 +69,21 @@ test("test annotation Routes", async (t) => {
     }
 
     // test that `throwOnCanvasIndexError` throws errors when it's supposed to
-    // TODO: do a query to createMany with `throwOnCanvasIndexError = true`. test thatan error happens as is is supposed to.
-    const annotationListWithTargetErrors = annotationList;
-    annotationListWithTargetErrors.resources = annotationListWithTargetErrors.resources.map((annotation) =>
-      // replace the annotation.on with an uuid => should trigger an error.
-      annotation.on = uuid4()
-    )
+    const annotationListWithTargetErrors = structuredClone(annotationList);
+    // replace the annotation.on with an uuid => should trigger an error.
+    annotationListWithTargetErrors.resources =
+      annotationListWithTargetErrors
+        .resources
+        .map((annotation) => {
+          annotation.on = uuid4();
+          return annotation
+        });
 
+    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    for (let i=0; i<data.length; i++) {
+      const [func, v] = data.at(i);
+      func(t, `/annotations/2/createMany?throwOnCanvasIndexError=${v}`, annotationListWithTargetErrors)
+    }
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {

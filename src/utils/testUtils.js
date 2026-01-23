@@ -7,6 +7,7 @@ import { visibleLog } from "#utils/utils.js";
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").DataOperationsType } DataOperationsType */
 
 /**
  * @param {NodeTestType} t
