@@ -191,10 +191,10 @@ class Annotations2 extends CollectionAbstract {
    * - set a key `canvasIdx` in all values of `annotation.on`, containing the position of the annotation's target canvas in the manifest,
    *    (or undefined if the manifest or canvas were not found).
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
-   * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be find, raise an error.
+   * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be found, raise an error.
    */
   async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError=false) {
-    // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
+    // NOTE: instead of propagating `throwOnCanvasIndexError` to `insertManifestsFromUriArray`, we could just check if `insertResponse.fetchErrorIds.length > 0` and return an error then.
     // convert objects to array to get a uniform interface.
     let converted;
     [ annotationData, converted ] = maybeToArray(annotationData, true);
@@ -214,23 +214,24 @@ class Annotations2 extends CollectionAbstract {
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
 
-    // some canvas indexes won't be able to be fetched => return an error
-    if ( throwOnCanvasIndexError && insertResponse.insertedIds.fetchErrorIds.length ) {
-      ""
+    if ( throwOnCanvasIndexError && insertResponse.fetchErrorIds.length ) {
+      visibleLog("THIS SHOULD NOT HAPPEN")
     }
 
-    // 3. update annotations with 2 things:
-    //  - where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
-    //  - set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
+    // 3. update annotations with info on manifest and canvas.
+    // if canvasIdx is undefined, throw.
     annotationData = await Promise.all(
       annotationData.map(async (ann) => {
         ann.on = await Promise.all(
           ann.on.map(async (target) => {
+            //  a. where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
             target.manifestUri =
               // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
               insertedManifestsIds.find((x) => x === target.manifestUri)
                 ? target.manifestUri
                 : undefined;
+
+            // b. set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
             target.canvasIdx =
               target.manifestUri
                 ? await this.manifestsPlugin.getCanvasIdx(target.manifestUri, target.full)
@@ -238,6 +239,9 @@ class Annotations2 extends CollectionAbstract {
             return target;
           })
         )
+        if ( throwOnCanvasIndexError &&  ann.on.some((target) => target.canvasIdx === undefined) ) {
+          throw new this.insertError(`${this.funcName(this.deleteAnnotations)}: could not get canvasIdx for annotation`);
+        }
         return ann;
       })
     );
