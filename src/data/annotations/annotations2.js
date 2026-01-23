@@ -264,7 +264,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
     annotation = this.#cleanAnnotation(annotation);
-    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation);
+    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
   }
 
