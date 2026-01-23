@@ -193,12 +193,11 @@ class Annotations2 extends CollectionAbstract {
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
    * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be find, raise an error.
    */
-  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError) {
+  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError=false) {
     // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
     // convert objects to array to get a uniform interface.
     let converted;
     [ annotationData, converted ] = maybeToArray(annotationData, true);
-    throwOnCanvasIndexError = throwOnCanvasIndexError || false;
 
     // 1. get all distinct manifest URIs
     const manifestUris = [];
@@ -254,10 +253,16 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * validate and insert a single annotation.
-   * @param {object} annotationArray
+   *
+   * about `throwOnCanvasIndexError`:
+   * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
+   * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
+   *
+   * @param {object} annotation
+   * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotation(annotation) {
+  async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
     annotation = this.#cleanAnnotation(annotation);
     annotation = await this.#insertManifestsAndGetCanvasIdx(annotation);
     return this.insertOne(annotation);
@@ -280,6 +285,11 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * validate and insert annotations from an annotation list.
+   *
+   * about `throwOnCanvasIndexError`:
+   * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
+   * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
+   *
    * @param {object} annotationList
    * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}

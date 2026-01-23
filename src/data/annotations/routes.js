@@ -202,6 +202,22 @@ function annotationsRoutes(fastify, options, done) {
             action: { type: "string", enum: [ "create", "update" ] }
           }
         },
+        // NOTE: throwOnCanvasIndexError is only implemented if `action==="create"` (see preValidation)
+        querystring: {
+          type: "object",
+          properties: {
+            throwOnCanvasIndexError: { type: "boolean" },
+          }
+        },
+        preValidation: async (request, reply) => {
+          const
+            { action } = request.params,
+            { throwOnCanvasIndexError } = request.querystring;
+          if ( action==="update" && throwOnCanvasIndexError ) {
+            returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.")
+          }
+          return;
+        },
         body: routeAnnotation2Or3Schema,
         response: responsePostSchema
       },
@@ -209,6 +225,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion, action } = request.params,
+        { throwOnCanvasIndexError } = request.query,
         annotation = request.body;
 
       try {
@@ -216,7 +233,7 @@ function annotationsRoutes(fastify, options, done) {
         // insert or update
         if ( iiifPresentationVersion === 2 ) {
           return action==="create"
-            ? await annotations2.insertAnnotation(annotation)
+            ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError)
             : await annotations2.updateAnnotation(annotation);
         } else {
           annotations3.notImplementedError();
