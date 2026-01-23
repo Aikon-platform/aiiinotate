@@ -75,7 +75,8 @@ test("test annotation Routes", async (t) => {
       annotationListWithTargetErrors
         .resources
         .map((annotation) => {
-          annotation.on = uuid4();
+          // if annotation.on is a string, the annotation should have a fragment
+          annotation.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
           return annotation
         });
 
