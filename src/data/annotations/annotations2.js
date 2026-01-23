@@ -191,11 +191,12 @@ class Annotations2 extends CollectionAbstract {
    * - set a key `canvasIdx` in all values of `annotation.on`, containing the position of the annotation's target canvas in the manifest,
    *    (or undefined if the manifest or canvas were not found).
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
+   * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be found, raise an error.
    */
-  async #insertManifestsAndGetCanvasIdx(annotationData) {
-    // TODO  : extract all canvas Ids, reconstruct manifest IDs from it. if they're valid, insert the manifests into the db.
+  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError=false) {
+    // NOTE: instead of propagating `throwOnCanvasIndexError` to `insertManifestsFromUriArray`, we could just check if `insertResponse.fetchErrorIds.length > 0` and return an error then.
     // convert objects to array to get a uniform interface.
-    let converted
+    let converted;
     [ annotationData, converted ] = maybeToArray(annotationData, true);
 
     // 1. get all distinct manifest URIs
@@ -209,22 +210,28 @@ class Annotations2 extends CollectionAbstract {
     // 2. insert the manifests
     // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
-      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, false),
+      insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, throwOnCanvasIndexError),
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
 
-    // 3. update annotations with 2 things:
-    //  - where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
-    //  - set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
+    if ( throwOnCanvasIndexError && insertResponse.fetchErrorIds.length ) {
+      visibleLog("THIS SHOULD NOT HAPPEN")
+    }
+
+    // 3. update annotations with info on manifest and canvas.
+    // if canvasIdx is undefined, throw.
     annotationData = await Promise.all(
       annotationData.map(async (ann) => {
         ann.on = await Promise.all(
           ann.on.map(async (target) => {
+            //  a. where manifest insertion has failed, set `manifestUri` to undefined on all values of `annotation.on`
             target.manifestUri =
               // has the insertion of `manifestUri` worked ? (has it returned a valid response, woth `insertedIds` key).
               insertedManifestsIds.find((x) => x === target.manifestUri)
                 ? target.manifestUri
                 : undefined;
+
+            // b. set `annotation.on.canvasIdx`: the position of the target canvas within the manifest, or undefined if it cound not be found.
             target.canvasIdx =
               target.manifestUri
                 ? await this.manifestsPlugin.getCanvasIdx(target.manifestUri, target.full)
@@ -232,6 +239,9 @@ class Annotations2 extends CollectionAbstract {
             return target;
           })
         )
+        if ( throwOnCanvasIndexError &&  ann.on.some((target) => target.canvasIdx === undefined) ) {
+          throw new this.insertError(`${this.funcName(this.deleteAnnotations)}: could not get canvasIdx for annotation`);
+        }
         return ann;
       })
     );
@@ -247,12 +257,18 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * validate and insert a single annotation.
-   * @param {object} annotationArray
+   *
+   * about `throwOnCanvasIndexError`:
+   * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
+   * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
+   *
+   * @param {object} annotation
+   * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotation(annotation) {
+  async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
     annotation = this.#cleanAnnotation(annotation);
-    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation);
+    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
   }
 
@@ -273,13 +289,19 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * validate and insert annotations from an annotation list.
+   *
+   * about `throwOnCanvasIndexError`:
+   * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
+   * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
+   *
    * @param {object} annotationList
+   * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotationList(annotationList) {
+  async insertAnnotationList(annotationList, throwOnCanvasIndexError) {
     let annotationArray;
     annotationArray = this.#cleanAnnotationList(annotationList);
-    annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray);
+    annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
     return this.insertMany(annotationArray);
   }
 
@@ -346,7 +368,8 @@ class Annotations2 extends CollectionAbstract {
   }
 
   /**
-   * implementation of the IIIF Search API 1.0
+   * implementation of the IIIF Search API 1.0.
+   * function arguments have been validated by JSONSchemas at route-level so they're clean.
    *
    * NOTE:
    *  - only `motivation` and `q` search params are implemented
@@ -354,6 +377,7 @@ class Annotations2 extends CollectionAbstract {
    *    implemented for `q` and `motivation` (in the IIIF specs, you can supply
    *    multiple space-separated values and the server should return all partial
    *    matches to any of those strings.)
+   * - non-standard `canvasMin` and `canvasMax` parameters are implemented: search by annotation's target canvas position.
    *
    * see:
    *  https://iiif.io/api/search/1.0/
@@ -361,11 +385,13 @@ class Annotations2 extends CollectionAbstract {
    *
    * @param {string} queryUrl
    * @param {string} manifestShortId
-   * @param {string} q
-   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"} motivation
+   * @param {string?} q
+   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"?} motivation
+   * @param {number?} canvasMin - minimum value of `on.canvasIdx`, inclusive
+   * @param {number?} canvasMax - maximum value of `on.canvasIdx`, inclusive
    * @returns {object} annotationList containing results
    */
-  async search(queryUrl, manifestShortId, q, motivation) {
+  async search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax) {
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };
@@ -379,7 +405,7 @@ class Annotations2 extends CollectionAbstract {
           { "resource.chars": q }
         ]
       });
-    }
+    };
     if ( motivation ) {
       queryFilters.$and.push(
         motivation === "non-painting"
@@ -388,6 +414,20 @@ class Annotations2 extends CollectionAbstract {
             ? { motivation: "sc:painting" }
             : { motivation: `oa:${motivation}` }
       );
+    };
+    if ( !isNaN(canvasMin) ) {
+      // if canvasMax is undefined, then search for canvasIdx===canvasMin
+      if ( !canvasMax ) {
+        queryFilters.$and.push({ "on.canvasIdx": canvasMin })
+      // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
+      } else {
+        queryFilters.$and.push({
+          $and: [
+            { "on.canvasIdx": { $gte: canvasMin } },
+            { "on.canvasIdx": { $lte: canvasMax } }
+          ]
+        })
+      }
     }
     const query =
       queryFilters.$and.length
@@ -395,6 +435,7 @@ class Annotations2 extends CollectionAbstract {
         : queryBase;
 
     const annotations = await this.find(query);
+    console.log(annotations.length);
     return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
   }
 

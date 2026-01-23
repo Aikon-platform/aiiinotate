@@ -105,7 +105,11 @@ Remember to have your `mongodb` service running: `sudo systemctl start mongod` !
 - **Start the app**
 
 ```bash
-npm run start
+# reload enabled
+npm run dev
+
+# reload disabled
+npm run prod
 ```
 
 - **Test the app**

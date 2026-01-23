@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair } from "#utils/utils.js";
+import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { returnError, makeResponsePostSchema } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
@@ -53,22 +53,43 @@ function commonRoutes(fastify, options, done) {
             motivation: {
               type: "string",
               enum: ["painting", "non-painting", "commenting", "describing", "tagging", "linking"]
+            },
+            canvasMin: {
+              type: "integer",
+              minimum: 0
+            },
+            canvasMax: {
+              type: ["integer","null"],
+              minimum: 0
             }
           }
         },
         response: {
           200: iiifAnnotationListSchema
         }
+      },
+      preValidation: async (request, reply) => {
+        const
+          { canvasMin, canvasMax } = request.query,
+          error = new Error(`Error validating GET search-api route: 'canvasMin' must be smaller than 'canvasMax'. If 'canvasMax' is defined, 'canvasMin' must be defined as well. Got canvasMin=${canvasMin}, canvasMax=${canvasMax}`),
+          throwError = () => returnError(request, reply, error, {}, 400);
+        if (
+          (canvasMin == null && canvasMax != null)
+          || (Number(canvasMax) < Number(canvasMin))
+        ) {
+          throwError();
+        }
+        return;
       }
     },
     async (request, reply) => {
       const
         queryUrl = pathToUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
-        { q, motivation } = request.query;
+        { q, motivation, canvasMin, canvasMax } = request.query;
 
       if ( iiifSearchVersion===1 ) {
-        return await annotations2.search(queryUrl, manifestShortId, q, motivation);
+        return await annotations2.search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax);
       } else {
         annotations3.notImplementedError();
       }

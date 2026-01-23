@@ -7,6 +7,7 @@ import { visibleLog } from "#utils/utils.js";
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").DataOperationsType } DataOperationsType */
 
 /**
  * @param {NodeTestType} t
@@ -95,6 +96,13 @@ const injectPost = (fastify, route, payload) =>
     method: "POST",
     url: route,
     payload: payload,
+  });
+
+const injectGet = (fastify, route, payload) =>
+  fastify.inject({
+    method: "GET",
+    url: route,
+    payload: payload || {}
   });
 
 /**
@@ -230,7 +238,6 @@ const injectTestAnnotations = async (fastify, t, annotationList) => {
   return [insertedCount, insertedIds];
 }
 
-
 export {
   assertObjectKeys,
   assertObjectKeysError,
@@ -241,6 +248,7 @@ export {
   assertResponseKeys,
   assertErrorValidResponse,
   injectPost,
+  injectGet,
   assertPostInvalidResponse,
   assertCreateValidResponse,
   assertUpdateValidResponse,

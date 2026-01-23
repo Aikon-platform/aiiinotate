@@ -55,8 +55,9 @@ test("test annotation Routes", async (t) => {
       return a;
     });
 
+    // test basic inserts
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
-    const data = [
+    let data = [
       [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
       [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
     ];
@@ -66,11 +67,29 @@ test("test annotation Routes", async (t) => {
         await func(t, "/annotations/2/createMany", testData.at(i));
       }
     }
+
+    // test that `throwOnCanvasIndexError` throws errors when it's supposed to
+    const annotationListWithTargetErrors = structuredClone(annotationList);
+    // replace the annotation.on with an uuid => should trigger an error.https://www.cinefil.com/film/mulholland-drive
+    annotationListWithTargetErrors.resources =
+      annotationListWithTargetErrors
+        .resources
+        .map((annotation) => {
+          // if annotation.on is a string, the annotation should have a fragment
+          annotation.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
+          return annotation
+        });
+
+    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    for (let i=0; i<data.length; i++) {
+      const [func, v] = data.at(i);
+      func(t, `/annotations/2/createMany?throwOnCanvasIndexError=${v}`, annotationListWithTargetErrors)
+    }
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
-    const data = [
+    let data = [
       [fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess],
       [fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure],
     ]
@@ -80,6 +99,15 @@ test("test annotation Routes", async (t) => {
         await func(t, "/annotations/2/create", testData.at(i));
       }
     };
+
+    // test throwOnCanvasIndexError
+    const annotationWithTargetError = structuredClone(fastify.fixtures.annotations2Valid.at(0));
+    annotationWithTargetError.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
+    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    for (let i=0; i<data.length; i++) {
+      const [func, v] = data.at(i);
+      await func(t, `/annotations/2/create?throwOnCanvasIndexError=${v}`, annotationWithTargetError)
+    }
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {

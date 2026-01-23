@@ -1,5 +1,5 @@
 import { maybeToArray, inspectObj } from "#utils/utils.js"
-import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#src/data/utils/routeUtils.js";
+import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").MongoDbType} MongoDbType */
 /** @typedef {import("#types").MongoClientType} MongoClientType */
@@ -20,8 +20,8 @@ class CollectionAbstractError extends Error {
    */
   constructor(collectionName, operation, message, errInfo) {
     const
-      collInfo = collectionName ? `on collection '${collectionName}',` : "",
-      operationInfo = operation ? `when performing operation '${operation.toLocaleLowerCase()}'`: "";
+      collInfo = collectionName ? `on collection '${collectionName}'` : "",
+      operationInfo = operation ? `, when performing operation '${operation.toLocaleLowerCase()}'`: "";
     super(`CollectionAbstractError: ${collInfo} ${operationInfo}: ${message}`);
     this.info = errInfo;
   }
@@ -94,7 +94,7 @@ class CollectionAbstract {
     this.errorConstructor = errorConstructor(collectionName);
     /** @type {Function(string, object?) => Error} */
     this.errorNoAction = this.errorConstructor(undefined);
-    // create this.error(Read|Insert|Update|Delete), properties that will be used to throw the proper error.
+    // create this.(read|insert|update|delete)Error, properties that will be used to throw the proper error.
     [ "read", "insert", "update", "delete" ].forEach((op) =>
       /** @type {Function(string,object?) => Error} */
       this[`${op}Error`] = errorConstructor(collectionName)(op)
@@ -148,7 +148,7 @@ class CollectionAbstract {
       // MongoInsertOneResultType and MongoInsertManyResultType have a different structureex
       mongoRes.insertedId || Object.values(mongoRes.insertedIds)
     );
-    return formatInsertResponse(insertedIds);
+    return formatInsertResponse({ insertedIds });
   }
 
   /**
@@ -174,6 +174,10 @@ class CollectionAbstract {
    */
   throwMongoError(operation, err) {
     throw this.errorConstructor(operation)(err.message, err.errorResponse);
+  }
+
+  notImplementedError() {
+    throw this.errorNoAction("not implemented");
   }
 
   //////////////////////////////////////

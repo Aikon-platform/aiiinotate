@@ -5,6 +5,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fixtures/annotations.js";
 import { manifest2Valid, manifest2ValidUri, manifest2Invalid, manifest2InvalidUri } from "#fixtures/manifests.js";
+import { generateIiif2Manifest, generateIiif2AnnotationList, generateIiif2ManifestAndAnnotationsList } from "#fixtures/generate.js";
 import { readFileToObject } from "#fixtures/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -39,7 +40,7 @@ async function fixtures(fastify, options) {
         }
       }
     },
-    (request, reply) => {
+    async (request, reply) => {
       const { fileName } = request.params;
       return readFileToObject(fileName);
     }
@@ -57,7 +58,10 @@ async function fixtures(fastify, options) {
     manifest2Valid: manifest2Valid,
     manifest2ValidUri: manifest2ValidUri,
     manifest2Invalid: manifest2Invalid,
-    manifest2InvalidUri: manifest2InvalidUri
+    manifest2InvalidUri: manifest2InvalidUri,
+    generateIiif2Manifest: generateIiif2Manifest,
+    generateIiif2AnnotationList: generateIiif2AnnotationList,
+    generateIiif2ManifestAndAnnotationsList: generateIiif2ManifestAndAnnotationsList
   });
 }
 

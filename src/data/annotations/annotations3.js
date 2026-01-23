@@ -4,12 +4,12 @@ import CollectionAbstract from "#data/collectionAbstract.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
-/** @typedef {Annnotations3} Annotations3InstanceType */
+/** @typedef {Annotations3} Annotations3InstanceType */
 
 /**
  * @extends {CollectionAbstract}
  */
-class Annnotations3 extends CollectionAbstract {
+class Annotations3 extends CollectionAbstract {
   /**
    * @param {FastifyInstanceType} fastify
    */
@@ -17,14 +17,10 @@ class Annnotations3 extends CollectionAbstract {
     super(fastify, "annotations3");
   }
 
-  notImplementedError() {
-    throw this.errorNoAction(`${this.constructor.name}: not implemented`);
-  }
-
 }
 
 export default fastifyPlugin((fastify, options, done) => {
-  fastify.decorate("annnotations3", new Annnotations3(fastify));
+  fastify.decorate("annotations3", new Annotations3(fastify));
   done();
 }, {
   name: "annotations3",

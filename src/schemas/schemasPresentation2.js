@@ -190,6 +190,19 @@ function addSchemas(fastify, options, done) {
           }
         ],
       },
+      manifestShortId: { type: "string" },
+      canvasIdx: {
+        anyOf: [
+          { type: "number" },
+          { type: "null" }
+        ]
+      },
+      manifestUri: {
+        anyOf: [
+          { type: "string" },
+          { type: "null" }
+        ]
+      },
       selector: { $ref: makeSchemaUri("selector") },
       purpose: { type: "string" }
     }

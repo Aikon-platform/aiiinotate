@@ -176,7 +176,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         annotationUri = pathToUrl(request.url),
-        { iiifPresentationVersion} = request.params;
+        { iiifPresentationVersion } = request.params;
       try {
         return iiifPresentationVersion === 2
           ? annotations2.findById(annotationUri)
@@ -202,6 +202,22 @@ function annotationsRoutes(fastify, options, done) {
             action: { type: "string", enum: [ "create", "update" ] }
           }
         },
+        // NOTE: throwOnCanvasIndexError is only implemented if `action==="create"` (see preValidation)
+        querystring: {
+          type: "object",
+          properties: {
+            throwOnCanvasIndexError: { type: "boolean" },
+          }
+        },
+        preValidation: async (request, reply) => {
+          const
+            { action } = request.params,
+            { throwOnCanvasIndexError } = request.querystring;
+          if ( action==="update" && throwOnCanvasIndexError ) {
+            returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.")
+          }
+          return;
+        },
         body: routeAnnotation2Or3Schema,
         response: responsePostSchema
       },
@@ -209,6 +225,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion, action } = request.params,
+        { throwOnCanvasIndexError } = request.query,
         annotation = request.body;
 
       try {
@@ -216,7 +233,7 @@ function annotationsRoutes(fastify, options, done) {
         // insert or update
         if ( iiifPresentationVersion === 2 ) {
           return action==="create"
-            ? await annotations2.insertAnnotation(annotation)
+            ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError)
             : await annotations2.updateAnnotation(annotation);
         } else {
           annotations3.notImplementedError();
@@ -251,6 +268,12 @@ function annotationsRoutes(fastify, options, done) {
             iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
+        querystring: {
+          type: "object",
+          properties: {
+            throwOnCanvasIndexError: { type: "boolean", },
+          }
+        },
         body: routeAnnotationCreateManySchema,
         response: responsePostSchema
       }
@@ -258,6 +281,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
+        { throwOnCanvasIndexError } = request.query,
         body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
         insertResponseArray = [];
 
@@ -282,7 +306,7 @@ function annotationsRoutes(fastify, options, done) {
         if ( iiifPresentationVersion === 2 ) {
           await Promise.all(annotationsArray.map(
             async (annotationList) => {
-              const r = await annotations2.insertAnnotationList(annotationList);
+              const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError);
               insertResponseArray.push(r);
             }
           ));
