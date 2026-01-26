@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { returnError, makeResponsePostSchema } from "#utils/routeUtils.js";
+import { returnError, makeResponseSchema, makeResponsePostSchema } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
@@ -61,12 +61,24 @@ function commonRoutes(fastify, options, done) {
             canvasMax: {
               type: ["integer","null"],
               minimum: 0
-            }
+            },
+            onlyIds: {
+              type: "boolean",
+              default: "false"
+            },
           }
         },
-        response: {
-          200: iiifAnnotationListSchema
-        }
+        // return either an AnnotationList, or if `onlyIds=true`, an array of strings
+        response:
+          makeResponseSchema(fastify, {
+            anyOf: [
+
+              { type: "array", items: { type: "string" } },
+              // anyOf with fastify.getSchema causes errors => use $ref directly
+              { "$ref": "http://127.0.0.1:4000/schemas/presentation/2/annotationList" },
+            ]
+          })
+          // { 200: iiifAnnotationListSchema }
       },
       preValidation: async (request, reply) => {
         const
@@ -86,10 +98,18 @@ function commonRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
-        { q, motivation, canvasMin, canvasMax } = request.query;
+        { q, motivation, canvasMin, canvasMax, onlyIds } = request.query;
 
       if ( iiifSearchVersion===1 ) {
-        return await annotations2.search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax);
+        return await annotations2.search({
+          queryUrl,
+          manifestShortId,
+          q,
+          motivation,
+          canvasMin,
+          canvasMax,
+          onlyIds
+        });
       } else {
         annotations3.notImplementedError();
       }

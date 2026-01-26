@@ -371,27 +371,47 @@ class Annotations2 extends CollectionAbstract {
    * implementation of the IIIF Search API 1.0.
    * function arguments have been validated by JSONSchemas at route-level so they're clean.
    *
+   * parameters:
+   * - queryUrl - the request URL (/search-api...)
+   * - manifestShortId - the manifest's identifier
+   * - q: query string (content to search for in annotations)
+   * - motivation: filter by annotation motivation
+   * - canvasMin - minimum value of `on.canvasIdx`, inclusive
+   * - canvasMax - maximum value of `on.canvasIdx`, inclusive
+   * - onlyIds - return only the @ids of matched annotations instead of the entire annotations
+   *
    * NOTE:
    *  - only `motivation` and `q` search params are implemented
    *  - to increase search execution speed, ONLY EXACT STRING MACHES are
    *    implemented for `q` and `motivation` (in the IIIF specs, you can supply
    *    multiple space-separated values and the server should return all partial
    *    matches to any of those strings.)
-   * - non-standard `canvasMin` and `canvasMax` parameters are implemented: search by annotation's target canvas position.
+   * - non-standard `canvasMin`, `canvasMax` and `onlyIds` parameters are implemented
    *
    * see:
    *  https://iiif.io/api/search/1.0/
    *  https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/specifications/4_search_api.md
    *
-   * @param {string} queryUrl
-   * @param {string} manifestShortId
-   * @param {string?} q
-   * @param {"painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking"?} motivation
-   * @param {number?} canvasMin - minimum value of `on.canvasIdx`, inclusive
-   * @param {number?} canvasMax - maximum value of `on.canvasIdx`, inclusive
+   * @param {{
+   *   queryUrl: string,
+   *   manifestShortId: string,
+   *   q: string?,
+   *   motivation: ("painting"|"non-painting"|"commenting"|"describing"|"tagging"|"linking")?,
+   *   canvasMin: number?,
+   *   canvasMax: number?,
+   *   onlyIds: boolean
+   * }}
    * @returns {object} annotationList containing results
    */
-  async search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax) {
+  async search({
+    queryUrl,
+    manifestShortId,
+    q,
+    motivation=undefined,
+    canvasMin=undefined,
+    canvasMax=undefined,
+    onlyIds=false
+  }) {
     const
       queryBase = { "on.manifestShortId": manifestShortId },
       queryFilters = { $and: [] };
@@ -434,9 +454,13 @@ class Annotations2 extends CollectionAbstract {
         ? { ...queryBase, ...queryFilters }
         : queryBase;
 
-    const annotations = await this.find(query);
-    console.log(annotations.length);
-    return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
+    if ( !onlyIds ) {
+      const annotations = await this.find(query);
+      return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
+    } else {
+      return ( await this.find(query, { "@id": 1 }) )
+        .map((ann) => ann["@id"]);
+    }
   }
 
   /**
