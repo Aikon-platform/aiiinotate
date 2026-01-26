@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { returnError, makeResponsePostSchema } from "#utils/routeUtils.js";
+import { returnError, makeResponseSchema, makeResponsePostSchema } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
@@ -61,12 +61,24 @@ function commonRoutes(fastify, options, done) {
             canvasMax: {
               type: ["integer","null"],
               minimum: 0
-            }
+            },
+            onlyIds: {
+              type: "array",
+              items: { type: "string" }
+            },
           }
         },
-        response: {
-          200: iiifAnnotationListSchema
-        }
+        // return either an AnnotationList, or if `onlyIds=true`, an array of strings
+        response: makeResponseSchema(fastify, {
+            anyOf: [
+              iiifAnnotationListSchema,
+              {
+                type: "array",
+                items: { type: "string" }
+              }
+            ]
+          }
+        )
       },
       preValidation: async (request, reply) => {
         const
@@ -86,7 +98,7 @@ function commonRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
-        { q, motivation, canvasMin, canvasMax } = request.query;
+        { q, motivation, canvasMin, canvasMax, onlyIds } = request.query;
 
       if ( iiifSearchVersion===1 ) {
         return await annotations2.search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax);
