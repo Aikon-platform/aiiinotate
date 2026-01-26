@@ -458,9 +458,8 @@ class Annotations2 extends CollectionAbstract {
       const annotations = await this.find(query);
       return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
     } else {
-      const annotationIds = await this.find(query, { "@id": 1 });
-      console.log(annotationIds);
-      return [];
+      return ( await this.find(query, { "@id": 1 }) )
+        .map((ann) => ann["@id"]);
     }
   }
 

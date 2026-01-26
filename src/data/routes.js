@@ -35,6 +35,18 @@ function commonRoutes(fastify, options, done) {
       fastify.schemasRoutes.getSchema("routeManifestFilter")
     ));
 
+  visibleLog(
+    makeResponseSchema(fastify, {
+      anyOf: [
+        {
+          type: "array",
+          items: { type: "string" }
+        },
+        iiifAnnotationListSchema,
+      ]
+    })
+  )
+
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
     {
@@ -69,16 +81,16 @@ function commonRoutes(fastify, options, done) {
           }
         },
         // return either an AnnotationList, or if `onlyIds=true`, an array of strings
-        response: makeResponseSchema(fastify, {
+        response:
+          makeResponseSchema(fastify, {
             anyOf: [
-              iiifAnnotationListSchema,
-              {
-                type: "array",
-                items: { type: "string" }
-              }
+
+              { type: 'array', items: { type: 'string' } },
+              // anyOf with fastify.getSchema causes errors => use $ref directly
+              { '$ref': 'http://127.0.0.1:4000/schemas/presentation/2/annotationList' },
             ]
-          }
-        )
+          })
+          // { 200: iiifAnnotationListSchema }
       },
       preValidation: async (request, reply) => {
         const
@@ -101,7 +113,15 @@ function commonRoutes(fastify, options, done) {
         { q, motivation, canvasMin, canvasMax, onlyIds } = request.query;
 
       if ( iiifSearchVersion===1 ) {
-        return await annotations2.search(queryUrl, manifestShortId, q, motivation, canvasMin, canvasMax);
+        return await annotations2.search({
+          queryUrl,
+          manifestShortId,
+          q,
+          motivation,
+          canvasMin,
+          canvasMax,
+          onlyIds
+        });
       } else {
         annotations3.notImplementedError();
       }
