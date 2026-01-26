@@ -35,18 +35,6 @@ function commonRoutes(fastify, options, done) {
       fastify.schemasRoutes.getSchema("routeManifestFilter")
     ));
 
-  visibleLog(
-    makeResponseSchema(fastify, {
-      anyOf: [
-        {
-          type: "array",
-          items: { type: "string" }
-        },
-        iiifAnnotationListSchema,
-      ]
-    })
-  )
-
   fastify.get(
     "/search-api/:iiifSearchVersion/manifests/:manifestShortId/search",
     {
@@ -75,8 +63,8 @@ function commonRoutes(fastify, options, done) {
               minimum: 0
             },
             onlyIds: {
-              type: "array",
-              items: { type: "string" }
+              type: "boolean",
+              default: "false"
             },
           }
         },
@@ -85,9 +73,9 @@ function commonRoutes(fastify, options, done) {
           makeResponseSchema(fastify, {
             anyOf: [
 
-              { type: 'array', items: { type: 'string' } },
+              { type: "array", items: { type: "string" } },
               // anyOf with fastify.getSchema causes errors => use $ref directly
-              { '$ref': 'http://127.0.0.1:4000/schemas/presentation/2/annotationList' },
+              { "$ref": "http://127.0.0.1:4000/schemas/presentation/2/annotationList" },
             ]
           })
           // { 200: iiifAnnotationListSchema }

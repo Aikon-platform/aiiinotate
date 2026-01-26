@@ -12,7 +12,7 @@
     - your data must match the `iiif_version` argument
     - if you insert an Annotation following the API v3.x, you can't search for it using `iiif_version=2`.
 
-This is because 
+This is because
 - the IIIF standard is quite complex and there are breaking changes between v2 and v3
 - handling conversions between v2 and v3 is error prone, would increase calculations and slow the app down
 
@@ -32,20 +32,36 @@ Implementation of the [IIIF Search API](https://iiif.io/api/search/2.0/), to sea
 
 - Variables:
     - `iiif_version` (`2 | 3`): the IIIF aearch API version. 2 is for IIIF Presentation API 3.x, 1 is for IIIF Presentation API 2.x
-    - `manifest_short_id` (`string`): the ID of the manifest. See the *IIIF URIs* section. 
+    - `manifest_short_id` (`string`): the ID of the manifest. See the *IIIF URIs* section.
 - Parameters:
-    - `q` (`string`): query string. 
+    - `q` (`string`): query string.
         - if `iiif_version=1`, `q` is searched in the fields: `@id`, `resource.@id` or `resource.chars` fields
     - `motivation` (`painting | non-painting | commenting | describing | tagging | linking`): values for the `motivation` field of an annotation
+    - `canvasMin` (`number`): a positive integer
+    - `canvasMax` (`number`): a positive integer
+        - `canvasMax` must be greater than `canvasMin`
+        - if `canvasMax` is undefined, then we will only return the annotations that target a canvas at the `canvasMin` position in its manifest.
+    - `onlyIds` (`boolean`): return just the value of `@id` fields of matched annotations as a `string[]` instead of returning all the annotations,
 
 #### Response
 
-Returns a JSON. If `iiif_version` is `1`, an `AnnotationList` is returned. Otherwise, an `AnnotationPage` is returned.
+```
+AnnotationList | AnnotationPage | string[]
+```
+
+- if `onlyIds=true`, return a `string[]` (array of the IDs of all matched annotations)
+- otherwise,
+    - if `iiif_version` is `1`, return an `AnnotationList`
+    - else, return an `AnnotationPage`.
 
 #### Notes
 
-- if `q` and `motivation` are unused, it will return all annotations for the manifest
-- only exact matches are allowed for `q` and `motivation`
+- `canvasMin`, `canvasMax` and `onlyIds` are non-standard query parameters that are NOT part of the IIIF Search API specification.
+- If `q` and `motivation` are unused, it will return all annotations for the manifest
+- Only exact matches are allowed for `q` and `motivation`
+- About `canvasMin` and `canvasMax`:
+    - they are used to search for annotations that target a range of canvases: for example, fetch all anotations between pages 3 and 30 of a manuscript.
+    - See section **Create/update an annotation** for more information and possible issues with canvas indexes.
 
 ---
 
@@ -75,7 +91,7 @@ DELETE /{collection_name}/{iiif_version}/delete
 { deletedCount: <integer> }
 ```
 
---- 
+---
 
 ## Manifests routes
 
@@ -106,14 +122,14 @@ POST /manifests/{iiif_version}/create
 
 #### Request
 
-- Variable: 
+- Variable:
     - `iiif_version` (`2 | 3`): the IIIF Presentation API version of your manifest
 - Body (`JSON`): the manifest  to index in the database
 
 #### Response
 
 ```
-{ 
+{
     insertedIds: string[],
     preExistingIds: string[],
     rejectedIds: []
@@ -205,15 +221,18 @@ Create or update a single annotation
 - Variables:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
     - `action` (`create | update`): the action to perform: create or update an annotation
+- Parameters:
+    - `throwOnCanvasIndexError` (`boolean`): if there is an error fetching the related manifest, or getting a target canvas' index, throw an error.
 - Body (`Object`): a IIIF annotation that follows the IIIF Presentation API 2 or 3 (depending on the value of `iiif_version`)
 
 #### Response
 
 ```
-{ 
+{
     insertedIds: string[],
     preExistingIds: string[],
-    rejectedIds: []
+    rejectedIds: string[],
+    fetchErrorIds: string[]
 }
 ```
 
@@ -227,7 +246,10 @@ Create or update a single annotation
     - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer
     - this depends on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
     - the annotation's target's manifest is fetched and inserted in the database, if possible, and stored in `annotation.on[0].manifestShortId`
-
+- If `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the proicess of fetching the target manifest or populating the `canvasIdx` field.
+    - fetching an annotation's target manfest is error prone: it depends on the manifest being available through HTTP, which is not in our control.
+    - in turn, normally, if there's an error, we will just add the issue to `fetchErrorIds` and not throw.
+    - in controlled environments where you know your manifests WILL be available and where you rely heavily on the `canvasIdx` field (like AIKON), throwing an error will ensure that the `canvasIdx` field is always defined.
 
 ---
 
@@ -241,7 +263,7 @@ Batch insert multiple annotations.
 
 #### Request
 
-- Parameters: 
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
 - Body: either:
     - a full `AnnotationList | AnnotationPage` embedded in the body (type must match `iiif_version`: AnnotationPage for IIIF 3, AnnotationList for IIIF 2).
@@ -252,7 +274,7 @@ Batch insert multiple annotations.
 #### Response
 
 ```
-{ 
+{
     insertedIds: string[],
     preExistingIds: string[],
     rejectedIds: []
