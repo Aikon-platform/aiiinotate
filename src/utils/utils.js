@@ -40,6 +40,34 @@ const addKeyValueToObjIfHasKey = (objIn, objOut, key, newKey) =>
     )
     : objOut;
 
+
+/**
+ * merge to objects (Dict) `objB` and `objA`.
+ * if `raiseOnConflict`, the two objects cannot have conflicting keys,
+ * otherwise, the values in `objB` overwrite those in objA.
+ *
+ * @param {object} objA
+ * @param {object} objB
+ * @param {boolean} raiseOnConflict
+ * @returns {object}
+ */
+const mergeObjects = (objA, objB, raiseOnConflict=false) => {
+  if ( !isObject(objA) || !isObject(objB) ) {
+    throw new Error(`mergeObjects: objA and objB must be javascript objects (not arrays), got types '${typeof objA}' for objA and '${typeof objB}' for objB.`)
+  }
+  // avoid wird side effects
+  const objMerge = structuredClone(objA);
+  const objBMerger = structuredClone(objB);
+
+  for ( const key of Object.keys(objBMerger) ) {
+    if ( raiseOnConflict && objMerge[key] != null ) {
+      throw new Error(`mergeObjects: objA and objB have conflicting key: '${key}'.`)
+    }
+    objMerge[key] = objBMerger[key];
+  }
+  return objMerge;
+}
+
 /**
  * hash generating function, copied from: https://stackoverflow.com/a/52171480
  * @returns {string}
@@ -227,5 +255,6 @@ export {
   throwIfValueError,
   ajvCompile,
   visibleLog,
-  isNonEmptyArray
+  isNonEmptyArray,
+  mergeObjects
 }

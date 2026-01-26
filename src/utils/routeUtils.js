@@ -1,4 +1,4 @@
-import { inspectObj, isNonEmptyArray } from "#utils/utils.js";
+import { inspectObj, isNonEmptyArray, mergeObjects } from "#utils/utils.js";
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
@@ -100,11 +100,35 @@ const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
     .send(error);
 }
 
+const paginationSchema = {
+  page: {
+    type: "integer",
+    default: 1,
+    minimum: 1
+  },
+  pageSize: {
+    type: "integer",
+    default: process.env.PAGE_SIZE || 5000,
+    minimum: 1,
+  }
+}
+/**
+ * add pagination to a route's query parameters in the route's schema definition.
+ *
+ * @param {Object} queryObj - a JSONSchema defined in a route's `schema.query` field
+ * @returns
+ */
+const addPagination = (queryObj) => {
+  queryObj.properties = mergeObjects(queryObj.properties, paginationSchema, true);
+  return queryObj;
+}
+
 export {
   formatInsertResponse,
   formatUpdateResponse,
   formatDeleteResponse,
   makeResponsePostSchema,
   makeResponseSchema,
-  returnError
+  returnError,
+  addPagination
 }

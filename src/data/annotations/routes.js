@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { makeResponseSchema, makeResponsePostSchema, returnError } from "#utils/routeUtils.js";
+import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -88,13 +88,13 @@ function annotationsRoutes(fastify, options, done) {
             iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
-        querystring: {
+        querystring: addPagination({
           type: "object",
           properties: {
             uri: { type: "string" },
             asAnnotationList: { type: "boolean" },
           }
-        },
+        }),
         response: makeResponseSchema(
           fastify,
           {

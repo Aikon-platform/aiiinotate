@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { returnError, makeResponseSchema, makeResponsePostSchema } from "#utils/routeUtils.js";
+import { returnError, makeResponseSchema, makeResponsePostSchema, addPagination } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
 /** @typedef {import("#types").Manifests3InstanceType} Manifests3InstanceType */
@@ -46,7 +46,7 @@ function commonRoutes(fastify, options, done) {
             manifestShortId: { type: "string" },
           },
         },
-        querystring: {
+        querystring: addPagination({
           type: "object",
           properties: {
             q: { type: "string" },
@@ -67,7 +67,7 @@ function commonRoutes(fastify, options, done) {
               default: "false"
             },
           }
-        },
+        }),
         // return either an AnnotationList, or if `onlyIds=true`, an array of strings
         response:
           makeResponseSchema(fastify, {
