@@ -1,0 +1,50 @@
+{
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "maeData": {
+      "tags": [],
+      "target": {
+        "drawingState": "{\"currentShape\":{\"fill\":\"rgba(100,100,100, 0)\",\"height\":1,\"id\":\"13c9a5ea-1dc8-4bbe-b530-1dc78d66080d\",\"radius\":297.63210702341144,\"rotation\":0,\"scaleX\":1,\"scaleY\":1,\"stroke\":\"rgba(255,0, 0, 0.5)\",\"strokeWidth\":5,\"type\":\"circle\",\"width\":1,\"x\":1002.7023411371238,\"y\":384.3210702341137},\"isDrawing\":true,\"shapes\":[{\"fill\":\"rgba(100,100,100, 0)\",\"height\":1,\"id\":\"13c9a5ea-1dc8-4bbe-b530-1dc78d66080d\",\"radius\":297.63210702341144,\"rotation\":0,\"scaleX\":1,\"scaleY\":1,\"stroke\":\"rgba(255,0, 0, 0.5)\",\"strokeWidth\":5,\"type\":\"circle\",\"width\":1,\"x\":1002.7023411371238,\"y\":384.3210702341137}]}",
+        "fullCanvaXYWH": "0,0,1728,2500",
+        "scale": 0.8959537572254336,
+        "svg": "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1728' height='2500'><defs/><g><g><path fill='rgb(100,100,100)' stroke='rgb(255,0,0' paint-order='fill stroke markers' d=' M 1300.3344481605352 384.3210702341137 A 297.63210702341144 297.63210702341144 0 1 1 1300.334299344494 384.02343817669544 Z' fill-opacity='0' stroke-miterlimit='10' stroke-width='3' stroke-dasharray=''/></g></g></svg>"
+      },
+      "templateType": "multiple_body",
+      "textBody": {
+        "purpose": "describing",
+        "type": "TextualBody",
+        "value": "<p>test 2</p>"
+      }
+    },
+    "motivation": [
+      "oa:commenting"
+    ],
+    "@id": "http://127.0.0.1:4444/data/2/wit1_pdf1_anno24/annotation/c1_30f3166d-1889-4a7f-9d88-e1397d74ccfc",
+    "resource": [
+      {
+        "chars": "<p>test 2</p>",
+        "@type": "dctypes:Text",
+        "motivation": "describing"
+      }
+    ],
+    "on": [
+      {
+        "@type": "oa:SpecificResource",
+        "full": "http://localhost:8000/aikon/iiif/v2/wit1_pdf1_anno24/canvas/c1.json",
+        "selector": {
+          "@type": "oa:Choice",
+          "default": {
+            "@type": "oa:SvgSelector",
+            "value": "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1728' height='2500'><defs/><g><g><path fill='rgb(100,100,100)' stroke='rgb(255,0,0' paint-order='fill stroke markers' d=' M 1300.3344481605352 384.3210702341137 A 297.63210702341144 297.63210702341144 0 1 1 1300.334299344494 384.02343817669544 Z' fill-opacity='0' stroke-miterlimit='10' stroke-width='3' stroke-dasharray=''/></g></g></svg>"
+          },
+          "item": {
+            "@type": "oa:FragmentSelector",
+            "value": "http://localhost:8000/aikon/iiif/v2/wit1_pdf1_anno24/canvas/c1.json#"
+          }
+        },
+        "manifestShortId": "wit1_pdf1_anno24",
+        "manifestUri": "http://localhost:8000/aikon/iiif/v2/wit1_pdf1_anno24/manifest.json",
+        "canvasIdx": 0
+      }
+    ]
+}

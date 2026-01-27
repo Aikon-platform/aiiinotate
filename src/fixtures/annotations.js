@@ -3,6 +3,7 @@ import { readFileToObject, toUrl } from "#fixtures/utils.js";
 
 const annotations2Invalid = readFileToObject("annotations2Invalid.jsonld");
 const annotations2Valid = readFileToObject("annotations2Valid.jsonld");
+const annotations2SvgValid = readFileToObject("annotations2SvgValid.jsonld");
 
 const annotationListUri = {
   uri: toUrl("annotationList_aikon_wit9_man11_anno165_all.jsonld")
@@ -28,6 +29,7 @@ const annotationListArray = [
 ];
 
 export {
+  annotations2SvgValid,
   annotations2Invalid,
   annotations2Valid,
   annotationListUri,

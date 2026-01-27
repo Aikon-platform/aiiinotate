@@ -134,7 +134,6 @@ const svgSelectorToXywh = (svgSelector) => {
 const choiceSelectorToXywh = (choiceSelector) => {
   let xywh;
   for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
-    console.log(selector);
     xywh = selectorToXywh(selector);
     if ( xywh.length ) {
       break;
@@ -143,9 +142,7 @@ const choiceSelectorToXywh = (choiceSelector) => {
   return xywh;
 }
 
-/**
- * @returns {number[]?}
- */
+/** @returns {number[]?} */
 const selectorToXywh = (selector) => {
   const mapper = [
     ["oa:SvgSelector", svgSelectorToXywh],
@@ -156,13 +153,67 @@ const selectorToXywh = (selector) => {
   for ( const [selectorName, func] of mapper ) {
     if ( selector["@type"] === selectorName ) {
       xywh = func(selector);
-      visibleLog(xywh)
       if ( xywh ) {
         break
       }
     }
   }
   return xywh
+}
+
+// NOTE: is this really necessary ?
+const normalizeSelectorType = (selector) => {
+  // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
+  if (
+    isObject(selector) && Object.keys(selector).includes("type")
+  ) {
+    selector["@type"] = selector.type;
+    delete selector.type;
+  }
+  return selector;
+}
+
+const stringToSpecificResource = (target) => {
+  let [full, fragment] = target.split("#");
+  return {
+    "@id": target,
+    "@type": "oa:SpecificResource",
+    full: full,
+    selector: {
+      "@type": "oa:FragmentSelector",
+      value: fragment
+    }
+  }
+}
+
+/**
+ * handle a single value of `annotation.on` (when annotation.on is an array).
+ * essentially, this function ensures the `_target` is a `SpecificResource` and extracts useful fields.
+ */
+const makeSingleTarget = (_target) => {
+  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: _target });
+
+  let specificResource;
+
+  // 1. convert to SpecificResouece
+  if ( typeof(_target) === "string" && !isNullish(_target) ) {
+    specificResource = stringToSpecificResource(_target);
+  } else if ( isObject(_target) && _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
+    specificResource = _target;
+    specificResource.selector = normalizeSelectorType(specificResource.selector);
+  // if _target is neither a string nor a SpecificResource, raise
+  } else {
+    throw err
+  }
+
+  // 2. extract relevant fields
+  // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
+  // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
+  specificResource.xywh = selectorToXywh(specificResource.selector);
+  specificResource.manifestShortId = getManifestShortId(specificResource.full);
+  specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
+
+  return specificResource
 }
 
 /**
@@ -172,55 +223,6 @@ const selectorToXywh = (selector) => {
  * @returns {object[]} - the array of targets extracted from 'annotation.on'
  */
 const makeTarget = (annotation) => {
-  const err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, an object or an array of objects containing { on: {@id: "<string URI>", @type: "oa:SpecificResource"} }`, { info: annotation });
-
-  /** annotation.on is converted to an array => this function creates a target from a single item of that array */
-  const makeSingleTarget = (_target) => {
-    let specificResource;
-
-    // convert to SpecificResource if it's not aldready the case
-    if ( typeof(_target) === "string" && !isNullish(_target) ) {
-      let [full, fragment] = _target.split("#");
-      specificResource = {
-        "@id": _target,
-        "@type": "oa:SpecificResource",
-        full: full,
-        selector: {
-          "@type": "oa:FragmentSelector",
-          value: fragment
-          // TODO extract xywh
-        }
-      }
-    } else if ( isObject(_target) ) {
-      if ( _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
-        specificResource = _target;
-        // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-        if (
-          isObject(specificResource.selector)
-          && Object.keys(specificResource.selector).includes("type")
-        ) {
-          specificResource.selector["@type"] = specificResource.selector.type;
-          delete specificResource.selector.type;
-        }
-        // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
-        // NOTE: only oa:FragmentSelector and oa:SvgSelector are supported (or an oa:Choice containing the both).
-        _target.xywh = selectorToXywh(_target.selector);
-
-      // if '_target' is an object but not a specificresource, raise.
-      } else {
-        throw err
-      }
-    // if _target is neither a string nor an object, raise
-    } else {
-      throw err
-    }
-    if ( objectHasKey(specificResource, "full") ) {
-      specificResource.manifestShortId = getManifestShortId(specificResource.full);
-      specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
-    }
-    return specificResource
-  }
-
   return maybeToArray(annotation.on).map(makeSingleTarget);
 }
 
