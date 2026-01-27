@@ -1,5 +1,8 @@
 import { v4 as uuid4 } from "uuid";
 
+import { XMLParser } from "fast-xml-parser";
+import { svgPathBbox } from "svg-path-bbox";
+
 import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 
@@ -105,6 +108,63 @@ const toAiiinotateManifestUri = (manifestShortId) =>
 const canvasUriToManifestUri = (canvasUri) =>
   canvasUri.split("/").slice(0,-2).join("/") + "/manifest.json";
 
+/** @returns {number[]?} */
+const fragmentSelectorToXywh = (fragmentSelector) => {
+  // fragmentSelector is of format: `$rootUrl#xywh=int,int,int,int`
+  const selectorValue = (fragmentSelector.value || "").split("xywh=");
+  const xywhString = selectorValue.length === 2 ? selectorValue[1] : ""
+  if (xywhString.length) {
+    return xywhString.split(",").map((x) => parseInt(x));
+  }
+  return
+}
+
+/** @returns {number[]?} */
+const svgSelectorToXywh = (svgSelector) => {
+  const parser = new XMLParser();
+  try {
+    const svgXml = parser.parse(svgSelector);
+    visibleLog(svgXml);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/** @returns {number[]?} */
+const choiceSelectorToXywh = (choiceSelector) => {
+  let xywh;
+  for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
+    console.log(selector);
+    xywh = selectorToXywh(selector);
+    if ( xywh.length ) {
+      break;
+    }
+  }
+  return xywh;
+}
+
+/**
+ * @returns {number[]?}
+ */
+const selectorToXywh = (selector) => {
+  const mapper = [
+    ["oa:SvgSelector", svgSelectorToXywh],
+    ["oa:FragmentSelector", fragmentSelectorToXywh],
+    ["oa:ChoiceSelector", choiceSelectorToXywh],
+  ]
+  let xywh;
+  for ( const [selectorName, func] of mapper ) {
+    if ( selector["@type"] === selectorName ) {
+      xywh = func(selector);
+      visibleLog(xywh)
+      if ( xywh ) {
+        break
+      }
+    }
+  }
+  return xywh
+}
+
 /**
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
@@ -128,16 +188,24 @@ const makeTarget = (annotation) => {
         selector: {
           "@type": "oa:FragmentSelector",
           value: fragment
+          // TODO extract xywh
         }
       }
     } else if ( isObject(_target) ) {
       if ( _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
         specificResource = _target;
         // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-        if ( specificResource.selector !== undefined && isObject(specificResource.selector) && Object.keys(specificResource.selector).includes("type") ) {
+        if (
+          isObject(specificResource.selector)
+          && Object.keys(specificResource.selector).includes("type")
+        ) {
           specificResource.selector["@type"] = specificResource.selector.type;
           delete specificResource.selector.type;
         }
+        // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
+        // NOTE: only oa:FragmentSelector and oa:SvgSelector are supported (or an oa:Choice containing the both).
+        _target.xywh = selectorToXywh(_target.selector);
+
       // if '_target' is an object but not a specificresource, raise.
       } else {
         throw err
