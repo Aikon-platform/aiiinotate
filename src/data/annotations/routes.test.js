@@ -93,8 +93,7 @@ test("test annotation Routes", async (t) => {
       [fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess],
       [fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure],
     ]
-    for ( let i=0; i<data.length; i++ ) {
-      let [ testData, func ] = data.at(i);
+    for ( const [ testData, func ] of data ) {
       for ( let i=0; i<testData.length; i++ ) {
         await func(t, "/annotations/2/create", testData.at(i));
       }
