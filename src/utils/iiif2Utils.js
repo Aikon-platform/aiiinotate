@@ -124,7 +124,7 @@ const svgSelectorToXywh = (svgSelector) => {
   const parser = new XMLParser();
   try {
     const svgXml = parser.parse(svgSelector);
-    visibleLog(svgXml);
+    visibleLog(svgXml, "SVG XML");
   } catch (err) {
     console.error(err);
   }
