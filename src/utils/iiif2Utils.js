@@ -187,20 +187,21 @@ const stringToSpecificResource = (target) => {
 
 /**
  * handle a single value of `annotation.on` (when annotation.on is an array).
- * essentially, this function ensures the `_target` is a `SpecificResource` and extracts useful fields.
+ * essentially, this function ensures the `target` is a `SpecificResource` and extracts useful fields.
+ * @returns {Promise<object>}
  */
-const makeSingleTarget = async (_target) => {
-  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: _target });
+const makeSingleTarget = async (target) => {
+  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: target });
 
   let specificResource;
 
   // 1. convert to SpecificResouece
-  if ( typeof(_target) === "string" && !isNullish(_target) ) {
-    specificResource = stringToSpecificResource(_target);
-  } else if ( isObject(_target) && _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
-    specificResource = _target;
+  if ( typeof(target) === "string" && !isNullish(target) ) {
+    specificResource = stringToSpecificResource(target);
+  } else if ( isObject(target) && target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
+    specificResource = target;
     specificResource.selector = normalizeSelectorType(specificResource.selector);
-  // if _target is neither a string nor a SpecificResource, raise
+  // if target is neither a string nor a SpecificResource, raise
   } else {
     throw err
   }
@@ -208,7 +209,7 @@ const makeSingleTarget = async (_target) => {
   // 2. extract relevant fields
   // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
   // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
-  specificResource.xywh = await selectorToXywh(specificResource.selector);
+  // specificResource.xywh = await selectorToXywh(specificResource.selector);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
 
@@ -219,11 +220,11 @@ const makeSingleTarget = async (_target) => {
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
  * @param {object} annotation
- * @returns {object[]} - the array of targets extracted from 'annotation.on'
+ * @returns {Promise<object[]>} - the array of targets extracted from 'annotation.on'
  */
 const makeTarget = async (annotation) => {
   return await Promise.all(
-    maybeToArray(annotation.on).map(makeSingleTarget)
+    maybeToArray(annotation.on).map(async (target) => await makeSingleTarget(target))
   );
 }
 

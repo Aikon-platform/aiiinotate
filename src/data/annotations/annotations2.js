@@ -123,10 +123,10 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} update - set to `true` if performing an update instead of an insert.
    * @returns {object}
    */
-  #cleanAnnotation(annotation, update=false) {
+  async #cleanAnnotation(annotation, update=false) {
     // 1) extract ids and targets. convert the target to an array.
     const
-      annotationTargetArray = makeTarget(annotation),
+      annotationTargetArray = await makeTarget(annotation),
       // we assume that all values of `annotationTargetArray` point to the same manifest => take the manifest of the 1st target
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
@@ -176,13 +176,17 @@ class Annotations2 extends CollectionAbstract {
    * @param {object} annotationList
    * @returns {object[]}
    */
-  #cleanAnnotationList(annotationList) {
+  async #cleanAnnotationList(annotationList) {
     // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
     if ( this.validatorAnnotationList(annotationList) ) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
-    return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
+    return await Promise.all(
+      annotationList.resources.map(async (ressource) =>
+        await this.#cleanAnnotation(ressource)
+      )
+    )
   }
 
   /**
@@ -267,7 +271,7 @@ class Annotations2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
-    annotation = this.#cleanAnnotation(annotation);
+    annotation = await this.#cleanAnnotation(annotation);
     annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
   }
@@ -280,7 +284,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async updateAnnotation(annotation) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
-    annotation = this.#cleanAnnotation(annotation, true);
+    annotation = await this.#cleanAnnotation(annotation, true);
     const
       query = { "@id": annotation["@id"] },
       update = { $set: annotation };
@@ -300,7 +304,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async insertAnnotationList(annotationList, throwOnCanvasIndexError) {
     let annotationArray;
-    annotationArray = this.#cleanAnnotationList(annotationList);
+    annotationArray = await this.#cleanAnnotationList(annotationList);
     annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
     return this.insertMany(annotationArray);
   }
