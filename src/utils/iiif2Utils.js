@@ -2,6 +2,7 @@ import { v4 as uuid4 } from "uuid";
 
 import { XMLParser } from "fast-xml-parser";
 import { svgPathBbox } from "svg-path-bbox";
+import { SVG } from "@svgdotjs/svg.js";
 
 import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
@@ -111,6 +112,7 @@ const canvasUriToManifestUri = (canvasUri) =>
 /** @returns {number[]?} */
 const fragmentSelectorToXywh = (fragmentSelector) => {
   // fragmentSelector is of format: `$rootUrl#xywh=int,int,int,int`
+  // => get the `int,int,int,int` part
   const selectorValue = (fragmentSelector.value || "").split("xywh=");
   const xywhString = selectorValue.length === 2 ? selectorValue[1] : ""
   if (xywhString.length) {
@@ -119,14 +121,74 @@ const fragmentSelectorToXywh = (fragmentSelector) => {
   return
 }
 
+/**
+ * recursively find all `path/@d` nodes in an SVG parsed into an Object with `fast-xml-parser`.
+ * return them as a string[]
+ *
+ * @param {object} svgObj
+ * @returns {string[]}
+ */
+const findPathDArray = (svgObj) => {
+  const pathDArr = [];
+
+  if ( !isObject(svgObj) ) {
+    return pathDArr
+  };
+
+  if (svgObj.path) {
+    svgObj.path = maybeToArray(svgObj.path);
+    // all the values of all the d attributes in the path
+    const dArr = svgObj.path.filter(p => objectHasKey(p, "@_d")).map(p => p["@_d"]);
+    if ( dArr.length ) {
+      pathDArr.push(...dArr);
+    }
+  }
+
+  for (const key in svgObj) {
+    if (key !== "path" && typeof svgObj[key] === "object") {
+      pathDArr.push(...findPathDArray(svgObj[key]));
+    }
+  }
+
+  return pathDArr;
+}
+
+const pathDArrayToXywh = (pathDArray) => {
+  try {
+    const bboxArray = pathDArray.map(svgPathBbox);
+
+    const [minX, minY, maxX, maxY] = bboxArray.reduce(
+      ([x1, y1, x2, y2], [nx1, ny1, nx2, ny2]) => [
+        Math.min(x1, nx1),
+        Math.min(y1, ny1),
+        Math.max(x2, nx2),
+        Math.max(y2, ny2),
+      ]
+    );
+    return [ minX, minY, maxX-minX, maxY-minY ];
+
+  } catch (err) {
+    // TODO
+    ""
+    throw err
+  }
+}
+
 /** @returns {number[]?} */
 const svgSelectorToXywh = (svgSelector) => {
-  const parser = new XMLParser();
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    parseAttributeValue: false,
+    stopNodes: ["path"], // prevent parsing below paths
+  });
   try {
-    const svgXml = parser.parse(svgSelector);
-    visibleLog(svgXml, "SVG XML");
+    const svgObj = parser.parse(svgSelector.value);
+    const pathDArray = findPathDArray(svgObj);
+    return pathDArrayToXywh(pathDArray);
   } catch (err) {
-    console.error(err);
+    // TODO
+    ""
+    throw err;
   }
 }
 
@@ -135,7 +197,7 @@ const choiceSelectorToXywh = (choiceSelector) => {
   let xywh;
   for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
     xywh = selectorToXywh(selector);
-    if ( xywh.length ) {
+    if ( xywh?.length ) {
       break;
     }
   }
@@ -147,13 +209,13 @@ const selectorToXywh = (selector) => {
   const mapper = [
     ["oa:SvgSelector", svgSelectorToXywh],
     ["oa:FragmentSelector", fragmentSelectorToXywh],
-    ["oa:ChoiceSelector", choiceSelectorToXywh],
+    ["oa:Choice", choiceSelectorToXywh],
   ]
   let xywh;
   for ( const [selectorName, func] of mapper ) {
     if ( selector["@type"] === selectorName ) {
       xywh = func(selector);
-      if ( xywh ) {
+      if ( xywh?.length ) {
         break
       }
     }
