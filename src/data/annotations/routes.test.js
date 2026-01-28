@@ -110,7 +110,9 @@ test("test annotation Routes", async (t) => {
     }
 
     // test SVG to XYWH conversion
-    await testPostRouteCreateSuccess(t, "/annotations/2/create", fastify.fixtures.annotations2SvgValid);
+    for ( const ann of  fastify.fixtures.annotations2SvgValid ) {
+      await testPostRouteCreateSuccess(t, "/annotations/2/create", ann);
+    }
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {
