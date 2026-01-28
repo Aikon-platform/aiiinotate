@@ -209,7 +209,7 @@ const makeSingleTarget = async (target) => {
   // 2. extract relevant fields
   // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
   // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
-  specificResource.xywh = await selectorToXywh(specificResource.selector);
+  specificResource.xywh = selectorToXywh(specificResource.selector);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
 
