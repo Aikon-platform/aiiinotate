@@ -108,6 +108,9 @@ test("test annotation Routes", async (t) => {
       const [func, v] = data.at(i);
       await func(t, `/annotations/2/create?throwOnCanvasIndexError=${v}`, annotationWithTargetError)
     }
+
+    // test SVG to XYWH conversion
+    await testPostRouteCreateSuccess(t, "/annotations/2/create", fastify.fixtures.annotations2SvgValid);
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {

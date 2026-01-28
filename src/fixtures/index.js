@@ -3,7 +3,7 @@
  */
 import fastifyPlugin from "fastify-plugin";
 
-import { annotations2Invalid, annotations2Valid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fixtures/annotations.js";
+import { annotations2Invalid, annotations2Valid, annotations2SvgValid, annotationListUri, annotationListUriArray, annotationList, annotationListArray, annotationListUriInvalid, annotationListUriArrayInvalid } from "#src/fixtures/annotations.js";
 import { manifest2Valid, manifest2ValidUri, manifest2Invalid, manifest2InvalidUri } from "#fixtures/manifests.js";
 import { generateIiif2Manifest, generateIiif2AnnotationList, generateIiif2ManifestAndAnnotationsList } from "#fixtures/generate.js";
 import { readFileToObject } from "#fixtures/utils.js";
@@ -47,6 +47,7 @@ async function fixtures(fastify, options) {
   )
 
   fastify.decorate("fixtures", {
+    annotations2SvgValid: annotations2SvgValid,
     annotationListUri: annotationListUri,
     annotationListUriArray: annotationListUriArray,
     annotationList: annotationList,
