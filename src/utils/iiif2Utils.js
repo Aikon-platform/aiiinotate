@@ -108,10 +108,10 @@ const canvasUriToManifestUri = (canvasUri) =>
 
 /** @returns {number[]?} */
 const fragmentSelectorToXywh = (fragmentSelector) => {
-  // fragmentSelector is of format: `$rootUrl#xywh=int,int,int,int`
-  // => get the `int,int,int,int` part
+  // fragmentSelector is of format: `$rootUrl#xywh=number,number,number,number`
+  // => get the `number,number,number,number` part
   const selectorValue = (fragmentSelector.value || "").split("xywh=");
-  const xywhString = selectorValue.length === 2 ? selectorValue[1] : ""
+  const xywhString = selectorValue.length > 1 ? selectorValue[1] : ""
   if (xywhString.length) {
     return xywhString.split(",").map((x) => parseInt(x));
   }
@@ -144,9 +144,12 @@ const choiceSelectorToXywh = async (choiceSelector) => {
 /** @returns {Promise<number[]?>} */
 const selectorToXywh = async (selector) => {
   const mapper = [
+    ["oa:Choice", choiceSelectorToXywh],
     ["oa:SvgSelector", svgSelectorToXywh],
     ["oa:FragmentSelector", fragmentSelectorToXywh],
-    ["oa:Choice", choiceSelectorToXywh],
+    ["Choice", choiceSelectorToXywh],
+    ["SvgSelector", svgSelectorToXywh],
+    ["FragmentSelector", fragmentSelectorToXywh],
   ]
   let xywh;
   for ( const [selectorName, func] of mapper ) {
@@ -160,7 +163,6 @@ const selectorToXywh = async (selector) => {
   return xywh
 }
 
-// NOTE: is this really necessary ?
 const normalizeSelectorType = (selector) => {
   // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
   if (
@@ -209,7 +211,7 @@ const makeSingleTarget = async (target) => {
   // 2. extract relevant fields
   // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
   // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
-  // specificResource.xywh = await selectorToXywh(specificResource.selector);
+  specificResource.xywh = await selectorToXywh(specificResource.selector);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
 

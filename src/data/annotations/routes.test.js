@@ -5,7 +5,7 @@ import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
 
 import { inspectObj, isObject, getRandomItem, visibleLog } from "#utils/utils.js"
-import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations, injectPost, injectGet } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -109,8 +109,21 @@ test("test annotation Routes", async (t) => {
     }
 
     // test SVG to XYWH conversion
+    // 1. insert and assert there was no mistake
+    // 2. retrieve the inserted annotation and check its xywh coordinates.
     for ( const ann of  fastify.fixtures.annotations2SvgValid ) {
-      await testPostRouteCreateSuccess(t, "/annotations/2/create", ann);
+      let r, rBody;
+      r = await injectPost(fastify, "/annotations/2/create", ann);
+      rBody = await JSON.parse(r.body);
+      t.assert.deepStrictEqual(r.statusCode, 200);
+      t.assert.deepStrictEqual(rBody.insertedIds.length, 1);
+      const annId = JSON.parse(r.body).insertedIds[0];
+      r = await injectGet(fastify, annId);
+      rBody = await JSON.parse(r.body);  // the annotation we just inserted
+      rBody.on.map(target => {
+        t.assert.deepStrictEqual(Array.isArray(target.xywh), true);
+        t.assert.deepStrictEqual(target.xywh.every((i) => !isNaN(i)), true);
+      })
     }
   })
 

@@ -93,7 +93,6 @@ class Annotations2 extends CollectionAbstract {
 
       // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
       resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
-      // delete the alternate keys
       [ "value", "cnt:chars" ].map((k) => {
         if ( Object.keys(resource).includes(k) ) {
           delete resource[k];
@@ -125,9 +124,9 @@ class Annotations2 extends CollectionAbstract {
    */
   async #cleanAnnotation(annotation, update=false) {
     // 1) extract ids and targets. convert the target to an array.
+    // we assume that all values of `annotationTargetArray` point to the same manifest => `manifestShortId` is extracted from the 1st target
     const
       annotationTargetArray = await makeTarget(annotation),
-      // we assume that all values of `annotationTargetArray` point to the same manifest => take the manifest of the 1st target
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
     // in updates, "@id" has aldready been extracted

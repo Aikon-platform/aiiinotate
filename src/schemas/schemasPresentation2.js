@@ -203,6 +203,10 @@ function addSchemas(fastify, options, done) {
           { type: "null" }
         ]
       },
+      xywh: {
+        type: "array",
+        items: { type: "number" }
+      },
       selector: { $ref: makeSchemaUri("selector") },
       purpose: { type: "string" }
     }

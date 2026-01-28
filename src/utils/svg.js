@@ -14,6 +14,9 @@
 
 import { svgPathBbox } from "svg-path-bbox";
 
+import { visibleLog } from "#utils/utils.js";
+
+
 /**
  * Extract bbox from circle element
  * <circle cx='100' cy='100' r='50'/>
@@ -337,7 +340,7 @@ async function svgStringToXywh(svgString) {
 
     try {
       // sanity checks
-      if ( typeof svgString !== "string" || !(svgString instanceof String) || !svgString?.length ) {
+      if ( !(typeof svgString === "string" || svgString instanceof String) || !svgString?.length ) {
         rej(new Error("svgStringToXywh: SVG must be a string"))
       }
       if (svgString.length > 10000000) {
