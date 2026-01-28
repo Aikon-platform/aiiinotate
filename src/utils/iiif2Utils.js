@@ -1,11 +1,8 @@
 import { v4 as uuid4 } from "uuid";
 
-import { XMLParser } from "fast-xml-parser";
-import { svgPathBbox } from "svg-path-bbox";
-import { SVG } from "@svgdotjs/svg.js";
-
 import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
+import { svgStringToXywh } from "#utils/svg.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
 
@@ -121,70 +118,10 @@ const fragmentSelectorToXywh = (fragmentSelector) => {
   return
 }
 
-/**
- * recursively find all `path/@d` nodes in an SVG parsed into an Object with `fast-xml-parser`.
- * return them as a string[]
- *
- * @param {object} svgObj
- * @returns {string[]}
- */
-const findPathDArray = (svgObj) => {
-  const pathDArr = [];
-
-  if ( !isObject(svgObj) ) {
-    return pathDArr
-  };
-
-  if (svgObj.path) {
-    svgObj.path = maybeToArray(svgObj.path);
-    // all the values of all the d attributes in the path
-    const dArr = svgObj.path.filter(p => objectHasKey(p, "@_d")).map(p => p["@_d"]);
-    if ( dArr.length ) {
-      pathDArr.push(...dArr);
-    }
-  }
-
-  for (const key in svgObj) {
-    if (key !== "path" && typeof svgObj[key] === "object") {
-      pathDArr.push(...findPathDArray(svgObj[key]));
-    }
-  }
-
-  return pathDArr;
-}
-
-const pathDArrayToXywh = (pathDArray) => {
-  try {
-    const bboxArray = pathDArray.map(svgPathBbox);
-
-    const [minX, minY, maxX, maxY] = bboxArray.reduce(
-      ([x1, y1, x2, y2], [nx1, ny1, nx2, ny2]) => [
-        Math.min(x1, nx1),
-        Math.min(y1, ny1),
-        Math.max(x2, nx2),
-        Math.max(y2, ny2),
-      ]
-    );
-    return [ minX, minY, maxX-minX, maxY-minY ];
-
-  } catch (err) {
-    // TODO
-    ""
-    throw err
-  }
-}
-
-/** @returns {number[]?} */
+/** @returns {Promise<number[]?>} */
 const svgSelectorToXywh = (svgSelector) => {
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    parseAttributeValue: false,
-    stopNodes: ["path"], // prevent parsing below paths
-  });
   try {
-    const svgObj = parser.parse(svgSelector.value);
-    const pathDArray = findPathDArray(svgObj);
-    return pathDArrayToXywh(pathDArray);
+    return svgStringToXywh(svgSelector.value);
   } catch (err) {
     // TODO
     ""
@@ -192,11 +129,11 @@ const svgSelectorToXywh = (svgSelector) => {
   }
 }
 
-/** @returns {number[]?} */
-const choiceSelectorToXywh = (choiceSelector) => {
+/** @returns {Promise<number[]?>} */
+const choiceSelectorToXywh = async (choiceSelector) => {
   let xywh;
   for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
-    xywh = selectorToXywh(selector);
+    xywh = await selectorToXywh(selector);
     if ( xywh?.length ) {
       break;
     }
@@ -204,8 +141,8 @@ const choiceSelectorToXywh = (choiceSelector) => {
   return xywh;
 }
 
-/** @returns {number[]?} */
-const selectorToXywh = (selector) => {
+/** @returns {Promise<number[]?>} */
+const selectorToXywh = async (selector) => {
   const mapper = [
     ["oa:SvgSelector", svgSelectorToXywh],
     ["oa:FragmentSelector", fragmentSelectorToXywh],
@@ -214,7 +151,7 @@ const selectorToXywh = (selector) => {
   let xywh;
   for ( const [selectorName, func] of mapper ) {
     if ( selector["@type"] === selectorName ) {
-      xywh = func(selector);
+      xywh = await func(selector);
       if ( xywh?.length ) {
         break
       }
@@ -252,7 +189,7 @@ const stringToSpecificResource = (target) => {
  * handle a single value of `annotation.on` (when annotation.on is an array).
  * essentially, this function ensures the `_target` is a `SpecificResource` and extracts useful fields.
  */
-const makeSingleTarget = (_target) => {
+const makeSingleTarget = async (_target) => {
   const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: _target });
 
   let specificResource;
@@ -271,7 +208,7 @@ const makeSingleTarget = (_target) => {
   // 2. extract relevant fields
   // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
   // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
-  specificResource.xywh = selectorToXywh(specificResource.selector);
+  specificResource.xywh = await selectorToXywh(specificResource.selector);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
 
@@ -284,8 +221,10 @@ const makeSingleTarget = (_target) => {
  * @param {object} annotation
  * @returns {object[]} - the array of targets extracted from 'annotation.on'
  */
-const makeTarget = (annotation) => {
-  return maybeToArray(annotation.on).map(makeSingleTarget);
+const makeTarget = async (annotation) => {
+  return await Promise.all(
+    maybeToArray(annotation.on).map(makeSingleTarget)
+  );
 }
 
 /**
