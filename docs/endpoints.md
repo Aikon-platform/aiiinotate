@@ -2,6 +2,15 @@
 
 ## Introductory notes
 
+### Terminology
+
+In the docs below,
+
+- `Parameters` describes route parameters (dynamic segments of a route's URL).
+- `Query` describes the query string in a key-value format
+
+### IIIF Version
+
 **aiiinotate** is meant to be able to handle both IIIF presentation APIs: the most common [2.x](https://iiif.io/api/presentation/2.1) and the more recent [3.x](https://iiif.io/api/presentation/3.0). Both APIs define a data structure for manifests, annotations, lists of annotations and collections of manifests.
 
 **HOWEVER, in aiiinotate, IIIF Presentation v2 and v3 data are isolated**: they form two separate collections, and no conversion is done between IIIF 2.x and 3.x data. This means that:
@@ -30,10 +39,10 @@ Implementation of the [IIIF Search API](https://iiif.io/api/search/2.0/), to sea
 
 #### Request
 
-- Variables:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF aearch API version. 2 is for IIIF Presentation API 3.x, 1 is for IIIF Presentation API 2.x
     - `manifest_short_id` (`string`): the ID of the manifest. See the *IIIF URIs* section.
-- Parameters:
+- Query:
     - `q` (`string`): query string.
         - if `iiif_version=1`, `q` is searched in the fields: `@id`, `resource.@id` or `resource.chars` fields
     - `motivation` (`painting | non-painting | commenting | describing | tagging | linking`): values for the `motivation` field of an annotation
@@ -73,10 +82,10 @@ DELETE /{collection_name}/{iiif_version}/delete
 
 #### Request
 
-- Variables
+- Parameters:
     - `collection_name` (`annotations | manifests`): delete an annotation or a manifest
     - `iiif_version` (`2 | 3`): IIIF presentation version
-- Parameters:
+- Query:
     - if `collection_name = manifests`:
         - `uri`: the full URI of the manifest to delete
         - `manifestShortId`: the manifest's identifier
@@ -105,7 +114,7 @@ Returns a Collection of all manifests in your **aiiinotate** instance.
 
 #### Request
 
-- Variables:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF Presentation API version
 
 #### Response
@@ -122,7 +131,7 @@ POST /manifests/{iiif_version}/create
 
 #### Request
 
-- Variable:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF Presentation API version of your manifest
 - Body (`JSON`): the manifest  to index in the database
 
@@ -152,10 +161,10 @@ GET /annotations/{iiif_version}/search
 
 #### Request
 
-- Variables:
-    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
 - Parameters:
-    - `uri` (`string`): the URI of the target canvas
+    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
+- Query:
+    - `canvasUri` (`string`): the URI of the target canvas
     - `asAnnotationList` (`true | false`):  format of the response
 
 #### Response
@@ -172,9 +181,9 @@ GET /annotations/{iiif_version}/count
 
 #### Request
 
-- Variables:
-    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
 - Parameters:
+    - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
+- Query:
     - `uri` (`string`): the annotation's `@id`
     - `canvasUri` (`string`): the annotation's target canvas (`on.full`)
     - `manifestShortId` (`string`): the short ID of the annotation's target manifest (`on.manifestShortId`)
@@ -197,7 +206,7 @@ This route allows to query an annotation by its ID by defering its `@id | id` fi
 
 #### Request
 
-- Variables:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
     - `manifest_short_id` (`string`): the identifier of the manifest the annotation is related to
     - `annotation_short_id`: the unique part of the annotation URL
@@ -218,10 +227,10 @@ Create or update a single annotation
 
 #### Request
 
-- Variables:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
     - `action` (`create | update`): the action to perform: create or update an annotation
-- Parameters:
+- Query:
     - `throwOnCanvasIndexError` (`boolean`): if there is an error fetching the related manifest, or getting a target canvas' index, throw an error.
 - Body (`Object`): a IIIF annotation that follows the IIIF Presentation API 2 or 3 (depending on the value of `iiif_version`)
 
@@ -263,7 +272,7 @@ Batch insert multiple annotations.
 
 #### Request
 
-- Parameters:
+- Query:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
 - Body: either:
     - a full `AnnotationList | AnnotationPage` embedded in the body (type must match `iiif_version`: AnnotationPage for IIIF 3, AnnotationList for IIIF 2).
