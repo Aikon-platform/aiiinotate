@@ -10,6 +10,7 @@ import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleL
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
+/** @typedef {import("mongodb").FindCursor} FindCursor */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
 /** @typedef {import("#types").MongoInsertResultType} MongoInsertResultType */
@@ -334,11 +335,12 @@ class Annotations2 extends CollectionAbstract {
    * about projection: 0 removes the fields from the response, 1 incldes it (but exclude all others)
    * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
    *      https://stackoverflow.com/questions/74447979/mongoservererror-cannot-do-exclusion-on-field-date-in-inclusion-projection
-   * @param {object} queryObj
+   * @param {object} queryObj - the filter document
    * @param {object?} projectionObj - extra projection fields to tailor the reponse format
-   * @returns {Promise<object[]>}
+   * @param {boolean} asCursor - return a cursor instead of an array of results
+   * @returns {Promise<object[] | FindCursor>}
    */
-  async find(queryObj, projectionObj={}) {
+  async find(queryObj, projectionObj={}, asCursor=false) {
     // 1. construct the final projection object, knowing that we can't mix exclusive and inclusive projectin.
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
@@ -365,9 +367,12 @@ class Annotations2 extends CollectionAbstract {
     }
 
     // 2. find, project and return
-    return this.collection
-      .find(queryObj, { projection: projectionObj })
-      .toArray();
+    const cursor = this.collection.find(queryObj, { projection: projectionObj });
+    if ( !asCursor ) {
+      return cursor.toArray()
+    } else {
+      return cursor;
+    };
   }
 
   /**
@@ -403,6 +408,8 @@ class Annotations2 extends CollectionAbstract {
    *   canvasMin: number?,
    *   canvasMax: number?,
    *   onlyIds: boolean
+   *   page: number?
+   *   pageSize: number
    * }}
    * @returns {object} annotationList containing results
    */
@@ -413,7 +420,9 @@ class Annotations2 extends CollectionAbstract {
     motivation=undefined,
     canvasMin=undefined,
     canvasMax=undefined,
-    onlyIds=false
+    onlyIds=false,
+    page=1,
+    pageSize=process.env.PAGE_SIZE
   }) {
     const
       queryBase = { "on.manifestShortId": manifestShortId },
@@ -457,9 +466,28 @@ class Annotations2 extends CollectionAbstract {
         ? { ...queryBase, ...queryFilters }
         : queryBase;
 
+    // TODO paginate onlyIds ?
+
     if ( !onlyIds ) {
-      const annotations = await this.find(query);
-      return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
+      // add pagination and run query
+      // NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
+      const totalCount = await this.collection.countDocuments(query);
+
+      const annotations =
+        await this.find(query, {}, true)
+          .skip(Math.max(page-1 * pageSize, 0))  // ensure that `skip` >=- 0
+          .limit(pageSize)
+          .toArray();
+
+      const hasNext = annotations.length < totalCount;
+
+      return toAnnotationList({
+        resources: annotations,
+        annotationListId: queryUrl,
+        page: page,
+        hasNext: hasNext,
+        label: `search results for query ${queryUrl} (page: ${page}, ${pageSize} entries per page)`
+      });
     } else {
       return ( await this.find(query, { "@id": 1 }) )
         .map((ann) => ann["@id"]);

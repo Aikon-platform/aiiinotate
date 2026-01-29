@@ -3,8 +3,8 @@ import test from "node:test";
 import { v4 as uuid4 } from "uuid";
 
 import build from "#src/app.js";
-import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#utils/iiif2Utils.js";
-import { visibleLog } from "#utils/utils.js";
+import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
+import { objectHasKey, visibleLog } from "#utils/utils.js";
 
 // hash-validating regex
 const hashRgx = /^\d+$/;
@@ -101,6 +101,45 @@ test("test 'iiif2Utils' functions", async (t) => {
       t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true));
     annotations2Invalid.map((annotation) =>
       t.assert.throws(() => makeAnnotationId(annotation)));
+  })
+
+  await t.test("test 'toAnnotationList'", (t) => {
+    /**
+     * @param {"prev"|"next"} val
+     * @returns {(_annotationList: object) => string?} */
+    const getPage = (val) => {
+      if ( !["prev", "next"].includes(val) ) {
+        throw new Error(`'getPage': invalid value for 'val': '${val}'`);
+      }
+      return (_annotationList) => {
+        if ( objectHasKey(annotationList, val) ) {
+          return new URL(annotationList[val]).searchParams.get("page")
+        }
+        return undefined;
+      }
+    }
+    const getPagePrev = getPage("prev");
+    const getPageNext = getPage("next");
+
+    const testUrl = new URL(`http://www.example.com/prefix/manifest-${uuid4()}/list/anno-list-${uuid4()}`);
+    const data = [
+      { page: 3, hasNext: true, prevNum: "2", nextNum: "4" },
+      { page: 1, hasNext: true, prevNum: undefined, nextNum: "2" },
+      { page: 1, hasNext: false, prevNum: undefined, nextNum: undefined },
+    ];
+    let annotationList;
+
+    for ( const { page, hasNext, prevNum, nextNum } of data ) {
+      annotationList = toAnnotationList({
+        resources: [],
+        annotationListId: testUrl.href,
+        page: page,
+        hasNext: hasNext,
+      });
+      t.assert.deepStrictEqual(getPagePrev(annotationList)==prevNum, true);
+      t.assert.deepStrictEqual(getPageNext(annotationList)==nextNum, true);
+    }
+
   })
 
 })

@@ -98,7 +98,7 @@ function commonRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
-        { q, motivation, canvasMin, canvasMax, onlyIds } = request.query;
+        { q, motivation, canvasMin, canvasMax, onlyIds, page, pageSize } = request.query;
 
       if ( iiifSearchVersion===1 ) {
         return await annotations2.search({
@@ -108,7 +108,9 @@ function commonRoutes(fastify, options, done) {
           motivation,
           canvasMin,
           canvasMax,
-          onlyIds
+          onlyIds,
+          page,
+          pageSize
         });
       } else {
         annotations3.notImplementedError();

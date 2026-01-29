@@ -255,13 +255,37 @@ const makeAnnotationId = (annotation, manifestShortId) => {
 }
 
 /**
+ * NOTE: for pagination to work, we assume some things about the anatomy of the route that uses `toAnnotationList`:
+ * - `annotationListId` must be the URL used to fetch annotations and generate the annotationList
+ * - the URL must have a `page` query parameter that handles pagination
  *
- * @param {object[]} resources: the annotatons
- * @param {string?} annotationListId: the AnnotationList's '@id' key
- * @param {string?} label: optional description
- * @returns {object}
+ * params:
+ * - resources: the annotatons
+ * - annotationListId: the AnnotationList's '@id' key
+ * - label: optional description
+ * - hasNext: there is a next page (for paginated results)
+ * - page: page number (for paginated results)
+ *
+ * @param {{
+ *  resources: object[],
+ *  annotationListId: string,
+*   page: number,
+*   hasNext: boolean,
+ *  label: string?
+ * }}
+ * @returns {object} - the annotationList
  */
-const toAnnotationList = (resources, annotationListId, label) => {
+const toAnnotationList = ({
+  resources,
+  annotationListId,
+  page,
+  hasNext,
+  label
+}) => {
+  if ( isNullish(annotationListId) ) {
+    throw new Error("toAnnotationList: 'annotationListId' must be defined");
+  }
+
   const annotationList = {
     ...IIIF_PRESENTATION_2_CONTEXT,
     "@type": "sc:AnnotationList",
@@ -270,6 +294,17 @@ const toAnnotationList = (resources, annotationListId, label) => {
   }
   if ( label ) {
     annotationList.label = label
+  }
+  if ( page ) {
+    const annotationListUrl = new URL(annotationListId);
+    if ( page > 1 ) {
+      annotationListUrl.searchParams.set("page", page-1);
+      annotationList.prev = annotationListUrl.href;
+    }
+    if ( hasNext ) {
+      annotationListUrl.searchParams.set("page", page+1);
+      annotationList.next = annotationListUrl.href;
+    }
   }
   return annotationList;
 }
