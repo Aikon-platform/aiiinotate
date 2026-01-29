@@ -123,9 +123,8 @@ const svgSelectorToXywh = (svgSelector) => {
   try {
     return svgStringToXywh(svgSelector.value);
   } catch (err) {
-    // TODO
-    ""
-    throw err;
+    console.warn(`svgSelectorToXywh: could not build bounding box from SvgSelector because of error: ${err.message}`);
+    return
   }
 }
 
@@ -163,6 +162,7 @@ const selectorToXywh = async (selector) => {
   return xywh
 }
 
+// NOTE: is this really useful ?
 const normalizeSelectorType = (selector) => {
   // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
   if (
@@ -212,8 +212,8 @@ const makeSingleTarget = async (target) => {
   // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
   // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
   specificResource.xywh = await selectorToXywh(specificResource.selector);
-  specificResource.manifestShortId = getManifestShortId(specificResource.full);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
+  specificResource.manifestShortId = getManifestShortId(specificResource.full);
 
   return specificResource
 }
