@@ -174,7 +174,7 @@ test("test annotation Routes", async (t) => {
           canvasId = getRandomItem(annotation.on).full,
           r = await fastify.inject({
             method: "GET",
-            url: `/annotations/2/search?uri=${canvasId}&asAnnotationList=${asAnnotationList}`
+            url: `/annotations/2/search?canvasUri=${canvasId}&asAnnotationList=${asAnnotationList}`
           }),
           body = await r.json();
 

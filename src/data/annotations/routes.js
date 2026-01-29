@@ -91,7 +91,7 @@ function annotationsRoutes(fastify, options, done) {
         querystring: addPagination({
           type: "object",
           properties: {
-            uri: { type: "string" },
+            canvasUri: { type: "string" },
             asAnnotationList: { type: "boolean" },
           }
         }),
@@ -110,11 +110,11 @@ function annotationsRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifPresentationVersion } = request.params,
-        { uri, asAnnotationList } = request.query;
+        { canvasUri, asAnnotationList } = request.query;
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.findByCanvasUri(queryUrl, uri, asAnnotationList);
+          return await annotations2.findByCanvasUri(queryUrl, canvasUri, asAnnotationList);
         } else {
           annotations3.notImplementedError();
         }
