@@ -474,10 +474,10 @@ class Annotations2 extends CollectionAbstract {
 
       const cursor = await this.find(query, {}, true);
       const annotations = await cursor
-          .sort({ "@id": 1 })
-          .skip(skip)  // ensure that `skip` >=- 0
-          .limit(pageSize)
-          .toArray();
+        .sort({ "@id": 1 })
+        .skip(skip)  // ensure that `skip` >=- 0
+        .limit(pageSize)
+        .toArray();
 
       const hasNext = page * pageSize <= totalCount;
 
@@ -503,7 +503,11 @@ class Annotations2 extends CollectionAbstract {
   async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
     const annotations = await this.find({ "on.full": canvasUri });
     return asAnnotationList
-      ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
+      ? toAnnotationList({
+        resources: annotations,
+        annotationListId: queryUrl,
+        label: `annotations targeting canvas ${canvasUri}`
+      })
       : annotations;
   }
 
