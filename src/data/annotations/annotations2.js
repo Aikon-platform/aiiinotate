@@ -500,8 +500,15 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
-    const annotations = await this.find({ "on.full": canvasUri });
+  async findByCanvasUri({
+    queryUrl,
+    canvasUri,
+    asAnnotationList=false,
+    page=1,
+    pageSize=process.env.PAGE_SIZE
+  }) {
+    const cursor = await this.find({ "on.full": canvasUri }, {}, true);
+    const annotations = await cursor.toArray();
     return asAnnotationList
       ? toAnnotationList({
         resources: annotations,

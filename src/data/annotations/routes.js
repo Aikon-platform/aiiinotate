@@ -114,7 +114,11 @@ function annotationsRoutes(fastify, options, done) {
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.findByCanvasUri(queryUrl, canvasUri, asAnnotationList);
+          return await annotations2.findByCanvasUri({
+            queryUrl,
+            canvasUri,
+            asAnnotationList
+          });
         } else {
           annotations3.notImplementedError();
         }
