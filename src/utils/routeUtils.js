@@ -104,7 +104,7 @@ const paginationSchema = {
   page: {
     type: "integer",
     default: 1,
-    minimum: 1
+    minimum: 1,
   },
   pageSize: {
     type: "integer",

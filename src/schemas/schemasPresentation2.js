@@ -335,7 +335,9 @@ function addSchemas(fastify, options, done) {
       "resources": {
         type: "array",
         items: { $ref: makeSchemaUri("annotation") }
-      }
+      },
+      "prev": { type: "string" },
+      "next": { type: "string" },
     }
   });
 

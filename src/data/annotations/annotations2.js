@@ -218,10 +218,6 @@ class Annotations2 extends CollectionAbstract {
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
 
-    if ( throwOnCanvasIndexError && insertResponse.fetchErrorIds.length ) {
-      visibleLog("THIS SHOULD NOT HAPPEN")
-    }
-
     // 3. update annotations with info on manifest and canvas.
     // if canvasIdx is undefined, throw.
     annotationData = await Promise.all(
@@ -408,7 +404,7 @@ class Annotations2 extends CollectionAbstract {
    *   canvasMin: number?,
    *   canvasMax: number?,
    *   onlyIds: boolean
-   *   page: number?
+   *   page: number
    *   pageSize: number
    * }}
    * @returns {object} annotationList containing results
@@ -470,16 +466,20 @@ class Annotations2 extends CollectionAbstract {
 
     if ( !onlyIds ) {
       // add pagination and run query
+      // TODO move pagination to its own module ? and add caching of `totalCount` in a map ?
       // NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
       const totalCount = await this.collection.countDocuments(query);
 
-      const annotations =
-        await this.find(query, {}, true)
-          .skip(Math.max(page-1 * pageSize, 0))  // ensure that `skip` >=- 0
+      const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
+
+      const cursor = await this.find(query, {}, true);
+      const annotations = await cursor
+          .sort({ "@id": 1 })
+          .skip(skip)  // ensure that `skip` >=- 0
           .limit(pageSize)
           .toArray();
 
-      const hasNext = annotations.length < totalCount;
+      const hasNext = page * pageSize <= totalCount;
 
       return toAnnotationList({
         resources: annotations,
