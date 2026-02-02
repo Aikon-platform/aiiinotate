@@ -161,36 +161,26 @@ test("test annotation Routes", async (t) => {
     return;
   });
 
-  // TODO REWORK FOR PAGINATION
+  // NOTE: this route handles pagination, but we don't test it here. the pagination module is aldready tested in `search-api`
   await t.test("test route /annotations/:iiifPresentationVersion/search", async (t) => {
     await injectTestAnnotations(fastify, t, annotationList);
-    await Promise.all(
-      // `asAnnotationList` is a boolean defining if we should return an array or an annotationList.
-      [false, true].map(async (asAnnotationList) => {
+    const
+      annotationCollection = await fastify.mongo.db.collection("annotations2").find().toArray(),
+      annotation = getRandomItem(annotationCollection),
+      canvasId = getRandomItem(annotation.on).full,
+      expectedCount = annotationCollection
+        .filter((annotation) => annotation.on.map(target => target.full).includes(canvasId))
+        .length,
+      pageSize = expectedCount + 1,  // all results will always be in 1 page
+      r = await fastify.inject({
+        method: "GET",
+        url: `/annotations/2/search?canvasUri=${canvasId}&page=1&pageSize=${pageSize}`
+      }),
+      body = await r.json();
 
-        const
-          annotation = await getRandomItem(
-            await fastify.mongo.db.collection("annotations2").find().toArray()
-          ),
-          canvasId = getRandomItem(annotation.on).full,
-          r = await fastify.inject({
-            method: "GET",
-            url: `/annotations/2/search?canvasUri=${canvasId}&asAnnotationList=${asAnnotationList}`
-          }),
-          body = await r.json();
-
-        t.assert.deepStrictEqual(r.statusCode, 200);
-        if ( asAnnotationList ) {
-          // we have aldready defined responses for both cases of `asAnnotationList`, so we just need to check that the response is of a proper type
-          t.assert.deepStrictEqual(Array.isArray(body), false);
-        } else {
-          t.assert.deepStrictEqual(Array.isArray(body), true)
-          t.assert.deepStrictEqual(body.length > 0, true);
-        }
-
-      })
-    )
-
+    t.assert.deepStrictEqual(r.statusCode, 200);
+    t.assert.deepStrictEqual(Array.isArray(body?.resources), true);
+    t.assert.deepStrictEqual(body.resources.length, expectedCount);
   })
 
   await t.test("test route /data/:iiifPresentationVersion/:manifestShortId/annotation/:annotationShortId", async (t) => {

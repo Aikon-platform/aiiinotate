@@ -92,7 +92,6 @@ function annotationsRoutes(fastify, options, done) {
           type: "object",
           properties: {
             canvasUri: { type: "string" },
-            asAnnotationList: { type: "boolean" },
           }
         }),
         response: makeResponseSchema(
@@ -110,14 +109,15 @@ function annotationsRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifPresentationVersion } = request.params,
-        { canvasUri, asAnnotationList } = request.query;
+        { canvasUri, page, pageSize } = request.query;
 
       try {
         if (iiifPresentationVersion === 2) {
           return await annotations2.findByCanvasUri({
             queryUrl,
             canvasUri,
-            asAnnotationList
+            page,
+            pageSize
           });
         } else {
           annotations3.notImplementedError();

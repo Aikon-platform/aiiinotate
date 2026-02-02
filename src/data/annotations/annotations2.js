@@ -252,6 +252,58 @@ class Annotations2 extends CollectionAbstract {
       : annotationData;
   }
 
+  /**
+   * taking a filter document `queryFilter`, return an annotationList with paginated results
+   *
+   * params:
+   * - queryUrl: the `@id` of the annotationList.
+   *    MUST be an URL to a route that sjupports pagination, in order to set `prev` and `next` in the annotationList.
+   * - queryFilter: the filter to apply to the collection
+   * - page: current page number
+   * - pageSize: number of annotations per page
+   * - label: title of the AnnotationList.
+   *
+   * NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
+   *
+   * @param {{
+   *  queryUrl: string,
+   *  queryFilter: object,
+   *  page: number,
+   *  pageSize: number,
+   *  label: string?
+   * }}
+   * @returns {object} - paginated annotation list
+   */
+  async #paginate({
+    queryUrl,
+    queryFilter,
+    page=1,
+    pageSize=process.env.PAGE_SIZE,
+    label=undefined
+  }) {
+    // TODO cache this in a map
+    const totalCount = await this.collection.countDocuments(queryFilter);
+
+    const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
+
+    const cursor = await this.find(queryFilter, {}, true);
+    const annotations = await cursor
+      .sort({ "@id": 1 })
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    const hasNext = page * pageSize <= totalCount;
+
+    return toAnnotationList({
+      resources: annotations,
+      annotationListId: queryUrl,
+      page: page,
+      hasNext: hasNext,
+      label: label
+    });
+  }
+
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -421,12 +473,12 @@ class Annotations2 extends CollectionAbstract {
     pageSize=process.env.PAGE_SIZE
   }) {
     const
-      queryBase = { "on.manifestShortId": manifestShortId },
-      queryFilters = { $and: [] };
+      filtersBase = { "on.manifestShortId": manifestShortId },
+      filtersExtra = { $and: [] };
 
     // expand query parameters
     if ( q ) {
-      queryFilters.$and.push({
+      filtersExtra.$and.push({
         $or: [
           { "@id": q },
           { "resource.@id": q },
@@ -435,7 +487,7 @@ class Annotations2 extends CollectionAbstract {
       });
     };
     if ( motivation ) {
-      queryFilters.$and.push(
+      filtersExtra.$and.push(
         motivation === "non-painting"
           ? { motivation: { $ne: "sc:painting" } }
           : motivation === "painting"
@@ -446,10 +498,10 @@ class Annotations2 extends CollectionAbstract {
     if ( !isNaN(canvasMin) ) {
       // if canvasMax is undefined, then search for canvasIdx===canvasMin
       if ( !canvasMax ) {
-        queryFilters.$and.push({ "on.canvasIdx": canvasMin })
+        filtersExtra.$and.push({ "on.canvasIdx": canvasMin })
       // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
       } else {
-        queryFilters.$and.push({
+        filtersExtra.$and.push({
           $and: [
             { "on.canvasIdx": { $gte: canvasMin } },
             { "on.canvasIdx": { $lte: canvasMax } }
@@ -457,39 +509,22 @@ class Annotations2 extends CollectionAbstract {
         })
       }
     }
-    const query =
-      queryFilters.$and.length
-        ? { ...queryBase, ...queryFilters }
-        : queryBase;
-
-    // TODO paginate onlyIds ?
+    const queryFilter =
+      filtersExtra.$and.length
+        ? { ...filtersBase, ...filtersExtra }
+        : filtersBase;
 
     if ( !onlyIds ) {
-      // add pagination and run query
-      // TODO move pagination to its own module ? and add caching of `totalCount` in a map ?
-      // NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
-      const totalCount = await this.collection.countDocuments(query);
-
-      const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
-
-      const cursor = await this.find(query, {}, true);
-      const annotations = await cursor
-        .sort({ "@id": 1 })
-        .skip(skip)  // ensure that `skip` >=- 0
-        .limit(pageSize)
-        .toArray();
-
-      const hasNext = page * pageSize <= totalCount;
-
-      return toAnnotationList({
-        resources: annotations,
-        annotationListId: queryUrl,
-        page: page,
-        hasNext: hasNext,
-        label: `search results for query ${queryUrl} (page: ${page}, ${pageSize} entries per page)`
-      });
+      return await this.#paginate({
+        queryUrl,
+        queryFilter,
+        page,
+        pageSize,
+        label: `Paginated annotation List (page: ${page}, ${pageSize} items per page)`
+      })
     } else {
-      return ( await this.find(query, { "@id": 1 }) )
+      // NOTE: there is no pagination if `onlyIds` is true
+      return ( await this.find(queryFilter, { "@id": 1 }) )
         .map((ann) => ann["@id"]);
     }
   }
@@ -503,19 +538,16 @@ class Annotations2 extends CollectionAbstract {
   async findByCanvasUri({
     queryUrl,
     canvasUri,
-    asAnnotationList=false,
     page=1,
     pageSize=process.env.PAGE_SIZE
   }) {
-    const cursor = await this.find({ "on.full": canvasUri }, {}, true);
-    const annotations = await cursor.toArray();
-    return asAnnotationList
-      ? toAnnotationList({
-        resources: annotations,
-        annotationListId: queryUrl,
-        label: `annotations targeting canvas ${canvasUri}`
-      })
-      : annotations;
+    return this.#paginate({
+      queryUrl,
+      queryFilter: { "on.full": canvasUri },
+      label: `annotations targeting canvas ${canvasUri}`,
+      page,
+      pageSize
+    });
   }
 
   /**
