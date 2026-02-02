@@ -1,13 +1,13 @@
 import test from "node:test";
 
-import build from "#src/app.js";
 import { v4 as uuid4 } from "uuid";
-import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId } from "#utils/iiif2Utils.js";
 
+import build from "#src/app.js";
+import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
+import { objectHasKey, visibleLog } from "#utils/utils.js";
 
-const
-  // hash-validating regex
-  hashRgx = /^\d+$/;
+// hash-validating regex
+const hashRgx = /^\d+$/;
 
 test("test 'iiif2Utils' functions", async (t) => {
   const
@@ -66,24 +66,32 @@ test("test 'iiif2Utils' functions", async (t) => {
 
   })
 
-  t.test("test 'getAnnotationTarget' and 'makeTarget'", async (t) => {
+  await t.test("test 'makeTarget'", async (t) => {
     await Promise.all(
-      [getAnnotationTarget, makeTarget].map((func) =>
-
-        t.test(`test '${func.name}'`, (t) => {
-          annotations2Valid.map((annotation) =>
-            // to test for an error, it's necessary to create a new function:
-            // https://stackoverflow.com/a/6645586
-            t.assert.doesNotThrow(() => func(annotation)));
-          annotations2Invalid.map((annotation) =>
-            t.assert.throws(() => func(annotation), Error));
-        })
-
+      annotations2Valid.map(async (annotation) =>
+        // `rejects` / `doesNotReject` works for aync functions,
+        // contrary to `throws` / `doesNotThrow`
+        // https://stackoverflow.com/a/35782749
+        t.assert.doesNotReject(async () => await makeTarget(annotation))
       )
+    );
+    await Promise.all(
+      annotations2Invalid.map(async (annotation) =>
+        t.assert.rejects(async () => await makeTarget(annotation))
+      )
+    );
+  })
+
+  await t.test("test 'getAnnotationTarget'", (t) => {
+    annotations2Valid.map((annotation) =>
+      t.assert.doesNotThrow(() => getAnnotationTarget(annotation))
+    );
+    annotations2Invalid.map((annotation) =>
+      t.assert.throws(() => getAnnotationTarget(annotation), Error)
     )
   })
 
-  t.test("test 'makeAnnotationId'", (t) => {
+  await t.test("test 'makeAnnotationId'", (t) => {
     // https://stackoverflow.com/a/6969486
     const escapeRegExp = (string) =>
       string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
@@ -93,6 +101,45 @@ test("test 'iiif2Utils' functions", async (t) => {
       t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true));
     annotations2Invalid.map((annotation) =>
       t.assert.throws(() => makeAnnotationId(annotation)));
+  })
+
+  await t.test("test 'toAnnotationList'", (t) => {
+    /**
+     * @param {"prev"|"next"} val
+     * @returns {(_annotationList: object) => string?} */
+    const getPage = (val) => {
+      if ( !["prev", "next"].includes(val) ) {
+        throw new Error(`'getPage': invalid value for 'val': '${val}'`);
+      }
+      return (_annotationList) => {
+        if ( objectHasKey(annotationList, val) ) {
+          return new URL(annotationList[val]).searchParams.get("page")
+        }
+        return undefined;
+      }
+    }
+    const getPagePrev = getPage("prev");
+    const getPageNext = getPage("next");
+
+    const testUrl = new URL(`http://www.example.com/prefix/manifest-${uuid4()}/list/anno-list-${uuid4()}`);
+    const data = [
+      { page: 3, hasNext: true, prevNum: "2", nextNum: "4" },
+      { page: 1, hasNext: true, prevNum: undefined, nextNum: "2" },
+      { page: 1, hasNext: false, prevNum: undefined, nextNum: undefined },
+    ];
+    let annotationList;
+
+    for ( const { page, hasNext, prevNum, nextNum } of data ) {
+      annotationList = toAnnotationList({
+        resources: [],
+        annotationListId: testUrl.href,
+        page: page,
+        hasNext: hasNext,
+      });
+      t.assert.deepStrictEqual(getPagePrev(annotationList)==prevNum, true);
+      t.assert.deepStrictEqual(getPageNext(annotationList)==nextNum, true);
+    }
+
   })
 
 })

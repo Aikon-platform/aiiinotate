@@ -2,6 +2,7 @@ import { v4 as uuid4 } from "uuid";
 
 import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
+import { svgStringToXywh } from "#utils/svg.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
 
@@ -105,55 +106,128 @@ const toAiiinotateManifestUri = (manifestShortId) =>
 const canvasUriToManifestUri = (canvasUri) =>
   canvasUri.split("/").slice(0,-2).join("/") + "/manifest.json";
 
+/** @returns {number[]?} */
+const fragmentSelectorToXywh = (fragmentSelector) => {
+  // fragmentSelector is of format: `$rootUrl#xywh=number,number,number,number`
+  // => get the `number,number,number,number` part
+  const selectorValue = (fragmentSelector.value || "").split("xywh=");
+  const xywhString = selectorValue.length > 1 ? selectorValue[1] : ""
+  if (xywhString.length) {
+    return xywhString.split(",").map((x) => parseInt(x));
+  }
+  return
+}
+
+/** @returns {Promise<number[]?>} */
+const svgSelectorToXywh = (svgSelector) => {
+  try {
+    return svgStringToXywh(svgSelector.value);
+  } catch (err) {
+    console.warn(`svgSelectorToXywh: could not build bounding box from SvgSelector because of error: ${err.message}`);
+    return
+  }
+}
+
+/** @returns {Promise<number[]?>} */
+const choiceSelectorToXywh = async (choiceSelector) => {
+  let xywh;
+  for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
+    xywh = await selectorToXywh(selector);
+    if ( xywh?.length ) {
+      break;
+    }
+  }
+  return xywh;
+}
+
+/** @returns {Promise<number[]?>} */
+const selectorToXywh = async (selector) => {
+  const mapper = [
+    ["oa:Choice", choiceSelectorToXywh],
+    ["oa:SvgSelector", svgSelectorToXywh],
+    ["oa:FragmentSelector", fragmentSelectorToXywh],
+    ["Choice", choiceSelectorToXywh],
+    ["SvgSelector", svgSelectorToXywh],
+    ["FragmentSelector", fragmentSelectorToXywh],
+  ]
+  let xywh;
+  for ( const [selectorName, func] of mapper ) {
+    if ( selector["@type"] === selectorName ) {
+      xywh = await func(selector);
+      if ( xywh?.length ) {
+        break
+      }
+    }
+  }
+  return xywh
+}
+
+// NOTE: is this really useful ?
+const normalizeSelectorType = (selector) => {
+  // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
+  if (
+    isObject(selector) && Object.keys(selector).includes("type")
+  ) {
+    selector["@type"] = selector.type;
+    delete selector.type;
+  }
+  return selector;
+}
+
+const stringToSpecificResource = (target) => {
+  let [full, fragment] = target.split("#");
+  return {
+    "@id": target,
+    "@type": "oa:SpecificResource",
+    full: full,
+    selector: {
+      "@type": "oa:FragmentSelector",
+      value: fragment
+    }
+  }
+}
+
+/**
+ * handle a single value of `annotation.on` (when annotation.on is an array).
+ * essentially, this function ensures the `target` is a `SpecificResource` and extracts useful fields.
+ * @returns {Promise<object>}
+ */
+const makeSingleTarget = async (target) => {
+  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: target });
+
+  let specificResource;
+
+  // 1. convert to SpecificResouece
+  if ( typeof(target) === "string" && !isNullish(target) ) {
+    specificResource = stringToSpecificResource(target);
+  } else if ( isObject(target) && target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
+    specificResource = target;
+    specificResource.selector = normalizeSelectorType(specificResource.selector);
+  // if target is neither a string nor a SpecificResource, raise
+  } else {
+    throw err
+  }
+
+  // 2. extract relevant fields
+  // extract xywh coordinates and return them as [x:int, y:int, w:int, h:int]
+  // NOTE: xywh extraxction is only supported for FragmentSelector and SvgSelector (or an oa:Choice containing either).
+  specificResource.xywh = await selectorToXywh(specificResource.selector);
+  specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
+  specificResource.manifestShortId = getManifestShortId(specificResource.full);
+
+  return specificResource
+}
+
 /**
  * convert the annotation's `on` to a SpecificResource
  * reimplemented from SAS: https://github.com/glenrobson/SimpleAnnotationServer/blob/dc7c8c6de9f4693c678643db2a996a49eebfcbb0/src/main/java/uk/org/llgc/annotation/store/AnnotationUtils.java#L123-L135
  * @param {object} annotation
- * @returns {object[]} - the array of targets extracted from 'annotation.on'
+ * @returns {Promise<object[]>} - the array of targets extracted from 'annotation.on'
  */
-const makeTarget = (annotation) => {
-  const err = new Error(`${makeTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, an object or an array of objects containing { on: {@id: "<string URI>", @type: "oa:SpecificResource"} }`, { info: annotation });
-
-  /** annotation.on is converted to an array => this function creates a target from a single item of that array */
-  const makeSingleTarget = (_target) => {
-    let specificResource;
-
-    // convert to SpecificResource if it's not aldready the case
-    if ( typeof(_target) === "string" && !isNullish(_target) ) {
-      let [full, fragment] = _target.split("#");
-      specificResource = {
-        "@id": _target,
-        "@type": "oa:SpecificResource",
-        full: full,
-        selector: {
-          "@type": "oa:FragmentSelector",
-          value: fragment
-        }
-      }
-    } else if ( isObject(_target) ) {
-      if ( _target["@type"] === "oa:SpecificResource" && !isNullish(_target["full"]) ) {
-        specificResource = _target;
-        // the received specificResource `selector` may have its type specified using the key `type`. correct it to `@type`.
-        if ( specificResource.selector !== undefined && isObject(specificResource.selector) && Object.keys(specificResource.selector).includes("type") ) {
-          specificResource.selector["@type"] = specificResource.selector.type;
-          delete specificResource.selector.type;
-        }
-      // if '_target' is an object but not a specificresource, raise.
-      } else {
-        throw err
-      }
-    // if _target is neither a string nor an object, raise
-    } else {
-      throw err
-    }
-    if ( objectHasKey(specificResource, "full") ) {
-      specificResource.manifestShortId = getManifestShortId(specificResource.full);
-      specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
-    }
-    return specificResource
-  }
-
-  return maybeToArray(annotation.on).map(makeSingleTarget);
+const makeTarget = async (annotation) => {
+  return await Promise.all(
+    maybeToArray(annotation.on).map(async (target) => await makeSingleTarget(target))
+  );
 }
 
 /**
@@ -181,13 +255,37 @@ const makeAnnotationId = (annotation, manifestShortId) => {
 }
 
 /**
+ * NOTE: for pagination to work, we assume some things about the anatomy of the route that uses `toAnnotationList`:
+ * - `annotationListId` must be the URL used to fetch annotations and generate the annotationList
+ * - the URL must have a `page` query parameter that handles pagination
  *
- * @param {object[]} resources: the annotatons
- * @param {string?} annotationListId: the AnnotationList's '@id' key
- * @param {string?} label: optional description
- * @returns {object}
+ * params:
+ * - resources: the annotatons
+ * - annotationListId: the AnnotationList's '@id' key
+ * - label: optional description
+ * - hasNext: there is a next page (for paginated results)
+ * - page: page number (for paginated results)
+ *
+ * @param {{
+ *  resources: object[],
+ *  annotationListId: string,
+*   page: number,
+*   hasNext: boolean,
+ *  label: string?
+ * }}
+ * @returns {object} - the annotationList
  */
-const toAnnotationList = (resources, annotationListId, label) => {
+const toAnnotationList = ({
+  resources,
+  annotationListId,
+  page,
+  hasNext,
+  label
+}) => {
+  if ( isNullish(annotationListId) ) {
+    throw new Error("toAnnotationList: 'annotationListId' must be defined");
+  }
+
   const annotationList = {
     ...IIIF_PRESENTATION_2_CONTEXT,
     "@type": "sc:AnnotationList",
@@ -196,6 +294,17 @@ const toAnnotationList = (resources, annotationListId, label) => {
   }
   if ( label ) {
     annotationList.label = label
+  }
+  if ( page ) {
+    const annotationListUrl = new URL(annotationListId);
+    if ( page > 1 ) {
+      annotationListUrl.searchParams.set("page", page-1);
+      annotationList.prev = annotationListUrl.href;
+    }
+    if ( hasNext ) {
+      annotationListUrl.searchParams.set("page", page+1);
+      annotationList.next = annotationListUrl.href;
+    }
   }
   return annotationList;
 }

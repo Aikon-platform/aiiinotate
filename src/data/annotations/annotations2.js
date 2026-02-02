@@ -6,10 +6,11 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog, memoize } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
+/** @typedef {import("mongodb").FindCursor} FindCursor */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
 /** @typedef {import("#types").MongoInsertResultType} MongoInsertResultType */
@@ -58,6 +59,15 @@ class Annotations2 extends CollectionAbstract {
   ////////////////////////////////////////////////////////////////
   // utils
 
+
+  /**
+   * @type {() => Promise<number>}
+   * cache the number of documents corresponding to a paginated query in a JS cache
+   * a simple cache avoids rerunning a count to get the total number of documents for each page of a paginated query
+   * see: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
+   */
+  #memoizePaginationTotalCount = memoize((x) => this.collection.countDocuments(x), 2000);
+
   /**
    * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.
    * @param {string} filterKey
@@ -93,7 +103,6 @@ class Annotations2 extends CollectionAbstract {
 
       // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
       resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
-      // delete the alternate keys
       [ "value", "cnt:chars" ].map((k) => {
         if ( Object.keys(resource).includes(k) ) {
           delete resource[k];
@@ -123,11 +132,11 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} update - set to `true` if performing an update instead of an insert.
    * @returns {object}
    */
-  #cleanAnnotation(annotation, update=false) {
+  async #cleanAnnotation(annotation, update=false) {
     // 1) extract ids and targets. convert the target to an array.
+    // we assume that all values of `annotationTargetArray` point to the same manifest => `manifestShortId` is extracted from the 1st target
     const
-      annotationTargetArray = makeTarget(annotation),
-      // we assume that all values of `annotationTargetArray` point to the same manifest => take the manifest of the 1st target
+      annotationTargetArray = await makeTarget(annotation),
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
     // in updates, "@id" has aldready been extracted
@@ -176,13 +185,17 @@ class Annotations2 extends CollectionAbstract {
    * @param {object} annotationList
    * @returns {object[]}
    */
-  #cleanAnnotationList(annotationList) {
+  async #cleanAnnotationList(annotationList) {
     // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
     if ( this.validatorAnnotationList(annotationList) ) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
     //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
-    return annotationList.resources.map((ressource) => this.#cleanAnnotation(ressource))
+    return await Promise.all(
+      annotationList.resources.map(async (ressource) =>
+        await this.#cleanAnnotation(ressource)
+      )
+    )
   }
 
   /**
@@ -213,10 +226,6 @@ class Annotations2 extends CollectionAbstract {
       insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, throwOnCanvasIndexError),
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */
       insertedManifestsIds = insertResponse.insertedIds.concat(insertResponse.preExistingIds || []);
-
-    if ( throwOnCanvasIndexError && insertResponse.fetchErrorIds.length ) {
-      visibleLog("THIS SHOULD NOT HAPPEN")
-    }
 
     // 3. update annotations with info on manifest and canvas.
     // if canvasIdx is undefined, throw.
@@ -252,6 +261,57 @@ class Annotations2 extends CollectionAbstract {
       : annotationData;
   }
 
+  /**
+   * taking a filter document `queryFilter`, return an annotationList with paginated results
+   *
+   * params:
+   * - queryUrl: the `@id` of the annotationList.
+   *    MUST be an URL to a route that sjupports pagination, in order to set `prev` and `next` in the annotationList.
+   * - queryFilter: the filter to apply to the collection
+   * - page: current page number
+   * - pageSize: number of annotations per page
+   * - label: title of the AnnotationList.
+   *
+   * NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
+   *
+   * @param {{
+   *  queryUrl: string,
+   *  queryFilter: object,
+   *  page: number,
+   *  pageSize: number,
+   *  label: string?
+   * }}
+   * @returns {object} - paginated annotation list
+   */
+  async #paginate({
+    queryUrl,
+    queryFilter,
+    page=1,
+    pageSize=process.env.PAGE_SIZE,
+    label=undefined
+  }) {
+    const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
+
+    const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
+
+    const cursor = await this.find(queryFilter, {}, true);
+    const annotations = await cursor
+      .sort({ "@id": 1 })
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    const hasNext = page * pageSize <= totalCount;
+
+    return toAnnotationList({
+      resources: annotations,
+      annotationListId: queryUrl,
+      page: page,
+      hasNext: hasNext,
+      label: label
+    });
+  }
+
   ////////////////////////////////////////////////////////////////
   // insert / updates
 
@@ -267,7 +327,7 @@ class Annotations2 extends CollectionAbstract {
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
-    annotation = this.#cleanAnnotation(annotation);
+    annotation = await this.#cleanAnnotation(annotation);
     annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
   }
@@ -280,7 +340,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async updateAnnotation(annotation) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
-    annotation = this.#cleanAnnotation(annotation, true);
+    annotation = await this.#cleanAnnotation(annotation, true);
     const
       query = { "@id": annotation["@id"] },
       update = { $set: annotation };
@@ -300,7 +360,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async insertAnnotationList(annotationList, throwOnCanvasIndexError) {
     let annotationArray;
-    annotationArray = this.#cleanAnnotationList(annotationList);
+    annotationArray = await this.#cleanAnnotationList(annotationList);
     annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
     return this.insertMany(annotationArray);
   }
@@ -331,11 +391,12 @@ class Annotations2 extends CollectionAbstract {
    * about projection: 0 removes the fields from the response, 1 incldes it (but exclude all others)
    * see: https://www.mongodb.com/docs/drivers/node/current/crud/query/project/#std-label-node-project
    *      https://stackoverflow.com/questions/74447979/mongoservererror-cannot-do-exclusion-on-field-date-in-inclusion-projection
-   * @param {object} queryObj
+   * @param {object} queryObj - the filter document
    * @param {object?} projectionObj - extra projection fields to tailor the reponse format
-   * @returns {Promise<object[]>}
+   * @param {boolean} asCursor - return a cursor instead of an array of results
+   * @returns {Promise<object[] | FindCursor>}
    */
-  async find(queryObj, projectionObj={}) {
+  async find(queryObj, projectionObj={}, asCursor=false) {
     // 1. construct the final projection object, knowing that we can't mix exclusive and inclusive projectin.
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
@@ -362,9 +423,12 @@ class Annotations2 extends CollectionAbstract {
     }
 
     // 2. find, project and return
-    return this.collection
-      .find(queryObj, { projection: projectionObj })
-      .toArray();
+    const cursor = this.collection.find(queryObj, { projection: projectionObj });
+    if ( !asCursor ) {
+      return cursor.toArray()
+    } else {
+      return cursor;
+    };
   }
 
   /**
@@ -400,6 +464,8 @@ class Annotations2 extends CollectionAbstract {
    *   canvasMin: number?,
    *   canvasMax: number?,
    *   onlyIds: boolean
+   *   page: number
+   *   pageSize: number
    * }}
    * @returns {object} annotationList containing results
    */
@@ -410,15 +476,17 @@ class Annotations2 extends CollectionAbstract {
     motivation=undefined,
     canvasMin=undefined,
     canvasMax=undefined,
-    onlyIds=false
+    onlyIds=false,
+    page=1,
+    pageSize=process.env.PAGE_SIZE
   }) {
     const
-      queryBase = { "on.manifestShortId": manifestShortId },
-      queryFilters = { $and: [] };
+      filtersBase = { "on.manifestShortId": manifestShortId },
+      filtersExtra = { $and: [] };
 
     // expand query parameters
     if ( q ) {
-      queryFilters.$and.push({
+      filtersExtra.$and.push({
         $or: [
           { "@id": q },
           { "resource.@id": q },
@@ -427,7 +495,7 @@ class Annotations2 extends CollectionAbstract {
       });
     };
     if ( motivation ) {
-      queryFilters.$and.push(
+      filtersExtra.$and.push(
         motivation === "non-painting"
           ? { motivation: { $ne: "sc:painting" } }
           : motivation === "painting"
@@ -438,10 +506,10 @@ class Annotations2 extends CollectionAbstract {
     if ( !isNaN(canvasMin) ) {
       // if canvasMax is undefined, then search for canvasIdx===canvasMin
       if ( !canvasMax ) {
-        queryFilters.$and.push({ "on.canvasIdx": canvasMin })
+        filtersExtra.$and.push({ "on.canvasIdx": canvasMin })
       // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
       } else {
-        queryFilters.$and.push({
+        filtersExtra.$and.push({
           $and: [
             { "on.canvasIdx": { $gte: canvasMin } },
             { "on.canvasIdx": { $lte: canvasMax } }
@@ -449,16 +517,22 @@ class Annotations2 extends CollectionAbstract {
         })
       }
     }
-    const query =
-      queryFilters.$and.length
-        ? { ...queryBase, ...queryFilters }
-        : queryBase;
+    const queryFilter =
+      filtersExtra.$and.length
+        ? { ...filtersBase, ...filtersExtra }
+        : filtersBase;
 
     if ( !onlyIds ) {
-      const annotations = await this.find(query);
-      return toAnnotationList(annotations, queryUrl, `search results for query ${queryUrl}`);
+      return await this.#paginate({
+        queryUrl,
+        queryFilter,
+        page,
+        pageSize,
+        label: `Paginated annotation List (page: ${page}, ${pageSize} items per page)`
+      })
     } else {
-      return ( await this.find(query, { "@id": 1 }) )
+      // NOTE: there is no pagination if `onlyIds` is true
+      return ( await this.find(queryFilter, { "@id": 1 }) )
         .map((ann) => ann["@id"]);
     }
   }
@@ -469,11 +543,19 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} asAnnotationList
    * @returns
    */
-  async findByCanvasUri(queryUrl, canvasUri, asAnnotationList=false) {
-    const annotations = await this.find({ "on.full": canvasUri });
-    return asAnnotationList
-      ? toAnnotationList(annotations, queryUrl, `annotations targeting canvas ${canvasUri}`)
-      : annotations;
+  async findByCanvasUri({
+    queryUrl,
+    canvasUri,
+    page=1,
+    pageSize=process.env.PAGE_SIZE
+  }) {
+    return this.#paginate({
+      queryUrl,
+      queryFilter: { "on.full": canvasUri },
+      label: `annotations targeting canvas ${canvasUri}`,
+      page,
+      pageSize
+    });
   }
 
   /**

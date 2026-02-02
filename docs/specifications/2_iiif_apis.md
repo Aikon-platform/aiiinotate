@@ -394,3 +394,35 @@ Properties of the annotation list are:
 }
 ```
 
+### Pagination
+
+A paginated resource can be for example a  `Collection` or an `AnnotationList`. 
+
+- A paginated Resource (i.e., a `Collection`)
+    - MUST use `first` to link to the first page
+    - MUST NOT embed the corresponding list that is being pagiated
+- A page (i.e., a single page of an `AnnotationList`)
+    - SHOULD use `within` to refer to its container resource
+    - MUST use `next` to provide a link to the next page, if it exists
+    - SHOULD use `prev` to provide a link to the previous page, if it exists
+    - MAY use `total` to list the total number of resources contained in all pages
+    - MAY use `startIndex` to document the index of the first item of the current page, starting from 0 (i.e., if you're on page 3 and there are 100 annotations per page, `startIndex: 300`)
+    - MAY inherit descriptive properties from the paged resource (i.e. the `logo` or `attribution`).
+
+```js
+// the first page of an annotation list
+{
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "http://example.org/iiif/book1/list/l1",
+  "@type": "sc:AnnotationList",
+
+  "startIndex": 0,
+  "within": "http://example.org/iiif/book1/layer/transcription",
+  "next": "http://example.org/iiif/book1/list/l2",
+
+  "resources": [
+    // Annotations live here ...
+  ]
+}
+```
+

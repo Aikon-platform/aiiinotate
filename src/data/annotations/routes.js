@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
-import { makeResponseSchema, makeResponsePostSchema, returnError } from "#utils/routeUtils.js";
+import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -88,13 +88,12 @@ function annotationsRoutes(fastify, options, done) {
             iiifPresentationVersion: iiifPresentationVersionSchema
           }
         },
-        querystring: {
+        querystring: addPagination({
           type: "object",
           properties: {
-            uri: { type: "string" },
-            asAnnotationList: { type: "boolean" },
+            canvasUri: { type: "string" },
           }
-        },
+        }),
         response: makeResponseSchema(
           fastify,
           {
@@ -110,11 +109,16 @@ function annotationsRoutes(fastify, options, done) {
       const
         queryUrl = pathToUrl(request.url),
         { iiifPresentationVersion } = request.params,
-        { uri, asAnnotationList } = request.query;
+        { canvasUri, page, pageSize } = request.query;
 
       try {
         if (iiifPresentationVersion === 2) {
-          return await annotations2.findByCanvasUri(queryUrl, uri, asAnnotationList);
+          return await annotations2.findByCanvasUri({
+            queryUrl,
+            canvasUri,
+            page,
+            pageSize
+          });
         } else {
           annotations3.notImplementedError();
         }

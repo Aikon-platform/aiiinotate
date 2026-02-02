@@ -98,6 +98,12 @@ const injectPost = (fastify, route, payload) =>
     payload: payload,
   });
 
+/**
+ * @param {FastifyInstanceType} fastify
+ * @param {string} route
+ * @param {object} payload
+ * @returns {Promise<FastifyReplyType>}
+ */
 const injectGet = (fastify, route, payload) =>
   fastify.inject({
     method: "GET",
@@ -238,6 +244,27 @@ const injectTestAnnotations = async (fastify, t, annotationList) => {
   return [insertedCount, insertedIds];
 }
 
+const testGetPaginated = async (fastify, t, iiifSearchVersion, route, expectedGetCount) => {
+  if ( iiifSearchVersion===2 ) {
+    let
+      routeNextPage = route,
+      totalCount = 0,
+      r,
+      rBody;
+    while ( routeNextPage ) {
+      r = await injectGet(fastify, routeNextPage);
+      t.assert.deepStrictEqual(r.statusCode, 200);
+      rBody = JSON.parse(r.body);
+      totalCount += rBody.resources.length;
+      routeNextPage = rBody.next;
+    }
+    t.assert.deepStrictEqual(totalCount, expectedGetCount);
+
+  } else {
+    throw new Error(`testGetPaginated: not implemented for 'iiifSearchVersion=${iiifSearchVersion}'`);
+  }
+}
+
 export {
   assertObjectKeys,
   assertObjectKeysError,
@@ -247,15 +274,16 @@ export {
   assertStatusCode,
   assertResponseKeys,
   assertErrorValidResponse,
-  injectPost,
-  injectGet,
   assertPostInvalidResponse,
   assertCreateValidResponse,
   assertUpdateValidResponse,
   assertDeleteValidResponse,
+  injectPost,
+  injectGet,
+  injectTestManifest,
+  injectTestAnnotations,
   testPostRouteCurry,
   testDeleteRouteCurry,
-  injectTestManifest,
-  injectTestAnnotations
+  testGetPaginated
 }
 

@@ -5,7 +5,7 @@ import { v4 as uuid4 } from "uuid";
 import build from "#src/app.js";
 import { getRandomItem, visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, testDeleteRouteCurry, injectPost, injectGet, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse } from "#utils/testUtils.js";
+import { testPostRouteCurry, testDeleteRouteCurry, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse, testGetPaginated } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -79,6 +79,21 @@ test("test common routes", async (t) => {
   //    // canvasMax
   //
   //  })
+
+  await t.test("test route /search-api/:iiifPresentationVersion/manifests/:manifestShortId/search", async (t) => {
+    await injectTestAnnotations(fastify, t, annotationList);
+
+    const manifestShortIdArray = [ ...new Set(
+      annotationList.resources.map(annotation => getManifestShortId(annotation.on))
+    )];
+    let route, expectedCount, pageSize;
+    for ( const manifestShortId of manifestShortIdArray ) {
+      expectedCount = annotationList.resources.filter(annotation => annotation.on.includes(manifestShortId)).length;
+      pageSize = Math.max(Math.floor(expectedCount / 10), 1);
+      route = `/search-api/1/manifests/${manifestShortId}/search?pageSize=${pageSize}`;
+      await testGetPaginated(fastify, t, 2, route, expectedCount);
+    }
+  })
 
   ////////////////////////////////////////////////
   // DELETE routes
