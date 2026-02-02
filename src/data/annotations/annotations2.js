@@ -66,7 +66,7 @@ class Annotations2 extends CollectionAbstract {
    * a simple cache avoids rerunning a count to get the total number of documents for each page of a paginated query
    * see: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
    */
-   #memoizePaginationTotalCount = memoize((x) => this.collection.countDocuments(x), 2000);
+  #memoizePaginationTotalCount = memoize((x) => this.collection.countDocuments(x), 2000);
 
   /**
    * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.

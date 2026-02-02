@@ -165,11 +165,16 @@ GET /annotations/{iiif_version}/search
     - `iiif_version` (`2 | 3`): the IIIF Presentation API of your manifests
 - Query:
     - `canvasUri` (`string`): the URI of the target canvas
-    - `asAnnotationList` (`true | false`):  format of the response
+    - `page` (`number`): results are paginated. Specifies the page number.
+    - `pageSize` (`number`): number of items per page
 
 #### Response
 
-`Object[] | Object`: if `true`, return an array of annotations. Otherwise, return an `AnnotationList`.
+Results are paginated.
+
+```
+AnnotationList | AnnotationPage
+``` 
 
 ---
 
