@@ -239,6 +239,72 @@ const visibleLog = (data, prefix) => {
   console.log(">".repeat(100));
 }
 
+/**
+ * sort an object recursively.
+ * supported types are: Objects ({}), Arrays ([]), primitive types.
+ * @param {any} x
+ * @returns {any}
+ */
+const recursiveSort = (x) => {
+  if ( Array.isArray(x) ) {
+    x = x.sort();
+    for ( let i=0; i<x.length; i++ ) {
+      x[i] = recursiveSort(x[i]);
+    }
+    return x;
+  } else if ( isObject(x) ) {
+    const xSorted = {};
+    const keys = Object.keys(x).sort();
+    for ( let i=0; i<keys.length; i++ ) {
+      let
+        k = keys[i],
+        v = x[k];
+      xSorted[k] = recursiveSort(v);
+    }
+    return xSorted;
+  }
+  return x;
+}
+
+/**
+ * Map cache with a timeout: after `timeout` ms have passed, clears the cache of the key `n`.
+ * if `timeout` is negative, the cache will never be cleared of `n`.
+ *
+ * NOTE: LIMITATIONS:
+ * - `memoize` converts `fn` to an async function to work with both sync/async patterns, remember to await !
+ * - `fn` should accept a single agument `n`
+ * - `n` should be JSON-stringify-able: a primitive, an array, or an object, but not a function, a class or class instance
+ *
+ * adapted from: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
+ *
+ * @param {Function} fn - the function whose result will be cached
+ * @param {number} timeout - timeout in ms to clear the cache of a newly assigned value
+ * @returns {async Function} - a function that takes a value and caches its result.
+ */
+const memoize = (fn, timeout = 2000) => {
+  const cache = new Map();
+  return async (n) => {
+    // stringify `n` to `key`, the key to find in the cache.
+    // since `map` is a key-value store, we need to stringify `n` to ensure it can be used as a key
+    // to ensure consistency, we sort our objects/array before stringifying
+    const key = JSON.stringify(recursiveSort(n));
+    if ( cache.has(key) ) {
+      return cache.get(key);
+    } else {
+      const result = await fn(n);  // apply the original arguments to `n`, not the sorted key.
+      cache.set(key, result);
+      // after `timeout` ms, clear the cache of `key`
+      if ( timeout > 0 ) {
+        setTimeout(
+          () => cache.delete(key),
+          timeout
+        )
+      }
+      return result;
+    }
+  }
+}
+
 export {
   maybeToArray,
   pathToUrl,
@@ -256,5 +322,6 @@ export {
   ajvCompile,
   visibleLog,
   isNonEmptyArray,
-  mergeObjects
+  mergeObjects,
+  memoize
 }

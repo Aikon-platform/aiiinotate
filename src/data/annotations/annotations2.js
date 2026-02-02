@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog, memoize } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -58,6 +58,15 @@ class Annotations2 extends CollectionAbstract {
 
   ////////////////////////////////////////////////////////////////
   // utils
+
+
+  /**
+   * @type {() => Promise<number>}
+   * cache the number of documents corresponding to a paginated query in a JS cache
+   * a simple cache avoids rerunning a count to get the total number of documents for each page of a paginated query
+   * see: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
+   */
+   #memoizePaginationTotalCount = memoize((x) => this.collection.countDocuments(x), 2000);
 
   /**
    * expand a pair of `filterKey`, `filterVal` following the schema `routeAnnotationFilter` into a proper filter for the `annotations2` collection.
@@ -281,8 +290,7 @@ class Annotations2 extends CollectionAbstract {
     pageSize=process.env.PAGE_SIZE,
     label=undefined
   }) {
-    // TODO cache this in a map
-    const totalCount = await this.collection.countDocuments(queryFilter);
+    const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
 
     const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
 
