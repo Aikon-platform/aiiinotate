@@ -1,6 +1,6 @@
 {
   "name": "aiiinotate",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "a fast IIIF-compliant annotation server",
   "main": "./cli/index.js",
   "type": "module",
@@ -18,7 +18,8 @@
     "test": "export AIIINOTATE_TESTING=true; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
-    "update_version": "python3 scripts/update_version.py"
+    "update_version": "python3 scripts/update_version.py",
+    "get_version": "python3 scripts/get_version.py"
   },
   "pre-commit": [
     "lint"
