@@ -257,16 +257,20 @@ Create or update a single annotation
 
 - A side effect of inserting annotations is inserting the related manifests.
 - When inserting an annotation, the annotation's target manifest is also fetched and inserted in the database
-- Annotations in `aiiinotate` contain 3 nonstandard fields. In IIIF presentation 2.x,
-    - `annotation.on[0].manifestUri`: the URI of the manifest on which is an annotation
-    - `annotation.on[0].manifestShortId`: the unique identifier of the manifest on which is an annotation
-    - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer
-    - this depends on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
-    - the annotation's target's manifest is fetched and inserted in the database, if possible, and stored in `annotation.on[0].manifestShortId`
-- If `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the proicess of fetching the target manifest or populating the `canvasIdx` field.
-    - fetching an annotation's target manfest is error prone: it depends on the manifest being available through HTTP, which is not in our control.
-    - in turn, normally, if there's an error, we will just add the issue to `fetchErrorIds` and not throw.
-    - in controlled environments where you know your manifests WILL be available and where you rely heavily on the `canvasIdx` field (like AIKON), throwing an error will ensure that the `canvasIdx` field is always defined.
+- Annotations in `aiiinotate` contain nonstandard fields. In IIIF presentation 2.x,
+    - `manifestUri`, `manifestShortId`, `canvasIdx`:
+        - `annotation.on[0].manifestUri`: the URI of the manifest on which is an annotation
+        - `annotation.on[0].manifestShortId`: the unique identifier of the manifest on which is an annotation
+        - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer
+        - this depends on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
+        - the annotation's target's manifest is fetched and inserted in the database, if possible, and stored in `annotation.on[0].manifestShortId`
+        - If `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the proicess of fetching the target manifest or populating the `canvasIdx` field.
+        - fetching an annotation's target manfest is error prone: it depends on the manifest being available through HTTP, which is not in our control.
+        - in turn, normally, if there's an error, we will just add the issue to `fetchErrorIds` and not throw.
+        - in controlled environments where you know your manifests WILL be available and where you rely heavily on the `canvasIdx` field (like AIKON), throwing an error will ensure that the `canvasIdx` field is always defined.
+   - `annotation.on[0].xywh`: the annotation's bounding box on its target canvas.
+        - when inserting an annotation, aiiinotate will attempt to extract its XYWH bounding box and store it as an `[number,number,number,number]`.
+        - this only works for `oa:SvgSelectors`, `oa:FragmentSeletors`, `oa:Choice` containing either an `SvgSelector` or a `FragmentSelector`, or a string-target (an URI with a `#xywh=` fragment selector).
 
 ---
 
