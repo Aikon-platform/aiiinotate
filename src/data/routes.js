@@ -69,15 +69,13 @@ function commonRoutes(fastify, options, done) {
           }
         }),
         // return either an AnnotationList, or if `onlyIds=true`, an array of strings
-        response:
-          makeResponseSchema(fastify, {
-            anyOf: [
-
-              { type: "array", items: { type: "string" } },
-              // anyOf with fastify.getSchema causes errors => use $ref directly
-              { "$ref": "http://127.0.0.1:4000/schemas/presentation/2/annotationList" },
-            ]
-          })
+        response: makeResponseSchema(fastify, {
+          anyOf: [
+            { type: "array", items: { type: "string" } },
+            // anyOf does not handle well $refs => resolve all references in the schema.
+            fastify.schemasResolver(iiifAnnotationListSchema)
+          ]
+        })
           // { 200: iiifAnnotationListSchema }
       },
       preValidation: async (request, reply) => {
