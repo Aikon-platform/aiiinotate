@@ -20,7 +20,7 @@ const isNullOrUndefined = (v) => v == null;
 const isNullish = (v) => v == null || !v.length;
 
 /** o is an object but not an array. https://stackoverflow.com/a/44556453 */
-const isObject = (o) => o.constructor === Object;
+const isObject = (o) => o?.constructor === Object;
 
 const isNonEmptyArray = (a) => Array.isArray(a) && a.length;
 
