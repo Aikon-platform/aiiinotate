@@ -72,7 +72,8 @@ AnnotationList | AnnotationPage | string[]
 - Only exact matches are allowed for `q` and `motivation`
 - About `canvasMin` and `canvasMax`:
     - they are used to search for annotations that target a range of canvases: for example, fetch all anotations between pages 3 and 30 of a manuscript.
-    - See section **Create/update an annotation** for more information and possible issues with canvas indexes.
+    - they are **0-indexed**: the 1st canvas of a manifest is indexed `0`, the 2nd is indexed `1`...
+    - See section [Create/update an annotation](#createupdate-an-annotation) for more information and possible issues with canvas indexes.
 
 ---
 
