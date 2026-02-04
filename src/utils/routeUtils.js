@@ -108,7 +108,7 @@ const paginationSchema = {
   },
   pageSize: {
     type: "integer",
-    default: process.env.PAGE_SIZE || 5000,
+    default: process.env.AIIINOTATE_PAGE_SIZE || 5000,
     minimum: 1,
   }
 }

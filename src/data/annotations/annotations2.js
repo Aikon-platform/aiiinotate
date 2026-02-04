@@ -287,7 +287,7 @@ class Annotations2 extends CollectionAbstract {
     queryUrl,
     queryFilter,
     page=1,
-    pageSize=process.env.PAGE_SIZE,
+    pageSize=process.env.AIIINOTATE_PAGE_SIZE,
     label=undefined
   }) {
     const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
@@ -478,7 +478,7 @@ class Annotations2 extends CollectionAbstract {
     canvasMax=undefined,
     onlyIds=false,
     page=1,
-    pageSize=process.env.PAGE_SIZE
+    pageSize=process.env.AIIINOTATE_PAGE_SIZE
   }) {
     const
       filtersBase = { "on.manifestShortId": manifestShortId },
@@ -547,7 +547,7 @@ class Annotations2 extends CollectionAbstract {
     queryUrl,
     canvasUri,
     page=1,
-    pageSize=process.env.PAGE_SIZE
+    pageSize=process.env.AIIINOTATE_PAGE_SIZE
   }) {
     return this.#paginate({
       queryUrl,

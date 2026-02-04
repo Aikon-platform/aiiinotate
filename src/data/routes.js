@@ -76,7 +76,7 @@ function commonRoutes(fastify, options, done) {
             fastify.schemasResolver(iiifAnnotationListSchema)
           ]
         })
-          // { 200: iiifAnnotationListSchema }
+        // { 200: iiifAnnotationListSchema }
       },
       preValidation: async (request, reply) => {
         const

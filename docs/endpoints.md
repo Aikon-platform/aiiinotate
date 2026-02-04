@@ -51,7 +51,7 @@ Implementation of the [IIIF Search API](https://iiif.io/api/search/2.0/), to sea
         - `canvasMax` must be greater than `canvasMin`
         - if `canvasMax` is undefined, then we will only return the annotations that target a canvas at the `canvasMin` position in its manifest.
     - `page` (`number`): results are paginated. This specifies the page number
-    - `pageSize` (`number`): number of annotations to display per page. Defaults to `process.env.PAGE_SIZE`.
+    - `pageSize` (`number`): number of annotations to display per page. Defaults to `process.env.AIIINOTATE_PAGE_SIZE`.
     - `onlyIds` (`boolean`): return just the value of `@id` fields of matched annotations as a `string[]` instead of returning all the annotations. If `onlyIds=true`, there is no pagination, `page` and `pageSize` won't have any effect.
 
 #### Response
@@ -168,7 +168,7 @@ GET /annotations/{iiif_version}/search
 - Query:
     - `canvasUri` (`string`): the URI of the target canvas
     - `page` (`number`): results are paginated. Specifies the page number.
-    - `pageSize` (`number`): number of items per page. Defaults to `process.env.PAGE_SIZE`.
+    - `pageSize` (`number`): number of items per page. Defaults to `process.env.AIIINOTATE_PAGE_SIZE`.
 
 #### Response
 
@@ -176,7 +176,7 @@ Results are paginated.
 
 ```
 AnnotationList | AnnotationPage
-``` 
+```
 
 ---
 
