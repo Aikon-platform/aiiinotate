@@ -261,7 +261,7 @@ Create or update a single annotation
     - `manifestUri`, `manifestShortId`, `canvasIdx`:
         - `annotation.on[0].manifestUri`: the URI of the manifest on which is an annotation
         - `annotation.on[0].manifestShortId`: the unique identifier of the manifest on which is an annotation
-        - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer
+        - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer. `canvasIdx` is**0-indexed**: the 1st canvas in a manifest is indexed `0`
         - this depends on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
         - the annotation's target's manifest is fetched and inserted in the database, if possible, and stored in `annotation.on[0].manifestShortId`
         - If `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the proicess of fetching the target manifest or populating the `canvasIdx` field.
