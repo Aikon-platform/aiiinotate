@@ -128,16 +128,23 @@ class Annotations2 extends CollectionAbstract {
    * some of the work consists of translating what is defined by the OpenAnnotations standard to what is actually used by IIIF annotations.
    * if `update`, some cleaning will be skipped (especially the redefinition of "@id"), otherwise updates would fail.
    *
-   * @param {object} annotation
-   * @param {boolean} update - set to `true` if performing an update instead of an insert.
+   * @param {{ annotation: object, update: boolean, throwOnXywhError: boolean }} annotation
    * @returns {object}
    */
-  async #cleanAnnotation(annotation, update=false) {
+  async #cleanAnnotation({
+    annotation,
+    update=false,
+    throwOnXywhError=false
+  }) {
     // 1) extract ids and targets. convert the target to an array.
     // we assume that all values of `annotationTargetArray` point to the same manifest => `manifestShortId` is extracted from the 1st target
     const
       annotationTargetArray = await makeTarget(annotation),
       manifestShortId = annotationTargetArray[0].manifestShortId;
+
+    if ( throwOnXywhError && annotationTargetArray[0]?.xywh.some(x => isNaN(x)) ) {
+      throw this.insertError("annotations2.#cleanAnnotation: could not extract bounding box for annotation target", annotation.on);
+    }
 
     // in updates, "@id" has aldready been extracted
     if ( !update ) {
@@ -183,17 +190,17 @@ class Annotations2 extends CollectionAbstract {
    * take an annotationList, clean it and return it as a array of annotations.
    * see: https://iiif.io/api/presentation/2.1/#annotation-list
    * @param {object} annotationList
-   * @returns {object[]}
+   * @param {boolean} throwOnXywhError
+   * @returns {Promise<object[]>}
    */
-  async #cleanAnnotationList(annotationList) {
+  async #cleanAnnotationList(annotationList, throwOnXywhError=false) {
     // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
     if ( this.validatorAnnotationList(annotationList) ) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
-    //NOTE: using an arrow function is necessary to avoid losing the scope of `this`. otherwise, `this` is undefined in `#cleanAnnotation`.
     return await Promise.all(
       annotationList.resources.map(async (ressource) =>
-        await this.#cleanAnnotation(ressource)
+        await this.#cleanAnnotation({ annotation: ressource, throwOnXywhError })
       )
     )
   }
@@ -322,12 +329,17 @@ class Annotations2 extends CollectionAbstract {
    * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
    * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
    *
+   * about `throwOnXywhError`: XYWH bounding-box extraction of an annotation is not supported for all selectors (see: `selectorToXywh()`).
+   * by default, no error is raised if a bounding box can't be extracted.
+   * if `throwOnXywhError`, an error will be thrown. this is for controlled environments where you know exactly what you'll be sending aiiinotate and must rely on `xywh`
+   *
    * @param {object} annotation
-   * @param {boolean?} throwOnCanvasIndexError
+   * @param {boolean} throwOnCanvasIndexError
+   * @param {boolean} throwOnXywhError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotation(annotation, throwOnCanvasIndexError=false) {
-    annotation = await this.#cleanAnnotation(annotation);
+  async insertAnnotation(annotation, throwOnCanvasIndexError=false, throwOnXywhError=false) {
+    annotation = await this.#cleanAnnotation({ annotation, update: false, throwOnXywhError });
     annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
   }
@@ -336,11 +348,12 @@ class Annotations2 extends CollectionAbstract {
    * TODO: handle side effects when changing `annotation.on`: changes that can affect `manifestShortId`, `manifestUri` and `canvasIdx`
    *    (for example, updating `annotation.on.full` would ask to change `canvasIdx`).
    * @param {object} annotation
+   * @param {boolean} throwOnXywhError
    * @returns {Promise<UpdateResponseType>}
    */
-  async updateAnnotation(annotation) {
+  async updateAnnotation(annotation, throwOnXywhError=false) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
-    annotation = await this.#cleanAnnotation(annotation, true);
+    annotation = await this.#cleanAnnotation({ annotation, update: true, throwOnXywhError });
     const
       query = { "@id": annotation["@id"] },
       update = { $set: annotation };
@@ -358,9 +371,9 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotationList(annotationList, throwOnCanvasIndexError) {
+  async insertAnnotationList(annotationList, throwOnCanvasIndexError=false, throwOnXywhError=false) {
     let annotationArray;
-    annotationArray = await this.#cleanAnnotationList(annotationList);
+    annotationArray = await this.#cleanAnnotationList(annotationList, throwOnXywhError);
     annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
     return this.insertMany(annotationArray);
   }
