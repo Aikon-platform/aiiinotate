@@ -239,8 +239,8 @@ Create or update a single annotation
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
     - `action` (`create | update`): the action to perform: create or update an annotation
 - Query:
-    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index.
-    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails.
+    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index. See [Appendix 1](#appendix-1-annotation-canvas-index-and-bounding-box-calculation)
+    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails. See [Appendix 1](#appendix-1-annotation-canvas-index-and-bounding-box-calculation)
 - Body (`Object`): a IIIF annotation that follows the IIIF Presentation API 2 or 3 (depending on the value of `iiif_version`)
 
 #### Response
@@ -269,8 +269,8 @@ Batch insert multiple annotations.
 - Parameters:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
 - Query:
-    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index.
-    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails.
+    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index. See [Appendix 1](#appendix-1-annotation-canvas-index-and-bounding-box-calculation)
+    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails. See [Appendix 1](#appendix-1-annotation-canvas-index-and-bounding-box-calculation)
 - Body: either:
     - a full `AnnotationList | AnnotationPage` embedded in the body (type must match `iiif_version`: AnnotationPage for IIIF 3, AnnotationList for IIIF 2).
     - `AnnotationList[] | AnnotationPage[]` (type must match `iiif_version`): an array of annotation lists or pages
