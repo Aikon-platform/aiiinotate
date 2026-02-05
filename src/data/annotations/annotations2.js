@@ -142,10 +142,6 @@ class Annotations2 extends CollectionAbstract {
       annotationTargetArray = await makeTarget(annotation),
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
-    if ( annotationTargetArray[0].selector["@type"] === "oa:CssSelector" ) {
-      visibleLog(annotationTargetArray);
-    }
-
     if ( throwOnXywhError && annotationTargetArray[0]?.xywh.some(x => isNaN(x)) ) {
       throw this.insertError("annotations2.#cleanAnnotation: could not extract bounding box for annotation target", annotation.on);
     }

@@ -67,13 +67,6 @@ const getSchema = (fastify, slug) =>
 
 function addSchemas(fastify, options, done) {
 
-  /////////////////////////////////////////////
-  // GENERIC STUFF
-
-  fastify.addSchema({
-    $id: makeSchemaUri("context"),
-    type: "string"
-  });
 
   /////////////////////////////////////////////
   // SPECIFIC RESOURCES
@@ -89,7 +82,7 @@ function addSchemas(fastify, options, done) {
         type: "string",
         enum: [ "iiif:ImageApiSelector" ]
       },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       region: { type: "string" },
       size: { type: "string" },
       rotation: { type: "string" },
@@ -314,7 +307,7 @@ function addSchemas(fastify, options, done) {
     required: [ "@id", "@context", "@type", "motivation", "on" ],
     properties: {
       "@id": { type: "string" },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": { type: "string", enum: [ "oa:Annotation" ] },
       motivation: { $ref: makeSchemaUri("motivation") },
       on: { $ref: makeSchemaUri("annotationTarget") },
@@ -331,7 +324,7 @@ function addSchemas(fastify, options, done) {
     required: ["@id", "@type", "@context", "resources"],
     properties: {
       "@id": { type: "string" },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": {
         type: "string",
         enum: [ "sc:AnnotationList" ]
@@ -407,7 +400,7 @@ function addSchemas(fastify, options, done) {
     type: "object",
     required: [ "@id", "@type", "@context", "members" ],
     properties: {
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": { type: "string", enum: [ "sc:Collection" ] },
       "@id": { type: "string" },
       label: { type: "string" },

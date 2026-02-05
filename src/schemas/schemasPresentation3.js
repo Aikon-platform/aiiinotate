@@ -17,19 +17,13 @@ const getSchema = (fastify, slug) =>
 
 function addSchemas(fastify, options, done) {
 
-  fastify.addSchema({
-    $id: makeSchemaUri("context"),
-    type: "string",
-    enum: [ IIIF_PRESENTATION_3_CONTEXT["@context"] ]
-  });
-
   // minimal schema for IIIF manifests3, containing just what we need to process a manifest
   fastify.addSchema({
     $id: makeSchemaUri("manifestPublic"),
     type: "object",
     required: [ "@context", "id", "items" ],
     properties: {
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       id: { type: "string" },
       items: {
         type: "array",

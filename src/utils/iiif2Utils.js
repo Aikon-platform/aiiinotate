@@ -215,9 +215,6 @@ const makeSingleTarget = async (target) => {
   specificResource.xywh = await selectorToXywh(specificResource.selector);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
-  if ( !specificResource.xywh?.length ) {
-    visibleLog(specificResource.xywh);
-  }
 
   return specificResource
 }
