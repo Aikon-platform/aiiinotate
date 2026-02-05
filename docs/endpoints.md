@@ -239,7 +239,8 @@ Create or update a single annotation
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
     - `action` (`create | update`): the action to perform: create or update an annotation
 - Query:
-    - `throwOnCanvasIndexError` (`boolean`): if there is an error fetching the related manifest, or getting a target canvas' index, throw an error.
+    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index.
+    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails.
 - Body (`Object`): a IIIF annotation that follows the IIIF Presentation API 2 or 3 (depending on the value of `iiif_version`)
 
 #### Response
@@ -253,25 +254,6 @@ Create or update a single annotation
 }
 ```
 
-#### Notes
-
-- A side effect of inserting annotations is inserting the related manifests.
-- When inserting an annotation, the annotation's target manifest is also fetched and inserted in the database
-- Annotations in `aiiinotate` contain nonstandard fields. In IIIF presentation 2.x,
-    - `manifestUri`, `manifestShortId`, `canvasIdx`:
-        - `annotation.on[0].manifestUri`: the URI of the manifest on which is an annotation
-        - `annotation.on[0].manifestShortId`: the unique identifier of the manifest on which is an annotation
-        - `annotation.on[0].canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer. `canvasIdx` is **0-indexed**: the 1st canvas in a manifest is indexed `0`
-        - this depends on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
-        - the annotation's target's manifest is fetched and inserted in the database, if possible, and stored in `annotation.on[0].manifestShortId`
-        - If `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the proicess of fetching the target manifest or populating the `canvasIdx` field.
-        - fetching an annotation's target manfest is error prone: it depends on the manifest being available through HTTP, which is not in our control.
-        - in turn, normally, if there's an error, we will just add the issue to `fetchErrorIds` and not throw.
-        - in controlled environments where you know your manifests WILL be available and where you rely heavily on the `canvasIdx` field (like AIKON), throwing an error will ensure that the `canvasIdx` field is always defined.
-   - `annotation.on[0].xywh`: the annotation's bounding box on its target canvas.
-        - when inserting an annotation, aiiinotate will attempt to extract its XYWH bounding box and store it as an `[number,number,number,number]`.
-        - this only works for `oa:SvgSelectors`, `oa:FragmentSeletors`, `oa:Choice` containing either an `SvgSelector` or a `FragmentSelector`, or a string-target (an URI with a `#xywh=` fragment selector).
-
 ---
 
 ### Insert several annotations
@@ -284,8 +266,11 @@ Batch insert multiple annotations.
 
 #### Request
 
-- Query:
+- Parameters:
     - `iiif_version` (`2 | 3`): the IIIF version of the annotation
+- Query:
+    - `throwOnCanvasIndexError` (`boolean`): throw an error if there's a problem fetching the annotation's target canvas index.
+    - `throwOnXywhError` (`boolean`): throw an error if target bounding box calculation fails.
 - Body: either:
     - a full `AnnotationList | AnnotationPage` embedded in the body (type must match `iiif_version`: AnnotationPage for IIIF 3, AnnotationList for IIIF 2).
     - `AnnotationList[] | AnnotationPage[]` (type must match `iiif_version`): an array of annotation lists or pages
@@ -310,7 +295,42 @@ Batch insert multiple annotations.
 
 ---
 
-## Appending 1: App logic: URL prefixes
+## Appendix 1: annotation canvas index and bounding box calculation
+
+Two non-standard side-effects happen when inserting an annotation:
+- the annotation's target manifest is also fetched and inserted in the database. The annotation's target canvas index is fetched and added to the annotation.
+- calculating the XYWH bounding box of an annotation.
+
+Annotations in `aiiinotate` contain nonstandard fields. In IIIF presentation 2.x,
+- `manifestUri`, `manifestShortId`, `canvasIdx`:
+    - `annotation.on.manifestUri`: the URI of the manifest on which is an annotation
+    - `annotation.on.manifestShortId`: the unique identifier of the manifest on which is an annotation
+    - `annotation.on.canvasIdx`: the position of an annotation's target canvas within the target manifest, as an integer. `canvasIdx` is **0-indexed**: the 1st canvas in a manifest is indexed from `0`
+    - this relies on reconstructing an annotation's target manifest URL and fetching it. If this process fails, the fields above will be `undefined`.
+    - fetching an annotation's target manfest is error prone: it depends on the manifest being available through HTTP, which is not in our control.
+    - **you can control error throwing** (throw an error if a canvas index can't be found) using:
+        - at route-level, the `throwOnCanvasIndexError` query parameter
+        - at app-level, the `AIIINOTATE_STRICT_MODE` env variable.
+        - if `AIIINOTATE_STRICT_MODE` or `throwOnCanvasIndexError`, an error will be thrown if an error appears anywhere in the process of fetching the target manifest and populating the `canvasIdx` field.
+- `annotation.on.xywh`: the annotation's bounding box on its target canvas.
+    - when inserting an annotation, aiiinotate will attempt to extract its XYWH bounding box and store it as an `[number,number,number,number]`.
+    - this only works for `oa:SvgSelectors`, `oa:FragmentSeletors`, `oa:Choice` containing either an `SvgSelector` or a `FragmentSelector`, or a string-target (an URI with a `#xywh=` fragment selector).
+    - **you can control error-throwing** (throw an error if a bounding-box can't be calculated) using:
+        - at route-level, the `throwOnXywhError` query parameter
+        - at app-level, the `AIIINOTATE_STRICT_MODE` env variable.
+
+About `throwOnCanvasIndexError`, `throwOnXywhError` and `AIIINOTATE_STRICT_MODE`:
+- as indicated above, fetching an annotation's target canvas index and calculating an annotation's target bounding boxc is error prone.
+- in turn, you can decide wether or not to throw errors using:
+    - at route-level, the `throwOnCanvasIndexError` (for canvas index) and `throwOnXywhError` (for bounding box) query parameters
+    - at app-level, the `AIIINOTATE_STRICT_MODE` env variable. Setting this to `true` will set the value of `throwOnCanvasIndexError` and `throwOnXywhError` to `true` by default.
+    - the value of `AIIINOTATE_STRICT_MODE` can be overridden by setting a value to query parameters `throwOnCanvasIndexError` and `throwOnXywhError`.
+- if those are set to `true`, an error will be thrown if a canvas index can't be found. Otherwise, the values will be set to `undefined`.
+- in controlled environments where you know your manifests will be available and where you rely heavily on the `canvasIdx` field (like AIKON), throwing an error will ensure that the `canvasIdx` field is always defined.
+
+---
+
+## Appendix 2: App logic: URL prefixes
 
 URL anatomy is a mix of [SAS endpoints](./specifications/4_sas.md) and IIIF specifications. In turn, we define the following prefixes:
 
@@ -338,7 +358,7 @@ There is an extra URL prefix: `schemas`. It is only used internally (not accessi
 
 ---
 
-## Appendix 2: IIIF URIs
+## Appendix 3: IIIF URIs
 
 IIIF URIs in the Presentation 2.1 API are:
 
