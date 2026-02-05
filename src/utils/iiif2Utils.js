@@ -193,16 +193,17 @@ const stringToSpecificResource = (target) => {
  * @returns {Promise<object>}
  */
 const makeSingleTarget = async (target) => {
-  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResouece or an array of SpecificResources`, { info: target });
+  const err = new Error(`${makeSingleTarget.name}: could not make target for annotation: 'annotation.on' must be an URI, a SpecificResource or an array of SpecificResources. The key 'SpecificResource.full' MUST be defined.`, { info: target });
 
   let specificResource;
 
-  // 1. convert to SpecificResouece
+  // 1. convert to SpecificResource
   if ( typeof(target) === "string" && !isNullish(target) ) {
     specificResource = stringToSpecificResource(target);
   } else if ( isObject(target) && target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
     specificResource = target;
     specificResource.selector = normalizeSelectorType(specificResource.selector);
+
   // if target is neither a string nor a SpecificResource, raise
   } else {
     throw err
@@ -214,6 +215,9 @@ const makeSingleTarget = async (target) => {
   specificResource.xywh = await selectorToXywh(specificResource.selector);
   specificResource.manifestUri = canvasUriToManifestUri(specificResource.full);
   specificResource.manifestShortId = getManifestShortId(specificResource.full);
+  if ( !specificResource.xywh?.length ) {
+    visibleLog(specificResource.xywh);
+  }
 
   return specificResource
 }

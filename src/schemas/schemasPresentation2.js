@@ -7,7 +7,7 @@ import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUti
 // TODO: schemas are maybe wayyy too strict.
 // convert all enums (the arrays below) to { type: string } ?
 
-const oaSelectorTypes = [
+const oaSelectorValues = [
   "oa:FragmentSelector",
   "oa:CssSelector",
   "oa:XPathSelector",
@@ -72,8 +72,7 @@ function addSchemas(fastify, options, done) {
 
   fastify.addSchema({
     $id: makeSchemaUri("context"),
-    type: "string",
-    enum: [ IIIF_PRESENTATION_2_CONTEXT["@context"] ]
+    type: "string"
   });
 
   /////////////////////////////////////////////
@@ -83,7 +82,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("iiifImageApiSelector"),
     type: "object",
-    required: [ "@id", "@type", "@context" ],
+    required: [ "@type", "@context" ],
     properties: {
       "@id": { type: "string" },
       "@type": {
@@ -108,17 +107,17 @@ function addSchemas(fastify, options, done) {
     properties: {
       "@id": { type: "string" },
       "@type": {
-        anyOf: [
+        oneOf: [
           {
             type: "string",
-            enum: oaSelectorTypes
+            enum: oaSelectorValues
           },
           {
             // IIIF 2.1 has examples with multiple `@types`: // `chars` is used by SvgSelector in: https://iiif.io/api/presentation/2.1/#non-rectangular-segments
             type: "array",
             items: {
               type: "string",
-              enum: oaSelectorTypes
+              enum: oaSelectorValues
             }
           }
         ]
@@ -204,8 +203,13 @@ function addSchemas(fastify, options, done) {
         ]
       },
       xywh: {
-        type: "array",
-        items: { type: "number" }
+        oneOf: [
+          {
+            type: "array",
+            items: { type: "number" }
+          },
+          { type: "null" }
+        ]
       },
       selector: { $ref: makeSchemaUri("selector") },
       purpose: { type: "string" }
