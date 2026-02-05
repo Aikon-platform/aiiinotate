@@ -20,7 +20,7 @@ const isNullOrUndefined = (v) => v == null;
 const isNullish = (v) => v == null || !v.length;
 
 /** o is an object but not an array. https://stackoverflow.com/a/44556453 */
-const isObject = (o) => o.constructor === Object;
+const isObject = (o) => o?.constructor === Object;
 
 const isNonEmptyArray = (a) => Array.isArray(a) && a.length;
 
@@ -305,6 +305,8 @@ const memoize = (fn, timeout = 2000) => {
   }
 }
 
+const STRICT_MODE = process.env.AIIINOTATE_STRICT_MODE?.toLowerCase() === "true";
+
 export {
   maybeToArray,
   pathToUrl,
@@ -323,5 +325,6 @@ export {
   visibleLog,
   isNonEmptyArray,
   mergeObjects,
-  memoize
+  memoize,
+  STRICT_MODE
 }

@@ -64,7 +64,7 @@ test("test annotation Routes", async (t) => {
     for ( let i=0; i<data.length; i++ ) {
       let [ testData, func ] = data.at(i);
       for ( let i=0; i<testData.length; i++ ) {
-        await func(t, "/annotations/2/createMany", testData.at(i));
+        await func(t, "/annotations/2/createMany?throwOnXywhError=true", testData.at(i));
       }
     }
 
@@ -95,18 +95,9 @@ test("test annotation Routes", async (t) => {
     ]
     for ( const [ testData, func ] of data ) {
       for ( let i=0; i<testData.length; i++ ) {
-        await func(t, "/annotations/2/create", testData.at(i));
+        await func(t, "/annotations/2/create?throwOnXywhError=true", testData.at(i));
       }
     };
-
-    // test throwOnCanvasIndexError
-    const annotationWithTargetError = structuredClone(fastify.fixtures.annotations2Valid.at(0));
-    annotationWithTargetError.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
-    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
-    for (let i=0; i<data.length; i++) {
-      const [func, v] = data.at(i);
-      await func(t, `/annotations/2/create?throwOnCanvasIndexError=${v}`, annotationWithTargetError)
-    }
 
     // test SVG to XYWH conversion
     // 1. insert and assert there was no mistake
@@ -125,6 +116,34 @@ test("test annotation Routes", async (t) => {
         t.assert.deepStrictEqual(target.xywh.every((i) => !isNaN(i)), true);
       })
     }
+
+    // test throwOnCanvasIndexError
+    let annotationError;
+    annotationError = structuredClone(fastify.fixtures.annotations2Valid.at(0));
+    annotationError.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
+    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    for (let i=0; i<data.length; i++) {
+      const [func, v] = data.at(i);
+      await func(t, `/annotations/2/create?throwOnCanvasIndexError=${v}`, annotationError)
+    }
+
+    // test throwOnXywhError. SvgSelectors are not supported, so this should fail
+    annotationError = structuredClone(fastify.fixtures.annotations2Valid.at(0));
+    // NOTE : this is an SVG selector and not a CSS selector !!!!
+    annotationError.on = {
+      "@type": "oa:SpecificResource",
+      "full": "https://aikon.enpc.fr/aikon/iiif/v2/wit9_man11_anno165/canvas/c11.json",
+      selector: {
+        "@context": "http://iiif.io/api/annex/openannotation/context.json",
+        "@type": "iiif:ImageApiSelector",
+        "region": "50,50,1250,1850"      }
+    }
+    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    for (let i=0; i<data.length; i++) {
+      const [func, v] = data.at(i);
+      await func(t, `/annotations/2/create?throwOnXywhError=${v}`, annotationError);
+    }
+
   })
 
   await t.test("test route /annotations/:iiifPresentationVersion/update", async (t) => {

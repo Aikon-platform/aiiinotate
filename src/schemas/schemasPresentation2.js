@@ -7,7 +7,7 @@ import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUti
 // TODO: schemas are maybe wayyy too strict.
 // convert all enums (the arrays below) to { type: string } ?
 
-const oaSelectorTypes = [
+const oaSelectorValues = [
   "oa:FragmentSelector",
   "oa:CssSelector",
   "oa:XPathSelector",
@@ -67,14 +67,6 @@ const getSchema = (fastify, slug) =>
 
 function addSchemas(fastify, options, done) {
 
-  /////////////////////////////////////////////
-  // GENERIC STUFF
-
-  fastify.addSchema({
-    $id: makeSchemaUri("context"),
-    type: "string",
-    enum: [ IIIF_PRESENTATION_2_CONTEXT["@context"] ]
-  });
 
   /////////////////////////////////////////////
   // SPECIFIC RESOURCES
@@ -83,14 +75,14 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("iiifImageApiSelector"),
     type: "object",
-    required: [ "@id", "@type", "@context" ],
+    required: [ "@type", "@context" ],
     properties: {
       "@id": { type: "string" },
       "@type": {
         type: "string",
         enum: [ "iiif:ImageApiSelector" ]
       },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       region: { type: "string" },
       size: { type: "string" },
       rotation: { type: "string" },
@@ -108,17 +100,17 @@ function addSchemas(fastify, options, done) {
     properties: {
       "@id": { type: "string" },
       "@type": {
-        anyOf: [
+        oneOf: [
           {
             type: "string",
-            enum: oaSelectorTypes
+            enum: oaSelectorValues
           },
           {
             // IIIF 2.1 has examples with multiple `@types`: // `chars` is used by SvgSelector in: https://iiif.io/api/presentation/2.1/#non-rectangular-segments
             type: "array",
             items: {
               type: "string",
-              enum: oaSelectorTypes
+              enum: oaSelectorValues
             }
           }
         ]
@@ -204,8 +196,13 @@ function addSchemas(fastify, options, done) {
         ]
       },
       xywh: {
-        type: "array",
-        items: { type: "number" }
+        oneOf: [
+          {
+            type: "array",
+            items: { type: "number" }
+          },
+          { type: "null" }
+        ]
       },
       selector: { $ref: makeSchemaUri("selector") },
       purpose: { type: "string" }
@@ -310,7 +307,7 @@ function addSchemas(fastify, options, done) {
     required: [ "@id", "@context", "@type", "motivation", "on" ],
     properties: {
       "@id": { type: "string" },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": { type: "string", enum: [ "oa:Annotation" ] },
       motivation: { $ref: makeSchemaUri("motivation") },
       on: { $ref: makeSchemaUri("annotationTarget") },
@@ -327,7 +324,7 @@ function addSchemas(fastify, options, done) {
     required: ["@id", "@type", "@context", "resources"],
     properties: {
       "@id": { type: "string" },
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": {
         type: "string",
         enum: [ "sc:AnnotationList" ]
@@ -403,7 +400,7 @@ function addSchemas(fastify, options, done) {
     type: "object",
     required: [ "@id", "@type", "@context", "members" ],
     properties: {
-      "@context": { $ref: makeSchemaUri("context") },
+      "@context": { type: "string" },
       "@type": { type: "string", enum: [ "sc:Collection" ] },
       "@id": { type: "string" },
       label: { type: "string" },

@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog, STRICT_MODE } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
@@ -206,11 +206,12 @@ function annotationsRoutes(fastify, options, done) {
             action: { type: "string", enum: [ "create", "update" ] }
           }
         },
-        // NOTE: throwOnCanvasIndexError is only implemented if `action==="create"` (see preValidation)
+        // NOTE: `throwOnCanvasIndexError` is only implemented if `action==="create"` (see preValidation)
         querystring: {
           type: "object",
           properties: {
-            throwOnCanvasIndexError: { type: "boolean" },
+            throwOnCanvasIndexError: { type: "boolean", default: STRICT_MODE },
+            throwOnXywhError: { type: "boolean", default: STRICT_MODE },
           }
         },
         preValidation: async (request, reply) => {
@@ -218,7 +219,7 @@ function annotationsRoutes(fastify, options, done) {
             { action } = request.params,
             { throwOnCanvasIndexError } = request.querystring;
           if ( action==="update" && throwOnCanvasIndexError ) {
-            returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.")
+            returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.");
           }
           return;
         },
@@ -229,7 +230,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion, action } = request.params,
-        { throwOnCanvasIndexError } = request.query,
+        { throwOnCanvasIndexError, throwOnXywhError } = request.query,
         annotation = request.body;
 
       try {
@@ -237,8 +238,8 @@ function annotationsRoutes(fastify, options, done) {
         // insert or update
         if ( iiifPresentationVersion === 2 ) {
           return action==="create"
-            ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError)
-            : await annotations2.updateAnnotation(annotation);
+            ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError)
+            : await annotations2.updateAnnotation(annotation, throwOnXywhError);
         } else {
           annotations3.notImplementedError();
         }
@@ -275,7 +276,8 @@ function annotationsRoutes(fastify, options, done) {
         querystring: {
           type: "object",
           properties: {
-            throwOnCanvasIndexError: { type: "boolean", },
+            throwOnCanvasIndexError: { type: "boolean", default: STRICT_MODE },
+            throwOnXywhError: { type: "boolean", default: STRICT_MODE },
           }
         },
         body: routeAnnotationCreateManySchema,
@@ -285,7 +287,7 @@ function annotationsRoutes(fastify, options, done) {
     async (request, reply) => {
       const
         { iiifPresentationVersion } = request.params,
-        { throwOnCanvasIndexError } = request.query,
+        { throwOnCanvasIndexError, throwOnXywhError } = request.query,
         body = maybeToArray(request.body),  // convert to an array to have a homogeneous data structure
         insertResponseArray = [];
 
@@ -310,7 +312,7 @@ function annotationsRoutes(fastify, options, done) {
         if ( iiifPresentationVersion === 2 ) {
           await Promise.all(annotationsArray.map(
             async (annotationList) => {
-              const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError);
+              const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError, throwOnXywhError);
               insertResponseArray.push(r);
             }
           ));
