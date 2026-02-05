@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, inspectObj, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog, STRICT_MODE } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
@@ -210,8 +210,8 @@ function annotationsRoutes(fastify, options, done) {
         querystring: {
           type: "object",
           properties: {
-            throwOnCanvasIndexError: { type: "boolean", default: false },
-            throwOnXywhError: { type: "boolean", default: false },
+            throwOnCanvasIndexError: { type: "boolean", default: STRICT_MODE },
+            throwOnXywhError: { type: "boolean", default: STRICT_MODE },
           }
         },
         preValidation: async (request, reply) => {
@@ -276,8 +276,8 @@ function annotationsRoutes(fastify, options, done) {
         querystring: {
           type: "object",
           properties: {
-            throwOnCanvasIndexError: { type: "boolean", default: false },
-            throwOnXywhError: { type: "boolean", default: false },
+            throwOnCanvasIndexError: { type: "boolean", default: STRICT_MODE },
+            throwOnXywhError: { type: "boolean", default: STRICT_MODE },
           }
         },
         body: routeAnnotationCreateManySchema,

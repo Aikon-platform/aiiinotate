@@ -6,7 +6,7 @@ import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, inspectObj, visibleLog, memoize } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize, STRICT_MODE } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
@@ -134,7 +134,7 @@ class Annotations2 extends CollectionAbstract {
   async #cleanAnnotation({
     annotation,
     update=false,
-    throwOnXywhError=false
+    throwOnXywhError=STRICT_MODE
   }) {
     // 1) extract ids and targets. convert the target to an array.
     // we assume that all values of `annotationTargetArray` point to the same manifest => `manifestShortId` is extracted from the 1st target
@@ -193,7 +193,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} throwOnXywhError
    * @returns {Promise<object[]>}
    */
-  async #cleanAnnotationList(annotationList, throwOnXywhError=false) {
+  async #cleanAnnotationList(annotationList, throwOnXywhError=STRICT_MODE) {
     // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
     if ( this.validatorAnnotationList(annotationList) ) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
@@ -213,7 +213,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {object|object[]} annotationData - an annotation, or array of annotations.
    * @param {boolean} throwOnCanvasIndexError - if canvasIdx can't be found, raise an error.
    */
-  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError=false) {
+  async #insertManifestsAndGetCanvasIdx(annotationData, throwOnCanvasIndexError=STRICT_MODE) {
     // NOTE: instead of propagating `throwOnCanvasIndexError` to `insertManifestsFromUriArray`, we could just check if `insertResponse.fetchErrorIds.length > 0` and return an error then.
     // convert objects to array to get a uniform interface.
     let converted;
@@ -338,7 +338,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} throwOnXywhError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotation(annotation, throwOnCanvasIndexError=false, throwOnXywhError=false) {
+  async insertAnnotation(annotation, throwOnCanvasIndexError=STRICT_MODE, throwOnXywhError=STRICT_MODE) {
     annotation = await this.#cleanAnnotation({ annotation, update: false, throwOnXywhError });
     annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     return this.insertOne(annotation);
@@ -351,7 +351,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean} throwOnXywhError
    * @returns {Promise<UpdateResponseType>}
    */
-  async updateAnnotation(annotation, throwOnXywhError=false) {
+  async updateAnnotation(annotation, throwOnXywhError=STRICT_MODE) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
     annotation = await this.#cleanAnnotation({ annotation, update: true, throwOnXywhError });
     const
@@ -371,7 +371,7 @@ class Annotations2 extends CollectionAbstract {
    * @param {boolean?} throwOnCanvasIndexError
    * @returns {Promise<InsertResponseType>}
    */
-  async insertAnnotationList(annotationList, throwOnCanvasIndexError=false, throwOnXywhError=false) {
+  async insertAnnotationList(annotationList, throwOnCanvasIndexError=STRICT_MODE, throwOnXywhError=STRICT_MODE) {
     let annotationArray;
     annotationArray = await this.#cleanAnnotationList(annotationList, throwOnXywhError);
     annotationArray = await this.#insertManifestsAndGetCanvasIdx(annotationArray, throwOnCanvasIndexError);
