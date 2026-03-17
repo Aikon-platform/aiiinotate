@@ -3,6 +3,7 @@ import cliProgress from "cli-progress";
 
 import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import FastifyClient from "#cli/utils/fastifyClient.js";
+import ProgressBar from "#cli/utils/progressbar.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -53,7 +54,7 @@ async function importAnnotationPage(fastifyClient, fileArr) {
 
 function makeProgressBar(desc) {
   return new cliProgress.SingleBar({
-    format: `${desc} [{bar}] {percentage}% {value}/{total} Time left: {eta}s`,
+    format: `${desc} [{bar}] {percentage}% {value}/{total} Time left: {eta}s\n`,
     stopOnComplete: true,
   }, cliProgress.Presets.shades_classic);
 }
@@ -67,14 +68,13 @@ async function importAnnotationList(fastifyClient, fileArr) {
   // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
   let totalImports = 0
 
-  const pb = makeProgressBar("importing annotations")
-  pb.start(fileArr.length, 0)
+  const pb = new ProgressBar({ desc: "importing annotations", total: fileArr.length});
   for ( const [i, file] of fileArr.entries() ) {
     const annotationList = JSON.parse(fileRead(file));
+    // console.log(annotationList);
     const result = await fastifyClient.importAnnotationList(annotationList);
-    console.log(result);
     pb.update(i)
-    // totalImports += Object.keys(result).length;
+    totalImports += Object.keys(result).length;
   }
 
   console.log(`\n\nDONE: imported ${totalImports} annotations into Aiiinotate !`);
