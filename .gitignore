@@ -5,3 +5,4 @@ data/*
 **/.env
 *.bak
 **/aikon-enpc-fr-annotation-lists.txt
+**/logs/*

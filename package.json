@@ -79,6 +79,7 @@
     "@stylistic/eslint-plugin": "^5.2.3",
     "eslint": "^9.33.0",
     "globals": "^16.3.0",
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "pino-pretty": "^13.1.3"
   }
 }

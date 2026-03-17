@@ -1,43 +1,50 @@
-const path = require('path');
-const fs = require('fs');
-const pino = require('pino');
+import path from "path";
+import fs from "fs";
+
+import pino from "pino";
 
 // Create logs directory if it doesn't exist
-const LOG_DIR = path.join(process.cwd(), 'logs');
+const LOG_DIR = path.join(process.cwd(), "logs");
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
 }
 
+const stdoutLogTarget = {
+  level: "debug",
+  target: "pino-pretty",
+  options: {
+    colorize: true,
+    singleLine: false,
+    translateTime: "SYS:standard",
+  },
+}
+
+const fileLogTargets = [
+  {
+    level: "debug",
+    target: "pino/file",
+    options: { destination: path.join(LOG_DIR, "debug.log") },
+  },
+  // {
+  //   level: "info",
+  //   target: "pino/file",
+  //   options: { destination: path.join(LOG_DIR, "info.log") },
+  // },
+  {
+    level: "error",
+    target: "pino/file",
+    options: { destination: path.join(LOG_DIR, "error.log") },
+  },
+]
+
 // Create Pino logger with JSON transports
 const pinoLogger = pino(
   {
-    level: process.env.LOG_LEVEL || 'debug',
+    level: process.env.LOG_LEVEL || "debug",
     transport: {
       targets: [
-        {
-          level: 'debug',
-          target: 'pino/file',
-          options: { destination: path.join(LOG_DIR, 'debug.log') },
-        },
-        {
-          level: 'info',
-          target: 'pino/file',
-          options: { destination: path.join(LOG_DIR, 'info.log') },
-        },
-        {
-          level: 'error',
-          target: 'pino/file',
-          options: { destination: path.join(LOG_DIR, 'error.log') },
-        },
-        {
-          level: 'debug',
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            singleLine: false,
-            translateTime: 'SYS:standard',
-          },
-        },
+        ...fileLogTargets,
+        stdoutLogTarget
       ],
     },
     serializers: {
@@ -60,7 +67,7 @@ class Logger {
   }
 
   _getCaller() {
-    const stack = new Error().stack.split('\n');
+    const stack = new Error().stack.split("\n");
     const callerLine = stack[3]; // Skip Error, _getCaller, and the actual method
     const match = callerLine.match(/at (.+) \((.+):(\d+):(\d+)\)/);
 
@@ -72,7 +79,7 @@ class Logger {
       };
     }
 
-    return { funcName: 'unknown', module: 'unknown', lineno: null };
+    return { funcName: "unknown", module: "unknown", lineno: null };
   }
 
   debug(message, meta = {}) {
@@ -100,6 +107,6 @@ class Logger {
   }
 }
 
-const logger = new Logger();
+const logger = new Logger()
 
-module.exports = logger;
+export default logger;

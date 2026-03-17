@@ -10,6 +10,7 @@ import fixtures from "#fixtures/index.js";
 import schemas from "#schemas/index.js";
 import data from "#data/index.js";
 import db from "#db/index.js";
+import logger from "#utils/logger.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -56,8 +57,6 @@ import db from "#db/index.js";
 //   exposeRoute: true,
 // }
 
-const allowedModes = ["test", "default"];
-
 const fastifyConfigCommon = {
   bodyLimit: 100 * 1048576  // 100 MiB
 }
@@ -73,10 +72,18 @@ const testConfig = {
 
 const defaultConfig = {
   fastify: {
-    logger: true,
+    loggerInstance: logger.pinoLogger,
     ...fastifyConfigCommon
   },
   mongo: { }
+}
+
+const setConfig = (mode) => {
+  const allowedModes = ["test", "default"];
+  if ( ! allowedModes.includes(mode) ) {
+    throw new Error(`app.build: 'mode' param expected one of ${allowedModes}, got ${mode}`)
+  }
+  return mode==="test" ? testConfig : defaultConfig;
 }
 
 /**
@@ -84,14 +91,10 @@ const defaultConfig = {
  * @returns {Promise<FastifyInstanceType>}
  */
 async function build(mode="default") {
-
-  if ( ! allowedModes.includes(mode) ) {
-    throw new Error(`app.build: 'mode' param expected one of ${allowedModes}, got ${mode}`)
-  }
-
   const
-    mongoConfig = mode==="test" ? testConfig.mongo : defaultConfig.mongo,
-    fastifyConfig = mode==="test" ? testConfig.fastify : defaultConfig.fastify,
+    config = setConfig(mode),
+    mongoConfig = config.mongo,
+    fastifyConfig = config.fastify,
     fastify = Fastify(fastifyConfig);
 
   // NOTE: we allow all origins => restrict ?

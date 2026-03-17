@@ -1,5 +1,4 @@
 import { Command, Option, Argument } from "commander";
-import cliProgress from "cli-progress";
 
 import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import FastifyClient from "#cli/utils/fastifyClient.js";
