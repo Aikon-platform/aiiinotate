@@ -56,7 +56,7 @@ function fileArrayValidate (fileArr) {
  * `file` is a path to a file containing paths to other files (1 file per line).
  * parse the file and return an array of absolute paths to files.
  * @param {str} file
- * @returns {string[]}
+ * @returns {Promise<string[]>}
  */
 async function parseImportInputFile(file) {
   // read `file` split it by lines, remove empty lines
@@ -66,7 +66,6 @@ async function parseImportInputFile(file) {
       .filter(l => !l.match(/^\s*$/g));
   return [...new Set(fileArrayValidate(fileArr))];
 }
-
 
 export {
   fileRead,

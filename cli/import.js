@@ -1,4 +1,5 @@
 import { Command, Option, Argument } from "commander";
+import cliProgress from "cli-progress";
 
 import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import FastifyClient from "#cli/utils/fastifyClient.js";
@@ -50,6 +51,13 @@ async function importAnnotationPage(fastifyClient, fileArr) {
   notImplementedExit(`${importAnnotationPage.name} is not implemented`)
 }
 
+function makeProgressBar(desc) {
+  return new cliProgress.SingleBar({
+    format: `${desc} [{bar}] {percentage}% {value}/{total} Time left: {eta}s`,
+    stopOnComplete: true,
+  }, cliProgress.Presets.shades_classic);
+}
+
 /**
  * @param {FastifyClient} fastifyClient
  * @param {string[]} fileArr - array of full paths to annotationLists to insert.
@@ -59,10 +67,13 @@ async function importAnnotationList(fastifyClient, fileArr) {
   // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
   let totalImports = 0
 
-  for (const file of fileArr) {
+  const pb = makeProgressBar("importing annotations")
+  pb.start(fileArr.length, 0)
+  for ( const [i, file] of fileArr.entries() ) {
     const annotationList = JSON.parse(fileRead(file));
     const result = await fastifyClient.importAnnotationList(annotationList);
     console.log(result);
+    pb.update(i)
     // totalImports += Object.keys(result).length;
   }
 
@@ -82,33 +93,19 @@ async function action(mongoClient, command, options) {
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
   /** @type {string[]} */
-  const inputFile = options.inputFile;
-  // /** @type {boolean} */
-  // const listFiles = options.listFiles;
-
-  // checkAllowedImportType(iiifVersion, dataType);
+  const inputFile = options.file;
 
   const fastifyClient = new FastifyClient();
   await fastifyClient.build();
 
-  // TODO update
-  const filesToProcess = parseImportInputFile(inputFile);
-
   // run
+  const filesToProcess = await parseImportInputFile(inputFile);
   if ( iiifVersion===2 ) {
     await importAnnotationList(fastifyClient, filesToProcess);
   } else {
     await importAnnotationPage(fastifyClient, filesToProcess);
   }
-  // switch (dataType) {
-  //   case ("annotation-list"):
-  //     await importAnnotationList(annotations2, filesToProcess, iiifVersion);
-  //     break;
-  //   default:
-  //     notImplementedExit(dataType);
-  // }
   mongoClient.close();
-
 }
 
 /////////////////////////////////////////
