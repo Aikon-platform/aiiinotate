@@ -13,7 +13,6 @@ import { Command, Option } from "commander";
 
 // import dotenvx from "dotenvx";
 
-import makeMongoClient from "#cli/utils/mongoClient.js";
 import makeImportCommand from "#cli/import.js";
 import makeMigrateCommand from "#cli/migrate.js";
 import makeServeCommand from "#cli/serve.js";

@@ -1,9 +1,9 @@
 import { Command, Option, Argument } from "commander";
 
-import Annotations2 from "#annotations/annotations2.js";
-import Annotations3 from "#annotations/annotations3.js";
-import { getFilesToProcess, fileRead, parseImportInputFile } from "#cli/utils/io.js";
-import loadMongoClient from "#cli/utils/mongoClient.js";
+import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
+import FastifyClient from "#cli/utils/fastifyClient.js";
+
+/** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 ////////////////////////////////////////
 
@@ -42,26 +42,28 @@ const parseNumber = (x) => Number(x);
 
 ////////////////////////////////////////
 
-async function importAnnotationPage(annotations3, fileArr, iiifVersion) {
+/**
+ * @param {FastifyInstanceType} fastifyClient
+ * @param {string[]} fileArr - array of full paths to annotationLists to insert.
+ */
+async function importAnnotationPage(fastifyClient, fileArr) {
   notImplementedExit(`${importAnnotationPage.name} is not implemented`)
 }
 
-// TODO change with fastify instance
 /**
- *
- * @param {Annotations2} annotations2
- * @param {string[]} fileArr
- * @param {2|3} iiifVersion
+ * @param {FastifyClient} fastifyClient
+ * @param {string[]} fileArr - array of full paths to annotationLists to insert.
  */
-async function importAnnotationList(annotations2, fileArr, iiifVersion) {
+async function importAnnotationList(fastifyClient, fileArr) {
   // RUN THE SCRIPT:
   // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
   let totalImports = 0
 
   for (const file of fileArr) {
-    const annotationList = JSON.parse(await fileRead(file));
-    const result = await annotations2.insertAnnotationList(annotationList);
-    totalImports += Object.keys(result).length;
+    const annotationList = JSON.parse(fileRead(file));
+    const result = await fastifyClient.importAnnotationList(annotationList);
+    console.log(result);
+    // totalImports += Object.keys(result).length;
   }
 
   console.log(`\n\nDONE: imported ${totalImports} annotations into Aiiinotate !`);
@@ -69,8 +71,6 @@ async function importAnnotationList(annotations2, fileArr, iiifVersion) {
 }
 
 ////////////////////////////////////////
-
-// TODO use parseImportInputFile
 
 /**
  * run the cli
@@ -88,20 +88,17 @@ async function action(mongoClient, command, options) {
 
   // checkAllowedImportType(iiifVersion, dataType);
 
+  const fastifyClient = new FastifyClient();
+  await fastifyClient.build();
+
   // TODO update
   const filesToProcess = parseImportInputFile(inputFile);
 
-  // TODO update with fastify instance
-  const annotations2 = new Annotations2(
-    mongoClient,
-    mongoClient.db()
-  );
-
   // run
   if ( iiifVersion===2 ) {
-    await importAnnotationList(/*...*/)
+    await importAnnotationList(fastifyClient, filesToProcess);
   } else {
-    await importAnnotationPage(/*...*/)
+    await importAnnotationPage(fastifyClient, filesToProcess);
   }
   // switch (dataType) {
   //   case ("annotation-list"):
