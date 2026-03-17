@@ -15,6 +15,7 @@
 import { svgPathBbox } from "svg-path-bbox";
 
 import { visibleLog } from "#utils/utils.js";
+import logger from "#utils/logger.js";
 
 
 /**
@@ -187,7 +188,7 @@ const applyTransform = (bbox, transformStr) => {
       case "rotate": {
         // Simplified: for rotation, we'd need to calculate 4 corners
         // For now, we'll skip proper rotation (requires matrix math)
-        console.warn("Rotation not fully supported in bbox calculation");
+        logger.warn("Rotation not fully supported in bbox calculation");
         break;
       }
       case "matrix": {

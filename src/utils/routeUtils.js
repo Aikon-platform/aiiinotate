@@ -1,4 +1,5 @@
 import { inspectObj, isNonEmptyArray, mergeObjects } from "#utils/utils.js";
+import logger from "#utils/logger.js";
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
@@ -83,7 +84,7 @@ const makeResponsePostSchema = (fastify) => makeResponseSchema(
  */
 const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
   // otherwise, the error is not logged, bad for debugging.
-  console.error(inspectObj(err));
+  logger.error(inspectObj(err));
 
   const error = {
     message: `failed ${request.method.toLocaleUpperCase()} request because of error: ${err.message}`,

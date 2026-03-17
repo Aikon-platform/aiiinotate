@@ -217,11 +217,11 @@ class Manifests2 extends CollectionAbstract {
     );
 
     if ( fetchErrorIds.length ){
-      const errMsg = `${this.funcName(this.insertManifestsFromUriArray)}: error inserting ${fetchErrorIds.length} manifests: ${fetchErrorIds}`
+      const errMsg = `error inserting ${fetchErrorIds.length} manifests: ${fetchErrorIds}`
       if ( throwOnError ) {
         throw this.insertError(errMsg)
       } else if ( fetchErrorIds.length ) {
-        console.error(errMsg, fetchErrorIds);
+        this.fastify.log.error(errMsg, fetchErrorIds);
       }
     }
 

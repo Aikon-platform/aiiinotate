@@ -23,7 +23,7 @@ const fileLogTargets = [
   {
     level: "debug",
     target: "pino/file",
-    options: { destination: path.join(LOG_DIR, "debug.log") },
+    options: { destination: path.join(LOG_DIR, "aiiinotate_debug.log") },
   },
   // {
   //   level: "info",
@@ -33,7 +33,7 @@ const fileLogTargets = [
   {
     level: "error",
     target: "pino/file",
-    options: { destination: path.join(LOG_DIR, "error.log") },
+    options: { destination: path.join(LOG_DIR, "aiiinotate_error.log") },
   },
 ]
 
@@ -59,6 +59,8 @@ const pinoLogger = pino(
     },
   }
 );
+
+// NOTE : to have environment-specific logger behaviour, see: https://fastify.dev/docs/latest/Reference/Logging/#environment-specific-configuration
 
 // Wrapper for caller information
 class Logger {

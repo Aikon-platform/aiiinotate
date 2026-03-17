@@ -1,6 +1,7 @@
 import util from "node:util";
 import Ajv from "ajv";
 
+import logger from "#utils/logger.js";
 
 /**
  * @param {object} obj
@@ -219,9 +220,9 @@ const ajv = new Ajv({
  */
 const ajvCompile = (schema) => {
   if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
-    const err = new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
-    // `console.error` is necessary to be sure that the error will be displayed
-    console.error(err);
+    const err = new Error(`'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
+    // logging is necessary to be sure that the error will be displayed
+    logger.error(err.message);
     throw err;
   }
   return ajv.compile(schema);
