@@ -3,39 +3,14 @@ import { Command, Option, Argument } from "commander";
 import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import FastifyClient from "#cli/utils/fastifyClient.js";
 import ProgressBar from "#cli/utils/progressbar.js";
+import logger from "#utils/logger.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 ////////////////////////////////////////
 
-// // allowed imports
-// const importTypes = [
-//   "annotation",  // import a single annotation
-//   "annotation-list",  // import a IIIF 2.x annotationList
-//   "annotation-page",  // import a IIIF 3.x annotationPage
-//   "manifest",  // import a single manifest
-//   // "annotation-array",  // import a JSON array of IIIF annotations
-//   // "manifest-array"  // import a json array of manifests
-// ]
-
-// // allowed import types per IIIF version
-// const allowedImportTypes = {
-//   2: ["annotation", "annotation-list", "manifest"],
-//   3: ["annotation", "annotation-page", "manifest"]
-// }
-
-// const checkAllowedImportType = (iiifVersion, dataType) => {
-//   if (
-//     ! allowedImportTypes[iiifVersion].includes(dataType)
-//   ) {
-//     console.error(`${checkAllowedImportType.name}: forbidden import type '${dataType}' for IIIF version '${iiifVersion}'. allowed import types are: ${allowedImportTypes[iiifVersion]}`);
-//     process.exit(1);
-//   };
-//
-// }
-
 const notImplementedExit = (method) => {
-  console.log(`\n\nERROR: import is not implemented '${method}'`);
+  logger.error(`\n\nERROR: import is not implemented '${method}'`);
   process.exit(1);
 }
 
@@ -64,13 +39,12 @@ async function importAnnotationList(fastifyClient, fileArr) {
   const pb = new ProgressBar({ desc: "importing annotations", total: fileArr.length});
   for ( const [i, file] of fileArr.entries() ) {
     const annotationList = JSON.parse(fileRead(file));
-    // console.log(annotationList);
     const result = await fastifyClient.importAnnotationList(annotationList);
     pb.update(i)
     totalImports += Object.keys(result).length;
   }
 
-  console.log(`\n\nDONE: imported ${totalImports} annotations into Aiiinotate !`);
+  logger.info(`imported ${totalImports} annotations into Aiiinotate !`);
   return
 }
 

@@ -26,7 +26,7 @@ class FastifyClient {
 
   async stop() {
     await this.fastify.close();
-    console.log("fastify instance successfully closed.");
+    this.fastify.log("fastify instance successfully closed.");
   }
 
   /**
@@ -59,7 +59,6 @@ class FastifyClient {
 
   async importAnnotationList(annotationList) {
     const r = await this.injectPost("/annotations/2/createMany", annotationList);
-    console.log(await r.json())
     return r;
   }
 }
