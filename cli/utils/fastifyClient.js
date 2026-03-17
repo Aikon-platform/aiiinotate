@@ -26,7 +26,7 @@ class FastifyClient {
 
   async stop() {
     await this.fastify.close();
-    this.fastify.log("fastify instance successfully closed.");
+    this.fastify.log.info("fastify instance successfully closed.");
   }
 
   /**
