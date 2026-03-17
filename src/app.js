@@ -13,27 +13,6 @@ import db from "#db/index.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
-const fastifyConfigCommon = {
-  bodyLimit: 100 * 1048576  // 100 MiB
-}
-
-const testConfig = {
-  fastify: {
-    ...fastifyConfigCommon
-  },
-  mongo: {
-    test: true,
-  }
-}
-
-const defaultConfig = {
-  fastify: {
-    logger: true,
-    ...fastifyConfigCommon
-  },
-  mongo: { }
-}
-
 //NOTE: couldn´t get fastify/swagger to work for now...
 // const swaggerConfig = {
 //   openapi: {
@@ -78,6 +57,27 @@ const defaultConfig = {
 // }
 
 const allowedModes = ["test", "default"];
+
+const fastifyConfigCommon = {
+  bodyLimit: 100 * 1048576  // 100 MiB
+}
+
+const testConfig = {
+  fastify: {
+    ...fastifyConfigCommon
+  },
+  mongo: {
+    test: true,
+  }
+}
+
+const defaultConfig = {
+  fastify: {
+    logger: true,
+    ...fastifyConfigCommon
+  },
+  mongo: { }
+}
 
 /**
  * @param {"test"|"default"} mode
