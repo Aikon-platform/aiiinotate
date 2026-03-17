@@ -52,18 +52,12 @@ async function importAnnotationPage(fastifyClient, fileArr) {
   notImplementedExit(`${importAnnotationPage.name} is not implemented`)
 }
 
-function makeProgressBar(desc) {
-  return new cliProgress.SingleBar({
-    format: `${desc} [{bar}] {percentage}% {value}/{total} Time left: {eta}s\n`,
-    stopOnComplete: true,
-  }, cliProgress.Presets.shades_classic);
-}
-
 /**
  * @param {FastifyClient} fastifyClient
  * @param {string[]} fileArr - array of full paths to annotationLists to insert.
  */
 async function importAnnotationList(fastifyClient, fileArr) {
+  fileArr = fileArr.slice(0,10)
   // RUN THE SCRIPT:
   // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
   let totalImports = 0
@@ -88,7 +82,7 @@ async function importAnnotationList(fastifyClient, fileArr) {
  * @param {import('commander').Command} command
  * @param {object} options
  */
-async function action(mongoClient, command, options) {
+async function action(command, options) {
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
@@ -105,13 +99,14 @@ async function action(mongoClient, command, options) {
   } else {
     await importAnnotationPage(fastifyClient, filesToProcess);
   }
-  mongoClient.close();
+  // exit
+  await fastifyClient.stop();
 }
 
 /////////////////////////////////////////
 
 /** define the cli */
-function makeImportCommand(mongoClient) {
+function makeImportCommand() {
 
   const versionOpt =
     new Option("-i, --iiif-version <version>", "IIIF version")
@@ -127,7 +122,7 @@ function makeImportCommand(mongoClient) {
     .description("import data into aiiinotate")
     .addOption(filesOpt)
     .addOption(versionOpt)
-    .action((options, command) => action(mongoClient, command, options))
+    .action((options, command) => action(command, options))
 }
 
 export default makeImportCommand;

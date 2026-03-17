@@ -24,6 +24,11 @@ class FastifyClient {
     this.fastify = await build("default");
   }
 
+  async stop() {
+    await this.fastify.close();
+    console.log("fastify instance successfully closed.");
+  }
+
   /**
    * @param {string} route
    * @returns {Promise<FastifyReplyType>}

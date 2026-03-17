@@ -17,11 +17,10 @@ class ProgressBar {
   render() {
     const terminalWidth = process.stdout.columns || 80;
 
-    // Calculate percentage
     const percent = this.total === 0 ? 100 : (this.current / this.total) * 100;
     const percentStr = percent.toFixed(1) + "%";
 
-    // Calculate elapsed and estimated time
+    // calculate elapsed and estimated time
     const elapsedTime = Date.now() - this.startTime;
     const elapsedSec = Math.floor(elapsedTime / 1000);
     const rate = this.current / (elapsedTime / 1000);
@@ -30,27 +29,26 @@ class ProgressBar {
     const timeStr = `${this.formatTime(elapsedSec)}/${this.formatTime(remainingTime)}`;
     const countStr = `${this.current}/${this.total}`;
 
-    // Calculate available space for bar
+    // calculate available space for bar
     const prefix = `${this.desc} [`;
     const suffix = `] ${percentStr} ${countStr} ${timeStr}`;
     const availableWidth = terminalWidth - prefix.length - suffix.length;
 
     if (availableWidth < 10) {
-      // Terminal too small, show minimal version
       process.stdout.write(`\r${this.desc}: ${percentStr}`);
       return;
     }
 
-    // Build progress bar
+    // build progress bar
     const filledWidth = Math.floor((this.current / this.total) * availableWidth);
     const emptyWidth = availableWidth - filledWidth;
     const bar = "█".repeat(filledWidth) + "░".repeat(emptyWidth);
 
-    // Build and display complete line
+    // build and display complete line
     const line = prefix + bar + suffix;
     process.stdout.write("\r" + line);
 
-    // New line when complete
+    // new line when complete
     if (this.current === this.total) {
       process.stdout.write("\n");
     }
