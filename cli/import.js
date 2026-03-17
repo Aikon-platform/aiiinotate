@@ -2,36 +2,36 @@ import { Command, Option, Argument } from "commander";
 
 import Annotations2 from "#annotations/annotations2.js";
 import Annotations3 from "#annotations/annotations3.js";
-import { getFilesToProcess, fileRead } from "#cli/utils/io.js";
+import { getFilesToProcess, fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import loadMongoClient from "#cli/utils/mongoClient.js";
 
 ////////////////////////////////////////
 
-// allowed imports
-const importTypes = [
-  "annotation",  // import a single annotation
-  "annotation-list",  // import a IIIF 2.x annotationList
-  "annotation-page",  // import a IIIF 3.x annotationPage
-  "manifest",  // import a single manifest
-  // "annotation-array",  // import a JSON array of IIIF annotations
-  // "manifest-array"  // import a json array of manifests
-]
+// // allowed imports
+// const importTypes = [
+//   "annotation",  // import a single annotation
+//   "annotation-list",  // import a IIIF 2.x annotationList
+//   "annotation-page",  // import a IIIF 3.x annotationPage
+//   "manifest",  // import a single manifest
+//   // "annotation-array",  // import a JSON array of IIIF annotations
+//   // "manifest-array"  // import a json array of manifests
+// ]
 
-// allowed import types per IIIF version
-const allowedImportTypes = {
-  2: ["annotation", "annotation-list", "manifest"],
-  3: ["annotation", "annotation-page", "manifest"]
-}
+// // allowed import types per IIIF version
+// const allowedImportTypes = {
+//   2: ["annotation", "annotation-list", "manifest"],
+//   3: ["annotation", "annotation-page", "manifest"]
+// }
 
-const checkAllowedImportType = (iiifVersion, dataType) => {
-  if (
-    ! allowedImportTypes[iiifVersion].includes(dataType)
-  ) {
-    console.error(`${checkAllowedImportType.name}: forbidden import type '${dataType}' for IIIF version '${iiifVersion}'. allowed import types are: ${allowedImportTypes[iiifVersion]}`);
-    process.exit(1);
-  };
-
-}
+// const checkAllowedImportType = (iiifVersion, dataType) => {
+//   if (
+//     ! allowedImportTypes[iiifVersion].includes(dataType)
+//   ) {
+//     console.error(`${checkAllowedImportType.name}: forbidden import type '${dataType}' for IIIF version '${iiifVersion}'. allowed import types are: ${allowedImportTypes[iiifVersion]}`);
+//     process.exit(1);
+//   };
+//
+// }
 
 const notImplementedExit = (method) => {
   console.log(`\n\nERROR: import is not implemented '${method}'`);
@@ -46,6 +46,7 @@ async function importAnnotationPage(annotations3, fileArr, iiifVersion) {
   notImplementedExit(`${importAnnotationPage.name} is not implemented`)
 }
 
+// TODO change with fastify instance
 /**
  *
  * @param {Annotations2} annotations2
@@ -69,39 +70,46 @@ async function importAnnotationList(annotations2, fileArr, iiifVersion) {
 
 ////////////////////////////////////////
 
+// TODO use parseImportInputFile
+
 /**
  * run the cli
  * @param {import('commander').Command} command
- * @param {string} dataType: one of importTypes
  * @param {object} options
  */
-async function action(command, dataType, options) {
-  const mongoClient = loadMongoClient();
+async function action(mongoClient, command, options) {
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
   /** @type {string[]} */
-  const files = options.files;
-  /** @type {boolean} */
-  const listFiles = options.listFiles;
+  const inputFile = options.inputFile;
+  // /** @type {boolean} */
+  // const listFiles = options.listFiles;
 
-  checkAllowedImportType(iiifVersion, dataType);
+  // checkAllowedImportType(iiifVersion, dataType);
 
-  const filesToProcess = getFilesToProcess(files, listFiles);
+  // TODO update
+  const filesToProcess = parseImportInputFile(inputFile);
 
+  // TODO update with fastify instance
   const annotations2 = new Annotations2(
     mongoClient,
     mongoClient.db()
   );
 
   // run
-  switch (dataType) {
-    case ("annotation-list"):
-      await importAnnotationList(annotations2, filesToProcess, iiifVersion);
-      break;
-    default:
-      notImplementedExit(dataType);
+  if ( iiifVersion===2 ) {
+    await importAnnotationList(/*...*/)
+  } else {
+    await importAnnotationPage(/*...*/)
   }
+  // switch (dataType) {
+  //   case ("annotation-list"):
+  //     await importAnnotationList(annotations2, filesToProcess, iiifVersion);
+  //     break;
+  //   default:
+  //     notImplementedExit(dataType);
+  // }
   mongoClient.close();
 
 }
@@ -111,13 +119,6 @@ async function action(command, dataType, options) {
 /** define the cli */
 function makeImportCommand(mongoClient) {
 
-  // argument and option name syntax:
-  // --opt-name <requiredVal> => you mst provide a value after --opt-name
-  // --opt-name [optionalVal] => if `optionalVal` is not provided, --opt-name will be treated as boolean
-  const dataTypeArg =
-    new Argument("<data-type>", "type of data to import")
-      .choices(importTypes);
-
   const versionOpt =
     new Option("-i, --iiif-version <version>", "IIIF version")
       .choices(["2", "3"])
@@ -125,19 +126,14 @@ function makeImportCommand(mongoClient) {
       .makeOptionMandatory();
 
   const filesOpt =
-    new Option("-f, --files <files...>", "files to process, either as: space-separated filepath(s) to the JSON(s) OR path to a file containing a list of paths to JSON files to process (1 line per path)")
+    new Option("-f, --file <file>", "file containing paths to AnnotationLists or AnnotationPages to process (1 line per path)")
       .makeOptionMandatory();
-
-  const listFilesOpt =
-    new Option("-l, --list-files", "flag indicating that --files points to a file containing a list of JSON files to process (1 line per path)")
 
   return new Command("import")
     .description("import data into aiiinotate")
-    .addArgument(dataTypeArg)
     .addOption(filesOpt)
     .addOption(versionOpt)
-    .addOption(listFilesOpt)
-    .action((dataType, options, command) => action(mongoClient, command, dataType, options))
+    .action((options, command) => action(mongoClient, command, options))
 }
 
 export default makeImportCommand;

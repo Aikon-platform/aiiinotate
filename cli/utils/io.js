@@ -54,53 +54,23 @@ function fileArrayValidate (fileArr) {
 
 /**
  * `file` is a path to a file containing paths to other files (1 file per line).
- * validate all paths and return them as absolute paths
+ * parse the file and return an array of absolute paths to files.
  * @param {str} file
  * @returns {string[]}
  */
-async function getFilesInListFile(file) {
+async function parseImportInputFile(file) {
   // read `file` split it by lines, remove empty lines
   const fileArr =
     fileRead(file)
       .split("\n")
       .filter(l => !l.match(/^\s*$/g));
-  return fileArrayValidate(fileArr);
+  return [...new Set(fileArrayValidate(fileArr))];
 }
 
-/**
- * get the files to import and return them as absolute paths
- *
- * `fileArr` is a list of paths to either:
- *  - (fileArr=false) JSON files to import
- *  - (fileArr=true)  text files containing paths to the JSONS to import
- * => take `fileArr`, validate that all files exist, extract all filepaths
- * from `fileArr`, and return the array of actual JSON paths to process.
- *
- * @param {string[]} fileArr
- * @param {boolean} listFiles
- * @returns {string[]} the list of existing files to process.
- */
-function getFilesToProcess(fileArr, listFiles=false) {
-  let filesToProcess = fileArrayValidate(fileArr);
-
-  // if `listFile`, open the files containing paths of files to proces, and redo the same validation process for each file in a list file.
-  if ( listFiles ) {
-    let filesInListFiles = []
-
-    filesToProcess.map((theListFile) => {
-      const files = getFilesInListFile(theListFile);
-      filesInListFiles = filesInListFiles.concat(files);
-    })
-
-    filesToProcess = [...new Set(filesInListFiles)];  // deduplicate
-  }
-
-  return filesToProcess
-}
 
 export {
   fileRead,
   fileOk,
   fileArrayValidate,
-  getFilesToProcess
+  parseImportInputFile
 }
