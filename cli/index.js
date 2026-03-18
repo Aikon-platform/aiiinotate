@@ -44,4 +44,4 @@ function makeCli() {
   return cli;
 }
 
-await makeCli();
+makeCli();
