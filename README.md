@@ -6,7 +6,7 @@ aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `n
 
 ## PROD USAGE
 
-### Install 
+### Install
 
 1. **Install mongodb**.
     - see [dev installation script for help](./scripts/setup_mongodb.sh)
@@ -17,7 +17,37 @@ aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `n
 npm install aiiinotate
 ```
 
-### Setup the app 
+### Env definition
+
+#### Basic definition
+
+Copy `config/.env.prod.template` to `.env` and edit it.
+
+#### Runtime env sourcing
+
+Once the package is installed, it must access variables from the .env file. However, running `aiiinotate <commands>` creates a subscript which means **you can't `source` an `.env` file**.
+
+```bash
+# THIS WILL FAIL: `aiiinotate` is executed in a subscript that doesn't inherit from the variables fetched in `source`.
+source .env && aiiinotate <command>
+```
+
+**The solutions**:
+1. use `dotenvx` to inject variables:
+    ```bash
+    npx dotenvx run -f .env -- aiiinotate <command>
+    ```
+2. manually export variables:
+    ```bash
+    set -a
+    source .env
+    set +a
+    aiiinotate <command>
+    ```
+
+For clarity, we omit env sourcing from the below commands.
+
+### Setup the app
 
 0. **Setup your `.env`** file after [.env.template](./config/.env.template).
 
@@ -30,19 +60,17 @@ sudo systemctl start mongod
 2. **Create and configure the database**
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- migrate apply
+aiiinotate -- migrate apply
 ```
 
 ### Usage
 
 All commands are accessible through a CLI (`./src/cli`).
 
-#### Run the app 
+#### Run the app
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- serve prod
-# or 
-aiiinotate --env <path-to-your-env-file> -- serve dev
+aiiinotate -- serve prod
 ```
 
 #### Run administration commands
@@ -50,7 +78,7 @@ aiiinotate --env <path-to-your-env-file> -- serve dev
 The base command is:
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- <command>
+aiiinotate -- <command>
 ```
 
 It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
@@ -61,7 +89,7 @@ It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --h
 
 ## DEV USAGE
 
-### Install 
+### Install
 
 ```bash
 # clone the repo

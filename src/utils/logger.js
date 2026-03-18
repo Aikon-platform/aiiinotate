@@ -43,7 +43,7 @@ const makePinoLogger = () => {
   const logTarget = {
     test: [stdoutLogTarget],
     dev: [stdoutLogTarget],
-    prod: [fileLogTargets]
+    prod: [stdoutLogTarget, ...fileLogTargets]
   }[TARGET];
 
   return pino({

@@ -30,10 +30,6 @@ case "$SCRIPT" in
         AIIINOTATE_TARGET="dev";
         nodemon --watch ./src --exec "bash -c '$DOTENVX_BIN run -f $ENV_PATH -- node $ROOT_DIR/cli/index.js serve dev'";
         ;;
-    prod)
-        AIIINOTATE_TARGET="prod";
-        run_cli serve prod;
-        ;;
     test)
         AIIINOTATE_TARGET="test";
         "$DOTENVX_BIN" run -f "$ENV_PATH" -- node --test --test-isolation=none

@@ -12,9 +12,8 @@
   },
   "scripts": {
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
-    "cli": "bash ./scripts/run.sh cli",
+    "cli": "bash ./scripts/run.sh cli ./config/.env",
     "dev": "bash ./scripts/run.sh dev ./config/.env",
-    "prod": "bash ./scripts/run.sh prod ./config/.env",
     "test": "bash ./scripts/run.sh test ./config/.env",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
