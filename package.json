@@ -11,11 +11,11 @@
     "aiiinotate": "./cli/index.js"
   },
   "scripts": {
-    "cli": "node ./cli/index.js --env=./config/.env",
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
-    "dev": "sudo systemctl start mongod && nodemon --watch ./src --exec \"npm run cli serve dev\"",
-    "prod": "sudo systemctl start mongod && npm run cli serve prod",
-    "test": "export AIIINOTATE_TESTING=true; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
+    "cli": "export AIIINOTATE_MODE=cli; node ./cli/index.js --env=./config/.env",
+    "dev": "export AIIINOTATE_MODE=app; sudo systemctl start mongod && nodemon --watch ./src --exec \"node ./cli/index.js --env=./config/.env serve dev\"",
+    "prod": "export AIIINOTATE_MODE=app; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env serve prod",
+    "test": "export AIIINOTATE_MODE=test; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
     "update_version": "python3 scripts/update_version.py",
