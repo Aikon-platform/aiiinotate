@@ -32,7 +32,7 @@ Once the package is installed, it must access variables from the .env file. Howe
 source .env && aiiinotate <command>
 ```
 
-**The solutions**:
+#### The solutions: do either:
 1. use `dotenvx` to inject variables:
     ```bash
     npx dotenvx run -f .env -- aiiinotate <command>
