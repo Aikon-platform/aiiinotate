@@ -3,6 +3,8 @@ import fs from "fs";
 
 import pino from "pino";
 
+import { TARGET } from "#constants";
+
 // Create logs directory if it doesn't exist
 const LOG_DIR = path.join(process.cwd(), "logs");
 if (!fs.existsSync(LOG_DIR)) {
@@ -18,7 +20,6 @@ const stdoutLogTarget = {
     translateTime: "SYS:standard",
   },
 }
-
 const fileLogTargets = [
   {
     level: "debug",
@@ -37,15 +38,24 @@ const fileLogTargets = [
   },
 ]
 
-// Create Pino logger with JSON transports
-const pinoLogger = pino(
-  {
+const makePinoLogger = () => {
+  // disable logging when running CLI commands
+  // (otherwise, logging from the fastify instance is mixed with logging from the CLI).
+  if ( TARGET==="cli" ) {
+    return pino({ enabled: false });
+  }
+
+  // otherwise, generate a specific logger based on the value of "TARGET"
+  const logTarget = {
+    test: [stdoutLogTarget],
+    dev: [stdoutLogTarget],
+    prod: [fileLogTargets]
+  }[TARGET];
+
+  return pino({
     level: process.env.LOG_LEVEL || "debug",
     transport: {
-      targets: [
-        ...fileLogTargets,
-        stdoutLogTarget
-      ],
+      targets: logTarget,
     },
     serializers: {
       req: (req) => ({
@@ -56,16 +66,37 @@ const pinoLogger = pino(
       res: (res) => ({
         statusCode: res.statusCode,
       }),
-    },
-  }
-);
+    }
+  })
+}
+
+// // Create Pino logger with JSON transports
+// const pinoLogger = pino(
+//   {
+//     level: process.env.LOG_LEVEL || "debug",
+//     transport: {
+//       targets: envToLogger[TARGET],
+//     },
+//     serializers: {
+//       req: (req) => ({
+//         id: req.id,
+//         method: req.method,
+//         url: req.url,
+//       }),
+//       res: (res) => ({
+//         statusCode: res.statusCode,
+//       }),
+//     },
+//   }
+// );
 
 // NOTE : to have environment-specific logger behaviour, see: https://fastify.dev/docs/latest/Reference/Logging/#environment-specific-configuration
 
 // Wrapper for caller information
 class Logger {
   constructor() {
-    this.pinoLogger = pinoLogger;
+    this.pinoLogger = makePinoLogger();
+    this.pinoLogger.info(">>>>>>>>>>>>>> HELLO !!");
   }
 
   _getCaller() {

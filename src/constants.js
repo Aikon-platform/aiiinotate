@@ -1,4 +1,4 @@
-// one of: "app"|"cli"|"test"
+// one of: "dev"|"prod"|"cli"|"test"
 const TARGET = process.env.AIIINOTATE_TARGET || "app";
 const STRICT_MODE = process.env.AIIINOTATE_STRICT_MODE?.toLowerCase() === "true";
 const PAGE_SIZE = parseInt(process.env.AIIINOTATE_PAGE_SIZE);
