@@ -12,10 +12,10 @@
   },
   "scripts": {
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
-    "cli": "export AIIINOTATE_MODE=cli; node ./cli/index.js --env=./config/.env",
-    "dev": "export AIIINOTATE_MODE=app; sudo systemctl start mongod && nodemon --watch ./src --exec \"node ./cli/index.js --env=./config/.env serve dev\"",
-    "prod": "export AIIINOTATE_MODE=app; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env serve prod",
-    "test": "export AIIINOTATE_MODE=test; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
+    "cli": "export AIIINOTATE_TARGET=cli; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env",
+    "dev": "export AIIINOTATE_TARGET=app; sudo systemctl start mongod && nodemon --watch ./src --exec \"node ./cli/index.js --env=./config/.env serve dev\"",
+    "prod": "export AIIINOTATE_TARGET=app; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env serve prod",
+    "test": "export AIIINOTATE_TARGET=test; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
     "update_version": "python3 scripts/update_version.py",
@@ -42,6 +42,7 @@
   "homepage": "https://github.com/Aikon-platform/aiiinotate#readme",
   "imports": {
     "#types": "./src/types.js",
+    "#constants": "./src/constants.js",
     "#cli/*.js": "./cli/*.js",
     "#src/*.js": "./src/*.js",
     "#migrations/*.js": "./migrations/*.js",

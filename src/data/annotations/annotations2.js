@@ -5,8 +5,9 @@
 import fastifyPlugin from "fastify-plugin";
 
 import CollectionAbstract from "#data/collectionAbstract.js";
+import { STRICT_MODE } from "#constants";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize, STRICT_MODE } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 
 
