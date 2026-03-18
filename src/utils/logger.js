@@ -3,10 +3,9 @@ import fs from "fs";
 
 import pino from "pino";
 
-import { TARGET } from "#constants";
+import { TARGET, LOG_DIR } from "#constants";
 
-// Create logs directory if it doesn't exist
-const LOG_DIR = path.join(process.cwd(), "logs");
+console.log(">>>", LOG_DIR);
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
 }
@@ -26,11 +25,6 @@ const fileLogTargets = [
     target: "pino/file",
     options: { destination: path.join(LOG_DIR, "aiiinotate_debug.log") },
   },
-  // {
-  //   level: "info",
-  //   target: "pino/file",
-  //   options: { destination: path.join(LOG_DIR, "info.log") },
-  // },
   {
     level: "error",
     target: "pino/file",
@@ -70,33 +64,10 @@ const makePinoLogger = () => {
   })
 }
 
-// // Create Pino logger with JSON transports
-// const pinoLogger = pino(
-//   {
-//     level: process.env.LOG_LEVEL || "debug",
-//     transport: {
-//       targets: envToLogger[TARGET],
-//     },
-//     serializers: {
-//       req: (req) => ({
-//         id: req.id,
-//         method: req.method,
-//         url: req.url,
-//       }),
-//       res: (res) => ({
-//         statusCode: res.statusCode,
-//       }),
-//     },
-//   }
-// );
-
-// NOTE : to have environment-specific logger behaviour, see: https://fastify.dev/docs/latest/Reference/Logging/#environment-specific-configuration
-
 // Wrapper for caller information
 class Logger {
   constructor() {
     this.pinoLogger = makePinoLogger();
-    this.pinoLogger.info(">>>>>>>>>>>>>> HELLO !!");
   }
 
   _getCaller() {

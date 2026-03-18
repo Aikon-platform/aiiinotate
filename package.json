@@ -12,9 +12,9 @@
   },
   "scripts": {
     "setup": "sudo systemctl start mongod && npm run cli migrate apply",
-    "cli": "export AIIINOTATE_TARGET=cli; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env",
-    "dev": "export AIIINOTATE_TARGET=dev; sudo systemctl start mongod && nodemon --watch ./src --exec \"node ./cli/index.js --env=./config/.env serve dev\"",
-    "prod": "export AIIINOTATE_TARGET=prod; sudo systemctl start mongod && node ./cli/index.js --env=./config/.env serve prod",
+    "cli": "[ -z \"$AIIINOTATE_TARGET\" ] && export AIIINOTATE_TARGET=cli; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node ./cli/index.js",
+    "dev": "sudo systemctl start mongod && nodemon --watch ./src --exec \"npm run cli serve dev\"",
+    "prod": "export AIIINOTATE_TARGET=prod; sudo systemctl start mongod && node ./cli/index.js serve prod",
     "test": "export AIIINOTATE_TARGET=test; sudo systemctl start mongod && dotenvx run -f ./config/.env -- node --test --test-isolation=none",
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
