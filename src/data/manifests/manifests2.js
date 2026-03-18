@@ -5,6 +5,7 @@ import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { formatInsertResponse } from "#utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
+import { BASE_URL } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").MongoObjectId} MongoObjectId */
@@ -324,7 +325,7 @@ class Manifests2 extends CollectionAbstract {
     return {
       ...IIIF_PRESENTATION_2_CONTEXT,
       "@type": "sc:Collection",
-      "@id": `${process.env.AIIINOTATE_BASE_URL}/manifests/2`,
+      "@id": `${BASE_URL}/manifests/2`,
       label: "Collection of all manifests indexed in the annotation server",
       members: manifestIndex
     }

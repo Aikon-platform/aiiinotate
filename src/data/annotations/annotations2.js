@@ -9,7 +9,7 @@ import { STRICT_MODE } from "#constants";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
-
+import { PAGE_SIZE } from "#constants";
 
 /** @typedef {import("mongodb").FindCursor} FindCursor */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -295,7 +295,7 @@ class Annotations2 extends CollectionAbstract {
     queryUrl,
     queryFilter,
     page=1,
-    pageSize=process.env.AIIINOTATE_PAGE_SIZE,
+    pageSize=PAGE_SIZE,
     label=undefined
   }) {
     const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
@@ -492,7 +492,7 @@ class Annotations2 extends CollectionAbstract {
     canvasMax=undefined,
     onlyIds=false,
     page=1,
-    pageSize=process.env.AIIINOTATE_PAGE_SIZE
+    pageSize=PAGE_SIZE
   }) {
     const
       filtersBase = { "on.manifestShortId": manifestShortId },
@@ -561,7 +561,7 @@ class Annotations2 extends CollectionAbstract {
     queryUrl,
     canvasUri,
     page=1,
-    pageSize=process.env.AIIINOTATE_PAGE_SIZE
+    pageSize=PAGE_SIZE
   }) {
     return this.#paginate({
       queryUrl,

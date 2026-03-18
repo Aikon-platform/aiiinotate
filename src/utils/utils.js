@@ -2,6 +2,7 @@ import util from "node:util";
 import Ajv from "ajv";
 
 import logger from "#utils/logger.js";
+import { BASE_URL } from "#constants";
 
 /**
  * @param {object} obj
@@ -164,7 +165,7 @@ const maybeToArray = (x, convertedFlag=false) =>
     : Array.isArray(x) ? x : [x];
 
 const pathToUrl = (path) =>
-  `${process.env.AIIINOTATE_BASE_URL}${path}`
+  `${BASE_URL}${path}`
 
 /**
  * display a detailed and nested view of an object. to be used with console.log.

@@ -1,6 +1,8 @@
 import { inspectObj, isNonEmptyArray, mergeObjects } from "#utils/utils.js";
 import logger from "#utils/logger.js";
 
+import { BASE_URL, PAGE_SIZE } from "#constants";
+
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */
 /** @typedef {import("#types").UpdateResponseType} UpdateResponseType */
@@ -109,7 +111,7 @@ const paginationSchema = {
   },
   pageSize: {
     type: "integer",
-    default: process.env.AIIINOTATE_PAGE_SIZE || 5000,
+    default: PAGE_SIZE || 5000,
     minimum: 1,
   }
 }

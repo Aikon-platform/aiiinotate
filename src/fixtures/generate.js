@@ -1,6 +1,7 @@
 import { v4 as uuid4 } from "uuid";
 
 import { getRandomItem } from "#utils/utils.js";
+import { BASE_URL } from "#constants";
 
 /**
  * generate an array of length `length` filled with values returned by `itemFunc`
@@ -23,7 +24,7 @@ const makeManifestShortId = () =>
   `wit${makeRandomNumber()}_pdf${makeRandomNumber()}_anno${makeRandomNumber()}`;
 
 const makeBaseUrl = (manifestShortId) =>
-  `${process.env.AIIINOTATE_BASE_URL}/data/2/${manifestShortId}`;
+  `${BASE_URL}/data/2/${manifestShortId}`;
 
 const makeAnnotationId = (manifestShortId) =>
   `${makeBaseUrl(manifestShortId)}/annotation/a_${uuid4()}`;

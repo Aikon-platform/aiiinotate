@@ -4,12 +4,14 @@
 
 import fastifyPlugin from "fastify-plugin";
 
+import { BASE_URL } from "#constants";
+
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.AIIINOTATE_BASE_URL}/schemas/routes/${slug}`;
+  `${BASE_URL}/schemas/routes/${slug}`;
 
 /**
  * @param {FastifyInstanceType} fastify
