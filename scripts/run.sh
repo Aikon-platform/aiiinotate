@@ -19,19 +19,14 @@ fi;
 
 cd "$ROOT_DIR";  # necessary because node needs to access package.json
 sudo systemctl start mongod;
-export AIIINOTATE_TARGET;
-
 case "$SCRIPT" in
     cli)
-        AIIINOTATE_TARGET="cli";
         "$DOTENVX_BIN" run -f "$ENV_PATH" -- node "$ROOT_DIR"/cli/index.js "${EXTRA_ARGS[@]}";
         ;;
     dev)
-        AIIINOTATE_TARGET="dev";
         nodemon --watch ./src --exec "bash -c '$DOTENVX_BIN run -f $ENV_PATH -- node $ROOT_DIR/cli/index.js serve dev'";
         ;;
     test)
-        AIIINOTATE_TARGET="test";
         "$DOTENVX_BIN" run -f "$ENV_PATH" -- node --test --test-isolation=none
         ;;
     *)

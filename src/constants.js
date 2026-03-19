@@ -1,9 +1,10 @@
 import { inspect } from "node:util";
 
-// one of: "dev"|"prod"|"cli"|"test"
-const TARGET = process.env.AIIINOTATE_TARGET || "app";
 const STRICT_MODE = process.env.AIIINOTATE_STRICT_MODE?.toLowerCase() === "true";
 const PAGE_SIZE = parseInt(process.env.AIIINOTATE_PAGE_SIZE);
+
+// one of "file"|"stdout"|"stdout+file"|"off"
+const LOG_TARGET = process.env.AIIINOTATE_LOG_TARGET;
 const LOG_DIR = process.env.AIIINOTATE_LOG_DIR;
 
 const PORT = process.env.AIIINOTATE_PORT;
@@ -16,10 +17,9 @@ const MONGODB_DB_TEST = process.env.MONGODB_DB_TEST;
 const MONGODB_CONNSTRING = process.env.MONGODB_CONNSTRING;
 const MONGODB_CONNSTRING_TEST = process.env.MONGODB_CONNSTRING_TEST;
 
-
 // ensure that all env variables are defined.
 const env_mapper = {
-  TARGET : TARGET,
+  LOG_TARGET : LOG_TARGET,
   STRICT_MODE : STRICT_MODE,
   PAGE_SIZE : PAGE_SIZE,
   LOG_DIR : LOG_DIR,
@@ -38,8 +38,15 @@ if ( Object.values(env_mapper).some(e => e==null) ) {
   process.exit(1);
 }
 
+// enforce value constraints on variables
+const allowedLogTargets = ["file", "stdout", "stdout+file", "off"];
+if ( !allowedLogTargets.includes(LOG_TARGET) ) {
+  console.error(`SETUP ERROR: env variable AIIINOTATE_LOG_TARGET must be set to ${allowedLogTargets}. Got ${LOG_TARGET}. Exiting...`)
+  process.exit(1);
+}
+
 export {
-  TARGET,
+  LOG_TARGET,
   STRICT_MODE,
   PAGE_SIZE,
   LOG_DIR,

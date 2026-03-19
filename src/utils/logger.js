@@ -3,7 +3,7 @@ import fs from "fs";
 
 import pino from "pino";
 
-import { TARGET, LOG_DIR } from "#constants";
+import { LOG_TARGET, LOG_DIR } from "#constants";
 
 console.log(">>>", LOG_DIR);
 if (!fs.existsSync(LOG_DIR)) {
@@ -33,18 +33,17 @@ const fileLogTargets = [
 ]
 
 const makePinoLogger = () => {
-  // disable logging when running CLI commands
-  // (otherwise, logging from the fastify instance is mixed with logging from the CLI).
-  if ( TARGET==="cli" ) {
+  // disable logging entierly
+  if ( LOG_TARGET==="off" ) {
     return pino({ enabled: false });
   }
 
-  // otherwise, generate a specific logger based on the value of "TARGET"
+  // otherwise, generate a specific logger based on the value of "LOG_TARGET"
   const logTarget = {
-    test: [stdoutLogTarget],
-    dev: [stdoutLogTarget],
-    prod: [stdoutLogTarget, ...fileLogTargets]
-  }[TARGET];
+    stdout: [stdoutLogTarget],
+    file: [...fileLogTargets],
+    "stdout+file": [stdoutLogTarget, ...fileLogTargets]
+  }[LOG_TARGET];
 
   return pino({
     level: process.env.LOG_LEVEL || "debug",
