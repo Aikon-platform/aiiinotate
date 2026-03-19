@@ -21,7 +21,7 @@ npm install aiiinotate
 
 #### Basic definition
 
-Copy `config/.env.prod.template` to `.env` and edit it.
+Copy `config/.env.template` to `.env` and edit it.
 
 #### Runtime env sourcing
 
