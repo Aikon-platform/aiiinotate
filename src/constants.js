@@ -41,7 +41,7 @@ if ( Object.values(env_mapper).some(e => e==null) ) {
 // enforce value constraints on variables
 const allowedLogTargets = ["file", "stdout", "stdout+file", "off"];
 if ( !allowedLogTargets.includes(LOG_TARGET) ) {
-  console.error(`SETUP ERROR: env variable AIIINOTATE_LOG_TARGET must be set to ${allowedLogTargets}. Got ${LOG_TARGET}. Exiting...`)
+  console.error(`SETUP ERROR: env variable AIIINOTATE_LOG_TARGET must be set to one of ${allowedLogTargets.map(x => "\"" + x + "\"").join(", ")}. Got "${LOG_TARGET}". Exiting...`)
   process.exit(1);
 }
 

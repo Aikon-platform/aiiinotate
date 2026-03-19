@@ -1,3 +1,17 @@
+/**
+ * a progress bar
+ * @example
+ *  const total = 100;
+ *  const ms = 10;
+ *  const pb = new ProgressBar({ desc: "Progressbar example", total: total });
+ *  const sleep = (pb, i) => {
+ *      pb.update(i);
+ *      return new Promise((res, rej) => setTimeout(res, ms));
+ *  };
+ *  for (let i=0; j<=total; j++) {
+ *      await sleep(pb, i);
+ *
+ */
 class ProgressBar {
   constructor(options = {
     desc: "Progress",
