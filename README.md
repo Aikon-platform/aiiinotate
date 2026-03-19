@@ -21,7 +21,7 @@ npm install aiiinotate
 
 #### Basic definition
 
-Copy `config/.env.template` to `.env` and edit it.
+Copy [`config/.env.template`](./config/.env.template) to `.env` and edit it.
 
 #### Runtime env sourcing
 
@@ -29,18 +29,18 @@ Once the package is installed, it must access variables from the .env file. Howe
 
 ```bash
 # THIS WILL FAIL: `aiiinotate` is executed in a subscript that doesn't inherit from the variables fetched in `source`.
-source .env && aiiinotate <command>
+source /path/to/.env && aiiinotate <command>
 ```
 
 #### The solutions: do either:
 1. use `dotenvx` to inject variables:
     ```bash
-    npx dotenvx run -f .env -- aiiinotate <command>
+    npx dotenvx run -f /path/to/.env -- aiiinotate <command>
     ```
 2. manually export variables:
     ```bash
     set -a
-    source .env
+    source /path/to/.env
     set +a
     aiiinotate <command>
     ```
@@ -48,8 +48,6 @@ source .env && aiiinotate <command>
 For clarity, we omit env sourcing from the below commands.
 
 ### Setup the app
-
-0. **Setup your `.env`** file after [.env.template](./config/.env.template).
 
 1. **Start `mongod`**
 
@@ -112,15 +110,15 @@ npm i
 
 After installing, some setup must be done
 
-0. **Setup your `.env`** file after [.env.template](./config/.env.template) and place it at `./config/.env`.
+1. **Setup your `.env`** file after [`config/.env.template`](./config/.env.template) and place it at `./config/.env`.
 
-1. **Start `mongod`**
+2. **Start `mongod`**
 
 ```bash
 sudo systemctl start mongod
 ```
 
-2. **Configure the database**
+3. **Configure the database**
 
 ```bash
 npm run migrate apply
