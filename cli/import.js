@@ -4,6 +4,7 @@ import { fileRead, parseImportInputFile } from "#cli/utils/io.js";
 import FastifyClient from "#cli/utils/fastifyClient.js";
 import ProgressBar from "#cli/utils/progressbar.js";
 import logger from "#utils/logger.js";
+import { inspectObj } from "#utils/utils.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -31,20 +32,29 @@ async function importAnnotationPage(fastifyClient, fileArr) {
  * @param {string[]} fileArr - array of full paths to annotationLists to insert.
  */
 async function importAnnotationList(fastifyClient, fileArr) {
-  fileArr = fileArr.slice(0,10)
-  // RUN THE SCRIPT:
-  // > npm run migrate-revert && npm run migrate-apply && npm run cli import -- annotation-list -i 2 -f ./data/aikon_wit9_man11_anno165_annotation_list.jsonld
-  let totalImports = 0
+  // fileArr = fileArr.slice(0,10)
 
   const pb = new ProgressBar({ desc: "importing annotations", total: fileArr.length});
+  const importErrors = [];
+  let totalImports = 0
+
   for ( const [i, file] of fileArr.entries() ) {
-    const annotationList = JSON.parse(fileRead(file));
-    const result = await fastifyClient.importAnnotationList(annotationList);
+    const
+      annotationList = JSON.parse(fileRead(file)),
+      [statusCode, resultPromise] = await fastifyClient.importAnnotationList(annotationList),
+      result = await resultPromise;
+    if ( statusCode <= 299 ) {
+      totalImports += result.insertedCount;
+    } else {
+      importErrors.push(file);
+    }
     pb.update(i)
-    totalImports += Object.keys(result).length;
   }
 
-  logger.info(`imported ${totalImports} annotations into Aiiinotate !`);
+  if ( importErrors.length ) {
+    logger.info(`There were problems importing annotations from the following ${importErrors.length} annotation lists: ${inspectObj(importErrors, -1)}`)
+  }
+  logger.info(`Imported ${totalImports} annotations into Aiiinotate !`);
   return
 }
 

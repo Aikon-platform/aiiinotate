@@ -257,7 +257,7 @@ class Annotations2 extends CollectionAbstract {
           })
         )
         if ( throwOnCanvasIndexError &&  ann.on.some((target) => target.canvasIdx === undefined) ) {
-          throw new this.insertError(`${this.funcName(this.deleteAnnotations)}: could not get canvasIdx for annotation`);
+          throw this.insertError(`${this.funcName(this.deleteAnnotations)}: could not get canvasIdx for annotation`);
         }
         return ann;
       })

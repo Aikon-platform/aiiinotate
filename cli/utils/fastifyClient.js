@@ -2,6 +2,7 @@ import build from "#src/app.js";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").FastifyReplyType} FastifyReplyType */
+/** @typedef {import("#types").InsertResponseType} InsertResponseType */
 
 /**
  * a client to interact with the fastify app.
@@ -22,8 +23,8 @@ class FastifyClient {
   async build() {
     /** @type {FastifyInstanceType} */
     this.fastify = await build("default");
-    // disable logging from the fastify instance.
-    // otherwise, the logs of the fastify instance are mixed with the logs of the CLI.
+    // TODO find way to actually completely disable logging because it makes the CLI UI uglyyy !
+    // log only fastify errors
     this.fastify.log.level = "error";
   }
 
@@ -60,9 +61,13 @@ class FastifyClient {
     // TODO
   }
 
+  /**
+   * @param {object} annotationList - IIIF 2 annotationList
+   * @returns {[number, Promise<InsertResponseType>]} - [ statusCode, response ]
+   */
   async importAnnotationList(annotationList) {
     const r = await this.injectPost("/annotations/2/createMany", annotationList);
-    return r;
+    return [ r.statusCode, r.json() ];
   }
 }
 
