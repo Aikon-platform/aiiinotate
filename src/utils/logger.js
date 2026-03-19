@@ -5,7 +5,6 @@ import pino from "pino";
 
 import { LOG_TARGET, LOG_DIR } from "#constants";
 
-console.log(">>>", LOG_DIR);
 if (!fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
 }
@@ -107,6 +106,10 @@ class Logger {
 
   child(bindings) {
     return this.pinoLogger.child(bindings);
+  }
+
+  setLevel(level) {
+    this.pinoLogger.level = level;
   }
 }
 

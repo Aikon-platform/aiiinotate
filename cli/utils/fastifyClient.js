@@ -22,6 +22,9 @@ class FastifyClient {
   async build() {
     /** @type {FastifyInstanceType} */
     this.fastify = await build("default");
+    // disable logging from the fastify instance.
+    // otherwise, the logs of the fastify instance are mixed with the logs of the CLI.
+    this.fastify.log.level = "error";
   }
 
   async stop() {
