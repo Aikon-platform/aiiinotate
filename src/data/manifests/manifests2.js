@@ -200,17 +200,11 @@ class Manifests2 extends CollectionAbstract {
       fetchErrorIds = [],
       manifestArray = [];
 
-    console.log("manifestUriArray", manifestUriArray);
-
     // fetch the manifests. if there's a fetch error, they won't be inserted.
     await Promise.all(
       manifestUriArray.map(async (manifestUri) => {
         try {
           const r = await this.#fetchManifestFromUri(manifestUri);
-
-          console.log("r", r);
-          console.log("r.error", r.error)
-
           if ( ! r.error ) {
             manifestArray.push(r);
           } else {
@@ -234,13 +228,8 @@ class Manifests2 extends CollectionAbstract {
       }
     }
 
-    console.log("manifestArray", manifestArray);
-
     // insert and format response
     const result = await this.insertManifestArray(manifestArray, throwOnError, true);
-
-    console.log("result", result);
-
     result.fetchErrorIds = fetchErrorIds;
     return result;
   }
