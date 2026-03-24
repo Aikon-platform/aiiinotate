@@ -81,7 +81,12 @@ aiiinotate -- <command>
 
 It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
 
-For more information (including **importing data**), see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
+For more information, see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
+
+#### Import data
+
+See [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
+
 
 ---
 
@@ -151,11 +156,19 @@ npm run test
 npm cli
 ```
 
-- **Process migrations** (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
+- **Process migrations**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
 
 ```bash
 # NOTE: the `--` is necessary !
 npm run migrate -- <command> <arguments?>
+```
+
+
+- **Import data**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md) for more info)
+
+```bash
+# NOTE: the `--` is necessary !
+npm run cli -- import <arguments>
 ```
 
 ---
