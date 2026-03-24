@@ -58,7 +58,7 @@ sudo systemctl start mongod
 2. **Create and configure the database**
 
 ```bash
-aiiinotate -- migrate apply
+aiiinotate migrate apply
 ```
 
 ### Usage
@@ -68,10 +68,10 @@ All commands are accessible through a CLI (`./src/cli`).
 #### Run the app
 
 ```bash
-aiiinotate -- serve prod
+aiiinotate serve prod
 ```
 
-#### Run administration commands
+#### Run the CLI
 
 The base command is:
 
@@ -81,7 +81,7 @@ aiiinotate -- <command>
 
 It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
 
-1. Import data - TODO
+For more information (including **importing data**), see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
 
 ---
 
@@ -144,26 +144,18 @@ npm run prod
 npm run test
 ```
 
-- **Run the CLI**
+- **Run the CLI**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
+
 
 ```bash
 npm cli
 ```
 
-- **Process migrations**
+- **Process migrations** (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
 
 ```bash
-# create a new migration. NOTE: the `--` is necessary !
-npm run migrate make -- --migration-name <your migration name>
-
-# apply all pending migrations
-npm run migrate apply
-
-# revert the last migration
-npm run migrate revert
-
-# revert all migrations
-npm run migrate revert-all
+# NOTE: the `--` is necessary !
+npm run migrate -- <command> <arguments?>
 ```
 
 ---
