@@ -8,9 +8,9 @@ The CLI is the main interface to interact with aiiinotate: all aiiinotate comman
 
 1. **Have your app set up**, either in dev or in prod. See [README](https://github.com/Aikon-platform/aiiinotate/blob/main/README.md) for more info
 
-1.a **In prod, source your `.env`**. See README.
+2. **In prod, source your `.env`**. See README.
 
-2. **The base command is**:
+3. **The base command is**:
 
 ```bash
 # in prod
