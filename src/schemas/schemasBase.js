@@ -1,10 +1,12 @@
 import fastifyPlugin from "fastify-plugin"
 
+import { BASE_URL } from "#constants";
+
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 /** @param {"search"|"presentation"} slug */
 const makeSchemaUri = (slug) =>
-  `${process.env.AIIINOTATE_BASE_URL}/schemas/${slug}/version`;
+  `${BASE_URL}/schemas/${slug}/version`;
 
 /**
  * @param {FastifyInstanceType} fastify

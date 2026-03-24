@@ -3,9 +3,10 @@
  */
 
 import build from "#src/app.js";
+import { PORT, HOST } from "#constants";
 
 /**
- * @param {import("#types").RerveModeType} serveMode
+ * @param {import("#types").ServeModeType} serveMode
  */
 async function server (serveMode) {
   if (["dev", "prod"].includes(serveMode)) {
@@ -14,7 +15,7 @@ async function server (serveMode) {
 
   const fastify = await build(serveMode);
   try {
-    fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
+    fastify.listen({ port: PORT, host: HOST });
   } catch(err) {
     fastify.log.error(err);
     process.exit(1);

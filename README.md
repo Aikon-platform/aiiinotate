@@ -6,7 +6,7 @@ aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `n
 
 ## PROD USAGE
 
-### Install 
+### Install
 
 1. **Install mongodb**.
     - see [dev installation script for help](./scripts/setup_mongodb.sh)
@@ -17,9 +17,37 @@ aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `n
 npm install aiiinotate
 ```
 
-### Setup the app 
+### Env definition
 
-0. **Setup your `.env`** file after [.env.template](./config/.env.template).
+#### Basic definition
+
+Copy [`config/.env.template`](./config/.env.template) to `.env` and edit it.
+
+#### Runtime env sourcing
+
+Once the package is installed, it must access variables from the .env file. However, running `aiiinotate <commands>` creates a subscript which means **you can't `source` an `.env` file**.
+
+```bash
+# THIS WILL FAIL: `aiiinotate` is executed in a subscript that doesn't inherit from the variables fetched in `source`.
+source /path/to/.env && aiiinotate <command>
+```
+
+#### The solutions: do either:
+1. use `dotenvx` to inject variables:
+    ```bash
+    npx dotenvx run -f /path/to/.env -- aiiinotate <command>
+    ```
+2. manually export variables:
+    ```bash
+    set -a
+    source /path/to/.env
+    set +a
+    aiiinotate <command>
+    ```
+
+For clarity, we omit env sourcing from the below commands.
+
+### Setup the app
 
 1. **Start `mongod`**
 
@@ -30,38 +58,41 @@ sudo systemctl start mongod
 2. **Create and configure the database**
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- migrate apply
+aiiinotate migrate apply
 ```
 
 ### Usage
 
 All commands are accessible through a CLI (`./src/cli`).
 
-#### Run the app 
+#### Run the app
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- serve prod
-# or 
-aiiinotate --env <path-to-your-env-file> -- serve dev
+aiiinotate serve prod
 ```
 
-#### Run administration commands
+#### Run the CLI
 
 The base command is:
 
 ```bash
-aiiinotate --env <path-to-your-env-file> -- <command>
+aiiinotate -- <command>
 ```
 
 It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
 
-1. Import data - TODO
+For more information, see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
+
+#### Import data
+
+See [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
+
 
 ---
 
 ## DEV USAGE
 
-### Install 
+### Install
 
 ```bash
 # clone the repo
@@ -84,15 +115,15 @@ npm i
 
 After installing, some setup must be done
 
-0. **Setup your `.env`** file after [.env.template](./config/.env.template) and place it at `./config/.env`.
+1. **Setup your `.env`** file after [`config/.env.template`](./config/.env.template) and place it at `./config/.env`.
 
-1. **Start `mongod`**
+2. **Start `mongod`**
 
 ```bash
 sudo systemctl start mongod
 ```
 
-2. **Configure the database**
+3. **Configure the database**
 
 ```bash
 npm run migrate apply
@@ -112,32 +143,32 @@ npm run dev
 npm run prod
 ```
 
-- **Test the app**
+- **Test the app**. NOTE: the tests will probably fail if you set the env variable `AIIINOTATE_STRICT_MODE` to `true`.
 
 ```bash
 npm run test
 ```
 
-- **Run the CLI**
+- **Run the CLI**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
+
 
 ```bash
 npm cli
 ```
 
-- **Process migrations**
+- **Process migrations**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
 
 ```bash
-# create a new migration. NOTE: the `--` is necessary !
-npm run migrate make -- --migration-name <your migration name>
+# NOTE: the `--` is necessary !
+npm run migrate -- <command> <arguments?>
+```
 
-# apply all pending migrations
-npm run migrate apply
 
-# revert the last migration
-npm run migrate revert
+- **Import data**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md) for more info)
 
-# revert all migrations
-npm run migrate revert-all
+```bash
+# NOTE: the `--` is necessary !
+npm run cli -- import <arguments>
 ```
 
 ---

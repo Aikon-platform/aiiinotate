@@ -1,6 +1,8 @@
 import util from "node:util";
 import Ajv from "ajv";
 
+import logger from "#utils/logger.js";
+import { BASE_URL } from "#constants";
 
 /**
  * @param {object} obj
@@ -163,12 +165,12 @@ const maybeToArray = (x, convertedFlag=false) =>
     : Array.isArray(x) ? x : [x];
 
 const pathToUrl = (path) =>
-  `${process.env.AIIINOTATE_BASE_URL}${path}`
+  `${BASE_URL}${path}`
 
 /**
  * display a detailed and nested view of an object. to be used with console.log.
  * @param {any} obj - object to inspect
- * @param {number|Infinity} maxLines - maximum number of lines in string output. defaults to 100.
+ * @param {number} maxLines - maximum number of lines in string output. defaults to 100. set to -1 to print the whole output regardless of size.
  * @returns
  */
 const inspectObj = (obj, maxLines=100) => {
@@ -176,6 +178,10 @@ const inspectObj = (obj, maxLines=100) => {
     str = util.inspect(obj, {showHidden: false, depth: null, colors: true}),
     strArr = str.split("\n"),
     strLen = strArr.length;
+  // if maxLines === -1, return the full `str`
+  if ( maxLines < 0 ) {
+    return str;
+  }
   // remove the middle lines if `str` is too long
   if ( strLen > maxLines ) {
     const
@@ -219,9 +225,9 @@ const ajv = new Ajv({
  */
 const ajvCompile = (schema) => {
   if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
-    const err = new Error(`ajvCompile: 'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
-    // `console.error` is necessary to be sure that the error will be displayed
-    console.error(err);
+    const err = new Error(`'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
+    // logging is necessary to be sure that the error will be displayed
+    logger.error(err.message);
     throw err;
   }
   return ajv.compile(schema);
@@ -305,8 +311,6 @@ const memoize = (fn, timeout = 2000) => {
   }
 }
 
-const STRICT_MODE = process.env.AIIINOTATE_STRICT_MODE?.toLowerCase() === "true";
-
 export {
   maybeToArray,
   pathToUrl,
@@ -326,5 +330,4 @@ export {
   isNonEmptyArray,
   mergeObjects,
   memoize,
-  STRICT_MODE
 }

@@ -112,7 +112,8 @@ function makeMigrateCommand() {
     new Argument("<migration-op>", "name of migration operation").choices(allowedMigrateOp);
 
   const migrationNameOpt =
-    new Option("-n, --migration-name <name>", "name of migration (for 'make' argument)");
+    new Option("-n, --migration-name <name>", "name of migration (for 'make' argument)")
+      .makeOptionMandatory();
 
   return new Command("migrate")
     .description("run database migrations")

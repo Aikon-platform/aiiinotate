@@ -1,6 +1,8 @@
 import fastifyPlugin from "fastify-plugin"
 import fastifyMongo from "@fastify/mongodb"
 
+import { MONGODB_DB, MONGODB_DB_TEST, MONGODB_CONNSTRING, MONGODB_CONNSTRING_TEST } from "#constants";
+
 /** @typedef {import('fastify').FastifyInstance} FastifyInstance */
 /** @typedef {import('mongodb').Db} MongoDB */
 
@@ -9,8 +11,8 @@ import fastifyMongo from "@fastify/mongodb"
  * @param {MongoDB} db
  */
 const emptyCollections = async (db) => {
-  if ( db.databaseName !== process.env.MONGODB_DB_TEST ) {
-    throw new Error(`'emptyCollections' may only be used on test database defined by .env variable 'MONGODB_DB_TEST'. expected test database '${process.env.MONGODB_DB_TEST}' but working on database '${db.databaseName}'`);
+  if ( db.databaseName !== MONGODB_DB_TEST ) {
+    throw new Error(`'emptyCollections' may only be used on test database defined by .env variable 'MONGODB_DB_TEST'. expected test database '${MONGODB_DB_TEST}' but working on database '${db.databaseName}'`);
   }
   await Promise.all(
     [
@@ -31,8 +33,8 @@ const emptyCollections = async (db) => {
 async function dbConnector(fastify, options) {
   const connString =
     options.test
-      ? process.env.MONGODB_CONNSTRING_TEST
-      : process.env.MONGODB_CONNSTRING;
+      ? MONGODB_CONNSTRING_TEST
+      : MONGODB_CONNSTRING;
 
   await fastify.register(fastifyMongo, {
     forceClose: true,

@@ -207,8 +207,17 @@ class CollectionAbstract {
    */
   async insertMany(docArr) {
     try {
-      const result = await this.collection.insertMany(docArr);
-      return this.makeInsertResponse(result);
+      // mongo insertMany throws an error if we try to insert an empty array of documetns
+      // => if docArr is empty, return an empty insert response.
+      if (docArr.length) {
+        const result = await this.collection.insertMany(docArr);
+        return this.makeInsertResponse(result);
+      } else {
+        return formatInsertResponse({
+          insertedIds: [],
+          rejectedIds: []
+        })
+      }
     } catch (err) {
       this.throwMongoError("insert", err);
     }

@@ -2,6 +2,8 @@ import url from "node:url";
 import path from "node:path";
 import fs from "node:fs";
 
+import { BASE_URL } from "#constants";
+
 // path to dirctory of curent file
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 // path to fixtures/data
@@ -25,7 +27,7 @@ const readFileToObject = (fn) => {
  * @param {string} fn
  * @returns {string}
  */
-const toUrl = (fn) => `${process.env.AIIINOTATE_BASE_URL}/fixtures/${fn}`;
+const toUrl = (fn) => `${BASE_URL}/fixtures/${fn}`;
 
 
 export {

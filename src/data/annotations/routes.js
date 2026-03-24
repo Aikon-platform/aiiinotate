@@ -1,6 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog, STRICT_MODE } from "#utils/utils.js";
+import { STRICT_MODE } from "#constants";
+import { pathToUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 

@@ -2,13 +2,13 @@ import serve from "#src/server.js";
 
 import { Command, Option, Argument } from "commander";
 
-/** @typedef {import("#types").RerveModeType} RerveModeType */
+/** @typedef {import("#types").ServeModeType} ServeModeType */
 
-const serveModeValues = ["test", "dev", "prod"];
+const serveModeValues = ["dev", "prod"];
 
 /**
  * @param {import('commander').Command} command
- * @param {RerveModeType} serveMode
+ * @param {ServeModeType} serveMode
  */
 async function action(command, serveMode) {
   await serve(serveMode);
