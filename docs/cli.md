@@ -80,6 +80,8 @@ Where:
 
 NOTE that data to import **MUST MATCH the IIIF version**: if `-i 2`, you can only import `AnnotationLists` following the IIIF Presentation 2.x standard, and note annotations in 3.x format.
 
+NOTE that for the moment, import is only implemented for IIIF version 2.
+
 Here is an example of import file:
 
 ```
