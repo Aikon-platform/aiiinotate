@@ -6,7 +6,7 @@ import build from "#src/app.js";
 import { PORT, HOST } from "#constants";
 
 /**
- * @param {import("#types").RerveModeType} serveMode
+ * @param {import("#types").ServeModeType} serveMode
  */
 async function server (serveMode) {
   if (["dev", "prod"].includes(serveMode)) {

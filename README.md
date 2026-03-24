@@ -138,7 +138,7 @@ npm run dev
 npm run prod
 ```
 
-- **Test the app**
+- **Test the app**. NOTE: the tests will probably fail if you set the env variable `AIIINOTATE_STRICT_MODE` to `true`.
 
 ```bash
 npm run test

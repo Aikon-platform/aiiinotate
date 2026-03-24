@@ -15,7 +15,7 @@
 
 /** @typedef {import("ajv").ValidateFunction} AjvValidateFunctionType */
 
-/** @typedef {"test"|"dev"|"prod"} RerveModeType */
+/** @typedef {"dev"|"prod"} ServeModeType */
 
 /** @typedef {"uri"|"manifestShortId"|"canvasUri"} AnnotationsDeleteKeyType */
 

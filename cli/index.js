@@ -28,9 +28,6 @@ function makeCli() {
     Run individual commands to see command-specific help.
     `.replace(/^\s+/gm, "");
 
-  const envFileOpt =
-    new Option("--env <env-file>", "path to .env file").makeOptionMandatory();
-
   // NOTE: before running, it is necessary to load env variables.
   const cli = new Command();
   cli
