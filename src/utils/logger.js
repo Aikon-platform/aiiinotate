@@ -5,7 +5,8 @@ import pino from "pino";
 
 import { LOG_TARGET, LOG_DIR } from "#constants";
 
-if (!fs.existsSync(LOG_DIR)) {
+// a LOG_DIR is defined and it doesn't exist
+if (LOG_DIR?.length && !fs.existsSync(LOG_DIR)) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
 }
 
