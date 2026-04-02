@@ -94,7 +94,7 @@ async function build(mode="default") {
   const
     config = setConfig(mode),
     mongoConfig = config.mongo,
-    fastifyConfig = config.fastify,
+                                                                                fastifyConfig = config.fastify,
     fastify = Fastify(fastifyConfig);
 
   // NOTE: we allow all origins => restrict ?
