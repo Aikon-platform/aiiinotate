@@ -93,7 +93,7 @@ const setConfig = (mode) => {
 async function build(mode="default") {
   const
     config = setConfig(mode),
-    mongoConfig = config.mongo,
+    mongoConfig                                      = config.mongo,
     fastifyConfig = config.fastify,
     fastify = Fastify(fastifyConfig);
 
