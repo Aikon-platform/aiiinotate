@@ -13,10 +13,9 @@ In the docs below,
 
 **aiiinotate** is meant to be able to handle both IIIF presentation APIs: the most common [2.x](https://iiif.io/api/presentation/2.1) and the more recent [3.x](https://iiif.io/api/presentation/3.0). Both APIs define a data structure for manifests, annotations, lists of annotations and collections of manifests.
 
-**HOWEVER, in aiiinotate, IIIF Presentation v2 and v3 data are isolated**: they form two separate collections, and no conversion is done between IIIF 2.x and 3.x data. This means that:
+**HOWEVER, in aiiinotate, v2 and v3 data are isolated**: they form two separate collections, and no conversion is done between IIIF 2.x and 3.x data. This means that:
 - **when communicating with aiiinotate**, you must specify a **IIIF presentation version in the query URL**. In the docs, this is described by the  `iiif_version` keyword.
 - **when inserting/updating data**, the data structure you provide must match the URL's `iiif_version`: you can't insert an annotation in v3 if your `iiif_version` is `2`.
-- **when searching for data**, if you inserted an annotation in v3, you must search for it with `iiif_version = 3`.
 - **TLDR**:
     - your data must match the `iiif_version` argument
     - if you insert an Annotation following the API v3.x, you can't search for it using `iiif_version=2`.
@@ -289,6 +288,7 @@ Batch insert multiple annotations.
 
 #### Notes
 
+- Calling this route using parallel processes (i.e., `Promise.all`) can cause data races which will cause inserts to fail
 - Be wary of maximum body size, especially when sending AnnotationLists in your body. If possible, using `{ uri: string }` is better.
 - All annotations within a single AnnotationList/Page may have different target canvases or manifests.
 - See **Create/update an annotation**.

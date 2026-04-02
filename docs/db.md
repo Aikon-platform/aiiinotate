@@ -4,15 +4,35 @@
 
 ## Collections
 
+- `annotations2`: a collection of annotations following the IIIF Presentation API 2.x (OpenAnnotation specification)
+- `annotations3`: a collection of annotations following the IIIF Presentation API 3.x (WebAnnotation specification)
+- `manifests2`: an index of manifests (manifest ID and array of canvas IDs of the manifest) following the IIIF Presentation API 2.x (OpenAnnotation specification)
+- `manifests3`: an index of manifests (manifest ID and array of canvas IDs of the manifest) following the IIIF Presentation API 3.x (WebAnnotation specification)
+
+Conversion between IIIF Presentation APIs 2 and 3 is not implemented.
+
 ---
 
 ## Validation rules
+
+Two levels of validation rules are implemented:
+- route-level validation
+- database-level validation
+
+At route-level, we ensure that the data has the absolutely necessary data to work with annotations.
+
+At database-level (see [`src/schema`](https://github.com/Aikon-platform/aiiinotate/blob/main/src/schemas/) module, we define a complete model (in JSONSchema) to describe annotations.
+
+**TLDR**: when inserting annotations (i.e., from an AnnotationList)
+1. at [route-level](https://github.com/Aikon-platform/aiiinotate/blob/main/src/data/annotations/routes.js), we ensure that the AnnotationList is generally valid (contains a `resource` with annotations, each annotations contains a `on`...)
+2. in the [`Annotations2`](https://github.com/Aikon-platform/aiiinotate/blob/main/src/data/annotations/annotations2.js) module, we do some extra checks and extra minimal reformatting to ensure that our annotations all have the same structure (i.e., convert `annotation.on` values to an array of `SpecificResources`). After finishing the cleanup, we are certain that an annotation can be inserted
+3. when inserting an annotation in the MongDB `annotations2`, MongoDB uses the `annotation` schema defined in [`src/schemas/schemasPresentation2`](https://github.com/Aikon-platform/aiiinotate/blob/main/src/schemas/schemasPresentation2.js) to validate annotations before inserting.
 
 ---
 
 ## Migrations
 
-Migrations are used to specify changes to the database's structure (creation and deletion of collections and indexes, changes to collection options such as validation rules etc.). Migration is done using [`migrate-mongo`](https://github.com/seppevs/migrate-mongo), a command-line interface for npm. 
+Migrations are used to specify changes to the database's structure (creation and deletion of collections and indexes, changes to collection options such as validation rules etc.). Migration is done using [`migrate-mongo`](https://github.com/seppevs/migrate-mongo), a command-line interface for npm.
 
 *Note that here, migrations only concern changes to the structure, not changes to the data.*
 

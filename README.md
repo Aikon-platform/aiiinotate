@@ -2,6 +2,14 @@
 
 aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `nodejs/fastify` and `mongodb` and provides an API to read/write/update/delete IIIF annotations and index manifests.
 
+NOTE: currently, only annotations following the IIIF presentation API 2.0 and 2.1 are supported.
+
+---
+
+## API
+
+See the [docs on the aiiinotate API](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/endpoints.md).
+
 ---
 
 ## PROD USAGE
@@ -138,9 +146,6 @@ Remember to have your `mongodb` service running: `sudo systemctl start mongod` !
 ```bash
 # reload enabled
 npm run dev
-
-# reload disabled
-npm run prod
 ```
 
 - **Test the app**. NOTE: the tests will probably fail if you set the env variable `AIIINOTATE_STRICT_MODE` to `true`.
@@ -153,7 +158,7 @@ npm run test
 
 
 ```bash
-npm cli
+npm run cli
 ```
 
 - **Process migrations**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
