@@ -22,7 +22,7 @@
     "ttt": "echo 'HELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLO'"
   },
   "pre-commit": [
-    "ttt"
+    "lint"
   ],
   "repository": {
     "type": "git",
