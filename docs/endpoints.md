@@ -288,6 +288,7 @@ Batch insert multiple annotations.
 
 #### Notes
 
+- Calling this route using parallel processes (i.e., `Promise.all`) can cause data races which will cause inserts to fail
 - Be wary of maximum body size, especially when sending AnnotationLists in your body. If possible, using `{ uri: string }` is better.
 - All annotations within a single AnnotationList/Page may have different target canvases or manifests.
 - See **Create/update an annotation**.
