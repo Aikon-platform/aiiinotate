@@ -24,12 +24,7 @@
     "lint"
   ],
   "repository": {
-    "type": "git",
-
-
-
-
-
+    "type":                                                            "git",
     "url": "git+https://github.com/Aikon-platform/aiiinotate.git"
   },
   "keywords": [
