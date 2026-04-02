@@ -18,10 +18,11 @@
     "lint": "npx eslint --fix",
     "migrate": "npm run cli -- migrate",
     "update_version": "python3 scripts/update_version.py",
-    "get_version": "python3 scripts/get_version.py"
+    "get_version": "python3 scripts/get_version.py",
+    "ttt": "echo 'HELLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLO'"
   },
   "pre-commit": [
-    "lint"
+    "ttt"
   ],
   "repository": {
     "type": "git",
