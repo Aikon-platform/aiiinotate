@@ -122,7 +122,7 @@ function makeMigrateCommand() {
         migrationOp == "make"
         && (options.migrationName === undefined || options.migrationName === "")
       ) {
-        command.error(`migration operation "apply" requires option "-n, --migration-name <name>"`, { exitCode: 1 });
+        command.error("migration operation \"apply\" requires option \"-n, --migration-name <name>\"", { exitCode: 1 });
       }
       action(command, migrationOp, options)
     })
