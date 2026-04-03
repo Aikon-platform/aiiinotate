@@ -15,9 +15,6 @@ import { execSync } from "node:child_process"
 
 import { Command, Option, Argument } from "commander";
 
-import loadMongoClient from "#cli/utils/mongoClient.js";
-
-
 /** @typedef {"make"|"apply"|"revert"|"revert-all"} MigrateOpType */
 const allowedMigrateOp = ["make", "apply", "revert", "revert-all"];
 
@@ -109,17 +106,26 @@ async function action(command, migrationOp, options) {
 
 function makeMigrateCommand() {
   const migrationOpArg =
-    new Argument("<migration-op>", "name of migration operation").choices(allowedMigrateOp);
+    new Argument("<migration-op>", "name of migration operation")
+      .choices(allowedMigrateOp);
 
   const migrationNameOpt =
-    new Option("-n, --migration-name <name>", "name of migration (for 'make' argument)")
-      .makeOptionMandatory();
+    new Option("-n, --migration-name <name>", "name of migration (for 'make' argument)");
 
-  return new Command("migrate")
+  const command = new Command("migrate");
+  return command
     .description("run database migrations")
     .addArgument(migrationOpArg)
     .addOption(migrationNameOpt)
-    .action((migrationOp, options, command) => action(command, migrationOp, options))
+    .action((migrationOp, options, command) => {
+      if (
+        migrationOp == "make"
+        && (options.migrationName === undefined || options.migrationName === "")
+      ) {
+        command.error(`migration operation "apply" requires option "-n, --migration-name <name>"`, { exitCode: 1 });
+      }
+      action(command, migrationOp, options)
+    })
 }
 
 export default makeMigrateCommand;
