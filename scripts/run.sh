@@ -27,7 +27,7 @@ case "$SCRIPT" in
         nodemon --watch ./src --exec "bash -c '$DOTENVX_BIN run -f $ENV_PATH -- node $ROOT_DIR/cli/index.js serve dev'";
         ;;
     test)
-        "$DOTENVX_BIN" run -f "$ENV_PATH" -- node --test --test-isolation=none
+        "$DOTENVX_BIN" run -f "$ENV_PATH" -- node --test --test-isolation=none --experimental-test-coverage
         ;;
     *)
         echo "Unknown run mode: $SCRIPT. Exiting...";

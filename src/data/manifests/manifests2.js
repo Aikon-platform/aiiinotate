@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { formatInsertResponse } from "#utils/routeUtils.js";
-import { inspectObj, visibleLog, ajvCompile } from "#utils/utils.js";
+import { inspectObj, visibleLog, ajvCompile, memoize } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { BASE_URL } from "#constants";
 
@@ -45,6 +45,23 @@ class Manifests2 extends CollectionAbstract {
 
   /////////////////////////////////////////////
   // utils
+
+  /**
+   * fetch the array of canvasIds for a single manifest.
+   * since, in AIKON after a RegionExtraction, an annotation insert
+   * is done once per canvas, and for each annotation insert, we
+   * fetch the canvas index, we memoize the canvas list for each manifest URI
+   * to avoid multiplying database calls.
+   * @type {(string) => Promise<string[]>}
+   */
+  #memoizeGetManifestCanvasIds = memoize(async (manifestUri) => {
+    const doc = await this.collection
+      .findOne(
+        { "@id": manifestUri },
+        { projection: { canvasIds: 1, _id: 0 } }  // findOne is enough, there's only one manifest per URI
+      );
+    return doc?.canvasIds ?? [];
+  }, 60_000);
 
   /**
    * NOTE: PERFORMANCE: using AJV validation is MUCH FASTER than doing manual verifications (-25% execution time for the test suite)
@@ -295,23 +312,18 @@ class Manifests2 extends CollectionAbstract {
    * @returns {Promise<number?>}
    */
   async getCanvasIdx(manifestUri, canvasUri) {
-    // NOTE: PERFORMANCE increases using `aggregate` with `$indexOfArray` to find the index of `canvasUri`: up to 30% faster execution of the app's test suite:
+    // old method without memoization.
     // - with `aggregate`, ~2800ms for the whole test suite to run.
     // - with a native `coll.findOne()` and then getting the canvas ID manually (`arr.indexOf`), ~4000ms for the whole test suite to run.
     // https://www.mongodb.com/docs/manual/aggregation/
     // https://www.mongodb.com/docs/manual/reference/operator/aggregation/indexOfArray/
-    /**
-     * @type { { _id: MongoObjectId, index: number } | null }
-     * if `cursor.next() => null`, no document was found.
-     * otherwise the index is returned (-1 if `canvasIdx` was not found in the document)
-     */
-    const r = await this.collection.aggregate([
-      { $match: { "@id": manifestUri } },
-      { $project: { index: { $indexOfArray: ["$canvasIds", canvasUri] } } }
-    ]).next();
-    return r === null
-      ? undefined
-      : r.index !== -1 ? r.index : undefined;
+    // const r = await this.collection.aggregate([
+    //   { $match: { "@id": manifestUri } },
+    //   { $project: { index: { $indexOfArray: ["$canvasIds", canvasUri] } } }
+    // ]).next();
+    const r = await this.#memoizeGetManifestCanvasIds(manifestUri);
+    const index = r.indexOf(canvasUri);
+    return index !== -1 ? index : undefined
   }
 
   /**

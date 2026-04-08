@@ -29,7 +29,7 @@ function commonRoutes(fastify, options, done) {
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
     responsePostSchema = makeResponsePostSchema(fastify),
     validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasResolver(
-      fastify.schemasRoutes.getSchema("routeAnnotationFilter")
+      fastify.schemasRoutes.getSchema("routeAnnotationDeleteFilter")
     )),
     validatorRouteManifestDeleteSchema = ajvCompile(fastify.schemasResolver(
       fastify.schemasRoutes.getSchema("routeManifestFilter")
@@ -147,7 +147,6 @@ function commonRoutes(fastify, options, done) {
               ? validatorRouteAnnotationDeleteSchema
               : validatorRouteManifestDeleteSchema,
           error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
-
         if ( !validator(query) ) {
           returnError(request, reply, error, {}, 400);
         }
@@ -155,16 +154,16 @@ function commonRoutes(fastify, options, done) {
       }
     },
     async (request, reply) => {
-      const
-        { collectionName, iiifPresentationVersion } = request.params,
-        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
+      const { collectionName, iiifPresentationVersion } = request.params;
 
       try {
         if ( collectionName==="annotations" ) {
+          const deleteFilter = request.query;
           return iiifPresentationVersion === 2
-            ? await annotations2.deleteAnnotations(deleteKey, deleteVal)
+            ? await annotations2.deleteAnnotations(deleteFilter)
             : annotations3.notImplementedError();
         } else {
+          const [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
           return iiifPresentationVersion === 2
             ? await manifests2.deleteManifest(deleteKey, deleteVal)
             : manifests3.notImplementedError();

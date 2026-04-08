@@ -176,6 +176,20 @@ npm run migrate -- <command> <arguments?>
 npm run cli -- import <arguments>
 ```
 
+--- 
+
+## Test coverage
+
+aiiinotate is well tested: **over 90% test coverage** on all files ! 
+
+```
+ℹ ----------------------------------------------------------------------------------------
+ℹ file       | line % | branch % | funcs % | uncovered lines
+ℹ ----------------------------------------------------------------------------------------
+ℹ all files  |  90.02 |    79.43 |   78.73 |
+ℹ ----------------------------------------------------------------------------------------
+```
+
 ---
 
 ## License

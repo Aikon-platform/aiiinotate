@@ -7,7 +7,7 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { STRICT_MODE } from "#constants";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize, getFirstNonEmptyPair } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 import { PAGE_SIZE } from "#constants";
 
@@ -62,7 +62,7 @@ class Annotations2 extends CollectionAbstract {
 
 
   /**
-   * @type {() => Promise<number>}
+   * @type {(object) => Promise<number>}
    * cache the number of documents corresponding to a paginated query in a JS cache
    * a simple cache avoids rerunning a count to get the total number of documents for each page of a paginated query
    * see: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
@@ -76,15 +76,28 @@ class Annotations2 extends CollectionAbstract {
    * @returns
    */
   #expandRouteAnnotationFilter(filterKey, filterVal) {
-    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri" ];
+    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri", "tag" ];
     if ( !allowedFilterKeys.includes(filterKey) ) {
       throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
     }
-    return  filterKey==="uri"
-      ? { "@id": filterVal }
-      : filterKey==="canvasUri"
-        ? { "on.full": filterVal }
-        : { "on.manifestShortId": filterVal };
+    const map = {
+      uri: { "@id": filterVal },
+      canvasUri: { "on.full": filterVal },
+      manifestShortId: { "on.manifestShortId": filterVal },
+      tag: {
+        $and: [
+          {
+            // schema accepts both oa:Tag and Tag
+            $or: [
+              {"resource.@type": "oa:Tag"},
+              {"resource.@type": "Tag"}
+            ]
+          },
+          { "resource.chars": filterVal }
+        ]
+      }
+    }
+    return map[filterKey];
   }
 
   /**
@@ -412,16 +425,30 @@ class Annotations2 extends CollectionAbstract {
   // delete
 
   /**
-   * @param {AnnotationsDeleteKeyType} deleteKey - what deleteVal describes: an annotation's '@id', a manifest's URI...
-   * @param {string} deleteVal - deletion key
+   * @param {Object<string,string>} deleteFilter - filter for the annotations to delete
    * @returns {Promise<DeleteResponseType>}
    */
-  async deleteAnnotations(deleteKey, deleteVal) {
+  async deleteAnnotations(deleteFilter) {
+    const err = (message) => this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${message}`);
     try {
-      const deleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
-      return this.delete(deleteFilter);
+      let expandedDeleteFilter;
+      if ( Object.keys(deleteFilter).includes("tag") ) {
+        // should be validated by the route's JSONSchema, but just in case.
+        if ( ! Object.keys(deleteFilter).includes("manifestShortId") ) {
+          throw err("Cannot delete by \"tag\" without also filtering by \"manifestShortId\" !")
+        }
+        const expand = (k) => this.#expandRouteAnnotationFilter(k, deleteFilter[k]);
+        expandedDeleteFilter = {
+          ...expand("tag"),
+          ...expand("manifestShortId")
+        }
+      } else {
+        const [deleteKey, deleteVal] = getFirstNonEmptyPair(deleteFilter);
+        expandedDeleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
+      }
+      return this.delete(expandedDeleteFilter);
     } catch (err) {
-      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${err.message}`)
+      throw err(err.message);
     }
   }
 
