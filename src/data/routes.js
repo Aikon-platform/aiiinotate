@@ -29,7 +29,7 @@ function commonRoutes(fastify, options, done) {
     routeDeleteSchema = fastify.schemasRoutes.getSchema("routeDelete"),
     responsePostSchema = makeResponsePostSchema(fastify),
     validatorRouteAnnotationDeleteSchema = ajvCompile(fastify.schemasResolver(
-      fastify.schemasRoutes.getSchema("routeAnnotationFilter")
+      fastify.schemasRoutes.getSchema("routeAnnotationDeleteFilter")
     )),
     validatorRouteManifestDeleteSchema = ajvCompile(fastify.schemasResolver(
       fastify.schemasRoutes.getSchema("routeManifestFilter")

@@ -165,6 +165,21 @@ function addSchemas(fastify, options, done) {
     ]
   })
 
+  // to delete an annotation by tag, you must also provide a manifestShortId (to avoid deleting all annotations with this tag in the entire db)
+  fastify.addSchema({
+    $id: makeSchemaUri("routeAnnotationFilterTag"),
+    type: "object",
+    required: ["tag", "manifestShortId"],
+    properties: {
+      manifestShortId: {
+        type: "string", description: "delete all annotations for a single manifest"
+      },
+      tag: {
+        type: "string", description: "delete allannotations for a single tag"
+      }
+    }
+  })
+
   // for annotations: key-value pairs to filter a manifests collection by
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationFilter"),
@@ -184,6 +199,15 @@ function addSchemas(fastify, options, done) {
         required: ["canvasUri"],
         properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } }
       }
+    ]
+  })
+
+  // delete either by tag+manifestShortId, or by annotation URI, manifestShortId, canvasUri
+  fastify.addSchema({
+    $id: makeSchemaUri("routeAnnotationDeleteFilter"),
+    oneOf: [
+      { $ref: makeSchemaUri("routeAnnotationFilterTag") },
+      { $ref: makeSchemaUri("routeAnnotationFilter") },
     ]
   })
 
