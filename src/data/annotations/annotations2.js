@@ -62,7 +62,7 @@ class Annotations2 extends CollectionAbstract {
 
 
   /**
-   * @type {() => Promise<number>}
+   * @type {(object) => Promise<number>}
    * cache the number of documents corresponding to a paginated query in a JS cache
    * a simple cache avoids rerunning a count to get the total number of documents for each page of a paginated query
    * see: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
