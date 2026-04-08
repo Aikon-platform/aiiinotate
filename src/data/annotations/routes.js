@@ -240,7 +240,7 @@ function annotationsRoutes(fastify, options, done) {
         if ( iiifPresentationVersion === 2 ) {
           return action==="create"
             ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError)
-            : await annotations2.updateAnnotation(annotation, throwOnXywhError);
+            : await annotations2.updateAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError);
         } else {
           annotations3.notImplementedError();
         }

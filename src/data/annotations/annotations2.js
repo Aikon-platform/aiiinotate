@@ -391,12 +391,18 @@ class Annotations2 extends CollectionAbstract {
    * TODO: handle side effects when changing `annotation.on`: changes that can affect `manifestShortId`, `manifestUri` and `canvasIdx`
    *    (for example, updating `annotation.on.full` would ask to change `canvasIdx`).
    * @param {object} annotation
-   * @param {boolean} throwOnXywhError
+   * @param {boolean?} throwOnCanvasIndexError
+   * @param {boolean?} throwOnXywhError
    * @returns {Promise<UpdateResponseType>}
    */
-  async updateAnnotation(annotation, throwOnXywhError=STRICT_MODE) {
+  async updateAnnotation(annotation, throwOnCanvasIndexError=STRICT_MODE, throwOnXywhError=STRICT_MODE) {
     // necessary: on insert, the `@id` received is modified by `this.#cleanAnnotationList`.
     annotation = await this.#cleanAnnotation({ annotation, update: true, throwOnXywhError });
+    // necessary:
+    //  1. handle changes to target canvas' manifest
+    //  2. when updating an annotation in MAE, the non-standard fields in the annotation are lost:
+    //    `canvasIdx`, `manifestUri`, `manifestShortId` are not serialized/deserialized in MAE.
+    annotation = await this.#insertManifestsAndGetCanvasIdx(annotation, throwOnCanvasIndexError);
     const
       query = { "@id": annotation["@id"] },
       update = { $set: annotation };
@@ -410,8 +416,13 @@ class Annotations2 extends CollectionAbstract {
    * when inserting, aiiinotate attempts to fetch the target manifest of an annotation and to add the canvas number of the annotation to `annotation.on`.
    * this may fail for a number of reasons (manifest URL and JSON structure, server storing the manifest is inaccessible...). if `throwOnCanvasIndexError`, it will raise.
    *
+   * about `throwOnXywhError`:
+   * we try to calculate the bounding box of an annotation. this is only supported for FragmentSelectors and SvgSelectors, and will fail otherwise
+   * => if `throwOnXywhError`, throw if there is an error calculating the bounding box.
+   *
    * @param {object} annotationList
    * @param {boolean?} throwOnCanvasIndexError
+   * @param {boolean?} throwOnXywhError
    * @returns {Promise<InsertResponseType>}
    */
   async insertAnnotationList(annotationList, throwOnCanvasIndexError=STRICT_MODE, throwOnXywhError=STRICT_MODE) {
