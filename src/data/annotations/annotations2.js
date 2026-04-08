@@ -7,7 +7,7 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { STRICT_MODE } from "#constants";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize } from "#utils/utils.js";
+import { ajvCompile, objectHasKey, isNullish, maybeToArray, visibleLog, memoize, getFirstNonEmptyPair } from "#utils/utils.js";
 import { getManifestShortId, makeTarget, makeAnnotationId, toAnnotationList, canvasUriToManifestUri } from "#utils/iiif2Utils.js";
 import { PAGE_SIZE } from "#constants";
 
@@ -425,16 +425,33 @@ class Annotations2 extends CollectionAbstract {
   // delete
 
   /**
-   * @param {AnnotationsDeleteKeyType} deleteKey - what deleteVal describes: an annotation's '@id', a manifest's URI...
-   * @param {string} deleteVal - deletion key
+   * @param {Object<string,string>} deleteFilter - filter for the annotations to delete
    * @returns {Promise<DeleteResponseType>}
    */
-  async deleteAnnotations(deleteKey, deleteVal) {
+  async deleteAnnotations(deleteFilter) {
+    const err = (message) => this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${message}`);
+
     try {
-      const deleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
-      return this.delete(deleteFilter);
+      let expandedDeleteFilter;
+      if ( Object.keys(deleteFilter).includes("tag") ) {
+        // should be validated by the route's JSONSchema, but just in case.
+        if ( ! Object.keys(deleteFilter).includes("manifestShortId") ) {
+          throw err("Cannot delete by \"tag\" without also filtering by \"manifestShortId\" !")
+        }
+        const expand = (k) => ({ k: this.#expandRouteAnnotationFilter(k, deleteFilter[k]) })
+        expandedDeleteFilter = {
+          $and: [
+            expand("tag"),
+            expand("manifestShortId")
+          ]
+        }
+      } else {
+        const [deleteKey, deleteVal] = getFirstNonEmptyPair(deleteFilter);
+        expandedDeleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
+      }
+      return this.delete(expandedDeleteFilter);
     } catch (err) {
-      throw this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${err.message}`)
+      throw err(err.message);
     }
   }
 

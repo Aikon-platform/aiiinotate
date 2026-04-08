@@ -155,16 +155,16 @@ function commonRoutes(fastify, options, done) {
       }
     },
     async (request, reply) => {
-      const
-        { collectionName, iiifPresentationVersion } = request.params,
-        [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
+      const { collectionName, iiifPresentationVersion } = request.params;
 
       try {
         if ( collectionName==="annotations" ) {
+          const deleteFilter = request.query;
           return iiifPresentationVersion === 2
-            ? await annotations2.deleteAnnotations(deleteKey, deleteVal)
+            ? await annotations2.deleteAnnotations(deleteFilter)
             : annotations3.notImplementedError();
         } else {
+          const [ deleteKey, deleteVal ] = getFirstNonEmptyPair(request.query);
           return iiifPresentationVersion === 2
             ? await manifests2.deleteManifest(deleteKey, deleteVal)
             : manifests3.notImplementedError();
