@@ -76,15 +76,28 @@ class Annotations2 extends CollectionAbstract {
    * @returns
    */
   #expandRouteAnnotationFilter(filterKey, filterVal) {
-    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri" ];
+    const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri", "tag" ];
     if ( !allowedFilterKeys.includes(filterKey) ) {
       throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
     }
-    return  filterKey==="uri"
-      ? { "@id": filterVal }
-      : filterKey==="canvasUri"
-        ? { "on.full": filterVal }
-        : { "on.manifestShortId": filterVal };
+    const map = {
+      uri: { "@id": filterVal },
+      canvasUri: { "on.full": filterVal },
+      manifestShortId: { "on.manifestShortId": filterVal },
+      tag: {
+        $and: [
+          {
+            // schema accepts both oa:Tag and Tag
+            $or: [
+              {"resource.@type": "oa:Tag"},
+              {"resource.@type": "Tag"}
+            ]
+          },
+          { "resource.chars": filterVal }
+        ]
+      }
+    }
+    return map[filterKey];
   }
 
   /**
