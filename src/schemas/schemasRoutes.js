@@ -177,7 +177,8 @@ function addSchemas(fastify, options, done) {
       tag: {
         type: "string", description: "delete allannotations for a single tag"
       }
-    }
+    },
+    additionalProperties: false
   })
 
   // for annotations: key-value pairs to filter a manifests collection by
@@ -187,17 +188,20 @@ function addSchemas(fastify, options, done) {
       {
         type: "object",
         required: ["uri"],
-        properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } }
+        properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } },
+        additionalProperties: false
       },
       {
         type: "object",
         required: ["manifestShortId"],
-        properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } }
+        properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } },
+        additionalProperties: false
       },
       {
         type: "object",
         required: ["canvasUri"],
-        properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } }
+        properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } },
+        additionalProperties: false
       }
     ]
   })
@@ -235,12 +239,14 @@ function addSchemas(fastify, options, done) {
       {
         type: "object",
         required: ["uri"],
-        properties: { uri: { type: "string" } }
+        properties: { uri: { type: "string" } },
+        additionalProperties: false
       },
       {
         type: "object",
         required: ["manifestShortId"],
-        properties: { manifestShortId: { type: "string" } }
+        properties: { manifestShortId: { type: "string" } },
+        additionalProperties: false
       }
     ]
   });

@@ -58,7 +58,10 @@ test("test common routes", async (t) => {
     await t.test("test preValidation hook for queryString validation", async (t) => {
       const data = [
         ["/manifests/2/delete?canvasUri=xxx", false],    // canvasUri is only allowed if `collectionName==="annotations"` => will fail.
-        ["/manifests/2/delete?manifestShortId=xxx", true]
+        ["/annotations/2/delete?tag=xxx", false],  // if using tag, manifestShortId must also be defined
+        ["/manifests/2/delete?tag=xxx&manifestShortId=xxx", false],  // tag is not allowed with `manifests`
+        ["/annotations/2/delete?tag=xxx&manifestShortId=xxx", true],
+        ["/manifests/2/delete?manifestShortId=xxx", true],
       ];
       for ( let i=0; i<data.length; i++ ) {
         const [url, expectSuccess] = data.at(i);
@@ -125,6 +128,33 @@ test("test common routes", async (t) => {
 
       await deletePipeline(true);
       await deletePipeline(false);
+      await fastify.emptyCollections();
+
+      await t.test("test route /annotations/:iiifPresentationVersion/delete with param 'tag'", async (t) => {
+        const
+          tags = ["tag1", "tag2", "tag3"],
+          // outputs one of the tags at random
+          selectTag = () => tags[Math.floor(Math.random() * 3)],
+          testTag = selectTag(),
+          // avoid changes to the global annotationList by cloning it.
+          annotationListCopy = structuredClone(annotationList),
+          // all annotations in the anno list are on the same manifest
+          manifestShortId = getManifestShortId(annotationList.resources[0].on);
+
+        annotationListCopy.resources = annotationList.resources.map((anno) => {
+          anno.resource = {
+            "@type": "oa:Tag",
+            "chars": selectTag()
+          }
+          return anno;
+        })
+        const expectedDeletedCount = annotationListCopy.resources.filter((anno) =>
+          anno.resource["@type"]==="oa:Tag"
+          && anno.resource["chars"]===testTag
+        ).length;
+        await injectTestAnnotations(fastify, t, annotationList);
+        await testDeleteRoute(t, `/annotations/2/delete?manifestShortId=${manifestShortId}&tag=${testTag}`, expectedDeletedCount);
+      })
     });
 
   })

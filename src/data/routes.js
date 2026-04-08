@@ -147,7 +147,6 @@ function commonRoutes(fastify, options, done) {
               ? validatorRouteAnnotationDeleteSchema
               : validatorRouteManifestDeleteSchema,
           error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
-
         if ( !validator(query) ) {
           returnError(request, reply, error, {}, 400);
         }

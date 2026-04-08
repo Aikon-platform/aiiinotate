@@ -430,7 +430,6 @@ class Annotations2 extends CollectionAbstract {
    */
   async deleteAnnotations(deleteFilter) {
     const err = (message) => this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${message}`);
-
     try {
       let expandedDeleteFilter;
       if ( Object.keys(deleteFilter).includes("tag") ) {
@@ -438,12 +437,10 @@ class Annotations2 extends CollectionAbstract {
         if ( ! Object.keys(deleteFilter).includes("manifestShortId") ) {
           throw err("Cannot delete by \"tag\" without also filtering by \"manifestShortId\" !")
         }
-        const expand = (k) => ({ k: this.#expandRouteAnnotationFilter(k, deleteFilter[k]) })
+        const expand = (k) => this.#expandRouteAnnotationFilter(k, deleteFilter[k]);
         expandedDeleteFilter = {
-          $and: [
-            expand("tag"),
-            expand("manifestShortId")
-          ]
+          ...expand("tag"),
+          ...expand("manifestShortId")
         }
       } else {
         const [deleteKey, deleteVal] = getFirstNonEmptyPair(deleteFilter);
