@@ -95,6 +95,8 @@ DELETE /{collection_name}/{iiif_version}/delete
         - `uri`: the full URI of the annotation to delete
         - `manifestShortId`: a manifest's identifier, to delete all annotations for a manifest
         - `canvasUri`: the full URI to an annotation's target canvas, to delete all annotatons for the canvas
+        - `tag`: delete all annotations with a certain tag in a manifest
+            - MUST be used in conjunction with `manifestShortId` to indicate on which manifest to delete annotations by tag: `delete?tag=<your-tag>&manifestShortId=<your-manifest-id>`
 
 #### Response
 
