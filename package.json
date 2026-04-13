@@ -56,7 +56,7 @@
     "#annotations/*.js": "./src/data/annotations/*.js"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.49.0",
+    "@dotenvx/dotenvx": "^1.61.0",
     "@fastify/ajv-compiler": "^4.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/mongodb": "^9.0.2",
