@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { STRICT_MODE } from "#constants";
-import { pathToInternalPublicUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToAiiinotatePublicUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
@@ -108,7 +108,7 @@ function annotationsRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        queryUrl = pathToInternalPublicUrl(request.url),
+        queryUrl = pathToAiiinotatePublicUrl(request.url),
         { iiifPresentationVersion } = request.params,
         { canvasUri, page, pageSize } = request.query;
 
@@ -180,7 +180,7 @@ function annotationsRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        annotationUri = pathToInternalPublicUrl(request.url),
+        annotationUri = pathToAiiinotatePublicUrl(request.url),
         { iiifPresentationVersion } = request.params;
       try {
         return iiifPresentationVersion === 2

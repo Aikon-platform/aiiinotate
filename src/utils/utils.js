@@ -170,11 +170,11 @@ const maybeToArray = (x, convertedFlag=false) =>
  * @param {boolean} publicUrl
  * @returns {(path: string) => string}
  */
-const pathToInternalUrl = (publicUrl) =>
+const pathToAiiinotateUrl = (publicUrl) =>
   (path) =>
     `${publicUrl ? PUBLIC_URL : BASE_URL}${path}`
-const pathToInternalPublicUrl = pathToInternalUrl(true);
-const pathToInternalBaseUrl = pathToInternalUrl(false);
+const pathToAiiinotatePublicUrl = pathToAiiinotateUrl(true);
+const pathToAiiinotateBaseUrl = pathToAiiinotateUrl(false);
 
 /**
  * display a detailed and nested view of an object. to be used with console.log.
@@ -322,8 +322,8 @@ const memoize = (fn, timeout = 2000) => {
 
 export {
   maybeToArray,
-  pathToInternalPublicUrl,
-  pathToInternalBaseUrl,
+  pathToAiiinotatePublicUrl,
+  pathToAiiinotateBaseUrl,
   getHash,
   isNullish,
   isObject,
