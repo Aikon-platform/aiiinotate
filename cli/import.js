@@ -63,9 +63,10 @@ async function importAnnotationList(fastifyClient, fileArr) {
 /**
  * run the cli
  * @param {import('commander').Command} command
+ * @param {"manifest"|"annotation"} datatype
  * @param {object} options
  */
-async function action(command, options) {
+async function action(command, datatype, options) {
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
@@ -91,6 +92,10 @@ async function action(command, options) {
 /** define the cli */
 function makeImportCommand() {
 
+  const datatypeArg =
+    new Argument("datatype", "type of data to import: manifests or annotations")
+      .choices(["manifest", "annotation"]);
+
   const versionOpt =
     new Option("-i, --iiif-version <version>", "IIIF version")
       .choices(["2", "3"])
@@ -98,14 +103,15 @@ function makeImportCommand() {
       .makeOptionMandatory();
 
   const filesOpt =
-    new Option("-f, --file <file>", "file containing paths to AnnotationLists or AnnotationPages to process (1 line per path)")
+    new Option("-f, --file <file>", "file containing paths to AnnotationLists, AnnotationPages or Manifests to process (1 line per path)")
       .makeOptionMandatory();
 
   return new Command("import")
     .description("import data into aiiinotate")
+    .addArgument(datatypeArg)
     .addOption(filesOpt)
     .addOption(versionOpt)
-    .action((options, command) => action(command, options))
+    .action((datatype, options, command) => action(command, datatype, options))
 }
 
 export default makeImportCommand;
