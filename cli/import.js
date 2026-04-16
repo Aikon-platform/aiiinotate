@@ -67,6 +67,7 @@ async function importAnnotationList(fastifyClient, fileArr) {
  * @param {object} options
  */
 async function action(command, datatype, options) {
+  console.log(datatype);
 
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
