@@ -36,7 +36,6 @@ function makeCli() {
     .addCommand(makeMigrateCommand());
 
   cli.parse(process.argv);
-  return cli;
 }
 
 makeCli();

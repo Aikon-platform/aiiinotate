@@ -20,42 +20,31 @@ const parseNumber = (x) => Number(x);
 ////////////////////////////////////////
 
 /**
- * @param {FastifyInstanceType} fastifyClient
- * @param {string[]} fileArr - array of full paths to annotationLists to insert.
- */
-async function importAnnotationPage(fastifyClient, fileArr) {
-  notImplementedExit(`${importAnnotationPage.name} is not implemented`)
-}
-
-/**
  * @param {FastifyClient} fastifyClient
  * @param {string[]} fileArr - array of full paths to annotationLists to insert.
  */
-async function importAnnotationList(fastifyClient, fileArr) {
-  // fileArr = fileArr.slice(0,10)
+async function importData(importFunc, datatype, fileArr) {
 
-  const pb = new ProgressBar({ desc: "importing annotations", total: fileArr.length});
-  const importErrors = [];
   let totalImports = 0
+  const
+    pb = new ProgressBar({ desc: `importing ${datatype}s`, total: fileArr.length}),
+    importErrors = [];
 
-  for ( const [i, file] of fileArr.entries() ) {
+  for ( let [i, file] of fileArr.entries() ) {
+    i += 1
     const
-      annotationList = JSON.parse(fileRead(file)),
-      [statusCode, resultPromise] = await fastifyClient.importAnnotationList(annotationList),
+      data = JSON.parse(fileRead(file)),
+      [statusCode, resultPromise] = await importFunc(data),
       result = await resultPromise;
     if ( statusCode <= 299 ) {
       totalImports += result.insertedCount;
     } else {
+      console.log(result);
       importErrors.push(file);
     }
     pb.update(i)
   }
-
-  if ( importErrors.length ) {
-    logger.info(`There were problems importing annotations from the following ${importErrors.length} annotation lists: ${inspectObj(importErrors, -1)}`)
-  }
-  logger.info(`Imported ${totalImports} annotations into Aiiinotate !`);
-  return
+  return [totalImports, importErrors]
 }
 
 ////////////////////////////////////////
@@ -67,25 +56,29 @@ async function importAnnotationList(fastifyClient, fileArr) {
  * @param {object} options
  */
 async function action(command, datatype, options) {
-  console.log(datatype);
-
   /** @type {2 | 3} */
   const iiifVersion = options.iiifVersion;
   /** @type {string[]} */
   const inputFile = options.file;
 
+  if (iiifVersion===3) {
+    notImplementedExit(`CLI imports for IIIF presentation V3 is not implemented`);
+  }
+
   const fastifyClient = new FastifyClient();
   await fastifyClient.build();
+  const importFunc = fastifyClient.importData(iiifVersion, datatype);
 
   // run
-  const filesToProcess = await parseImportInputFile(inputFile);
-  if ( iiifVersion===2 ) {
-    await importAnnotationList(fastifyClient, filesToProcess);
-  } else {
-    await importAnnotationPage(fastifyClient, filesToProcess);
+  const fileArr = await parseImportInputFile(inputFile);
+  const [totalImports, importErrors] = await importData(importFunc, datatype, fileArr);
+
+  if ( importErrors.length ) {
+    logger.info(`There were problems importing ${datatype}s from the following ${importErrors.length} files: ${inspectObj(importErrors, -1)}`)
   }
-  // exit
-  await fastifyClient.stop();
+  logger.info(`Imported ${totalImports} ${datatype}s into aiiinotate !`);
+  await fastifyClient.stop(); // TODO app keeps idling after that ....
+  return
 }
 
 /////////////////////////////////////////
