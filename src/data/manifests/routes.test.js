@@ -4,6 +4,7 @@ import build from "#src/app.js";
 import { visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { testPostRouteCurry, injectPost, injectTestManifest, assertStatusCode, assertObjectKeys} from "#utils/testUtils.js";
+import { PORT, HOST } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -30,7 +31,7 @@ test("test manifests Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
+    await fastify.listen({ port: PORT, host: HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;

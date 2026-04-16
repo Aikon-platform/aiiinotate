@@ -1,7 +1,7 @@
 import test from "node:test";
 
 import build from "#src/app.js";
-
+import { PORT, HOST } from "#constants";
 import { assertObjectKeysInsert } from "#utils/testUtils.js";
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -27,7 +27,7 @@ test("test Manifests2 module", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
+    await fastify.listen({ port: PORT, host: HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;

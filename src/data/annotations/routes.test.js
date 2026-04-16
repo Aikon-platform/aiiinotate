@@ -6,6 +6,8 @@ import { v4 as uuid4 } from "uuid";
 
 import { inspectObj, isObject, getRandomItem, visibleLog } from "#utils/utils.js"
 import { testPostRouteCurry, testDeleteRouteCurry, injectTestAnnotations, injectPost, injectGet } from "#utils/testUtils.js";
+import { PUBLIC_URL, PORT, HOST } from "#constants";
+
 
 /** @typedef {import("#types").NodeTestType} NodeTestType */
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -41,7 +43,7 @@ test("test annotation Routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
+    await fastify.listen({ port: PORT, host: HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;
@@ -213,8 +215,8 @@ test("test annotation Routes", async (t) => {
         const
           annotationIdQuery =
             shouldExist
-              ? annotationId.replace(process.env.AIIINOTATE_BASE_URL, "")
-              : annotationId.replace(process.env.AIIINOTATE_BASE_URL, "") + "string_that_does_not_exist_in_the_db",
+              ? annotationId.replace(PUBLIC_URL, "")
+              : annotationId.replace(PUBLIC_URL, "") + "string_that_does_not_exist_in_the_db",
           r = await fastify.inject({
             method: "GET",
             url: annotationIdQuery

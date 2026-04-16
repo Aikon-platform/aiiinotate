@@ -171,8 +171,8 @@ const maybeToArray = (x, convertedFlag=false) =>
  * @returns {(path: string) => string}
  */
 const pathToInternalUrl = (publicUrl) =>
-    (path) =>
-      `${publicUrl ? PUBLIC_URL : BASE_URL}${path}`
+  (path) =>
+    `${publicUrl ? PUBLIC_URL : BASE_URL}${path}`
 const pathToInternalPublicUrl = pathToInternalUrl(true);
 const pathToInternalBaseUrl = pathToInternalUrl(false);
 
