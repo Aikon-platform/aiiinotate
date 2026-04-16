@@ -11,6 +11,35 @@ import { PUBLIC_URL } from "#constants";
 /** @typedef {import("#types").FastifySchemaType} FastifySchemaType */
 
 /**
+ * NOTE : how are schemas managed in aiiinotate ?
+ * we implement "namespaced schemas" (aka, schemas grouped together in a single fastify decorator).
+ *
+ * TLDR: schemas are added to the global fastify instance, but their IDs are namespaced;
+ * schemas they are then accessed through decorators, each decorator is used to resolve annotations
+ * within a namespace.
+ *
+ * @example
+ *  > fastify.schemasPresentation2.getSchema("annotations") =>
+ *  > // resolves to
+ *  > fastify.getSchema("$PUBLIC_URL/schemas/schemasPresentation2/annotation")
+ *
+ * IN MORE DETAIL:
+ * - namespacing is done through the IDs of the schemas, defined on `fastify.addSchema` and used
+ *    to retrieve a schema with `fastify.getSchema()`
+ * - the global schema ID anatomy is defined here, in `_makeSchemaUri`: it's an URI that
+ *    accepts a "namespace". each schema has a unique `slug` appended to the end of the URI.
+ * - each file in this module (appart from `schemasResolver` and this file) exports
+ *    an `addSchemas` function that adds schemas to the global fastify instance with
+ *    a specific namespace.
+ * - then, a decorator is added to the fastify instance for each namespace. it adds 2 functions
+ *    `getSchema` and `makeSchemaUri` that are used to resolve schemas names and to access
+ *    all schemas within a certain namespace.
+ * - thanks to that, schemas can be accessed by their unique slug with the pattern:
+ *   `fastify.$schemaNamespace.getSchema($schemaSlug)`.
+ * - schemas defined here are accessible in the entire fastify app.
+ */
+
+/**
  * @type {(namespace: string) => (slug: string) => string}
  */
 const _makeSchemaUri = (namespace) =>
