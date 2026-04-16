@@ -1,7 +1,7 @@
 import { inspectObj, isNonEmptyArray, mergeObjects } from "#utils/utils.js";
 import logger from "#utils/logger.js";
 
-import { BASE_URL, PAGE_SIZE } from "#constants";
+import { PAGE_SIZE } from "#constants";
 
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("#types").InsertResponseType} InsertResponseType */

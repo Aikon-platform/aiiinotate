@@ -3,7 +3,7 @@ import { v4 as uuid4 } from "uuid";
 import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { svgStringToXywh } from "#utils/svg.js";
-import { BASE_URL } from "#constants";
+import { PUBLIC_URL } from "#constants";
 import logger from "#utils/logger.js";
 
 /** @typedef {import("#types").MongoCollectionType} MongoCollectionType */
@@ -95,10 +95,15 @@ const getAnnotationTarget = (annotation) => {
  * @returns {string}
  */
 const toAiiinotateAnnotationUri = (manifestShortId, canvasId) =>
-  `${BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
+  `${PUBLIC_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/annotation/${canvasId}_${uuid4()}`;
 
+/**
+ * @example "127.0.0.1:3000/data/2/wit9_man11_anno165/manifest.json"
+ * @param {string} manifestShortId
+ * @returns {string}
+ */
 const toAiiinotateManifestUri = (manifestShortId) =>
-  `${BASE_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
+  `${PUBLIC_URL}/data/${IIIF_PRESENTATION_2}/${manifestShortId}/manifest.json`;
 
 /**
  * if `canvasUri` follows the recommended IIIF 2.1 recommended URI pattern, convert it to a JSON manifest URI.

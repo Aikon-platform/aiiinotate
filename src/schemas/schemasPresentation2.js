@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { BASE_URL } from "#constants";
+import { PUBLIC_URL } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
@@ -56,7 +56,7 @@ const embeddedBodyTypeValues = [
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${BASE_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
+  `${PUBLIC_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
 
 /**
  * @param {FastifyInstanceType} fastify

@@ -322,6 +322,8 @@ class Annotations2 extends CollectionAbstract {
    * - pageSize: number of annotations per page
    * - label: title of the AnnotationList.
    *
+   * returns: the paginated AnnotationList as a promise
+   *
    * NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
    *
    * @param {{
@@ -331,7 +333,7 @@ class Annotations2 extends CollectionAbstract {
    *  pageSize: number,
    *  label: string?
    * }}
-   * @returns {object} - paginated annotation list
+   * @returns {Promise<object>} - paginated annotation list
    */
   async #paginate({
     queryUrl,
@@ -620,9 +622,13 @@ class Annotations2 extends CollectionAbstract {
 
   /**
    * find all annotations whose target (`on.full`) is `canvasUri`.
-   * @param {string} canvasUri
-   * @param {boolean} asAnnotationList
-   * @returns
+   * @param {{
+   *   queryUrl: string,
+   *   canvasUri: string,
+   *   page: Number,
+   *   pageSize: Number
+   * }} canvasUri
+   * @returns {AnnotationList}
    */
   async findByCanvasUri({
     queryUrl,

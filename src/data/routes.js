@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToInternalPublicUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { returnError, makeResponseSchema, makeResponsePostSchema, addPagination } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
@@ -94,7 +94,7 @@ function commonRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        queryUrl = pathToUrl(request.url),
+        queryUrl = pathToInternalPublicUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
         { q, motivation, canvasMin, canvasMax, onlyIds, page, pageSize } = request.query;
 

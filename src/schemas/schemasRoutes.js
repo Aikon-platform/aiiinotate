@@ -4,14 +4,14 @@
 
 import fastifyPlugin from "fastify-plugin";
 
-import { BASE_URL } from "#constants";
+import { PUBLIC_URL } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 
 /** @param {string} slug */
 const makeSchemaUri = (slug) =>
-  `${BASE_URL}/schemas/routes/${slug}`;
+  `${PUBLIC_URL}/schemas/routes/${slug}`;
 
 /**
  * @param {FastifyInstanceType} fastify

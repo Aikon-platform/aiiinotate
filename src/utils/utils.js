@@ -2,7 +2,7 @@ import util from "node:util";
 import Ajv from "ajv";
 
 import logger from "#utils/logger.js";
-import { BASE_URL } from "#constants";
+import { BASE_URL, PUBLIC_URL } from "#constants";
 
 /**
  * @param {object} obj
@@ -164,8 +164,17 @@ const maybeToArray = (x, convertedFlag=false) =>
     ? Array.isArray(x) ? [x, false] : [[x], true]
     : Array.isArray(x) ? x : [x];
 
-const pathToUrl = (path) =>
-  `${BASE_URL}${path}`
+/**
+ * build a URL to this aiiinotate instance.
+ * if `publicUrl`, set the root to PUBLIC_URL. otherwise, set to BASE_URL
+ * @param {boolean} publicUrl
+ * @returns {(path: string) => string}
+ */
+const pathToInternalUrl = (publicUrl) =>
+    (path) =>
+      `${publicUrl ? PUBLIC_URL : BASE_URL}${path}`
+const pathToInternalPublicUrl = pathToInternalUrl(true);
+const pathToInternalBaseUrl = pathToInternalUrl(false);
 
 /**
  * display a detailed and nested view of an object. to be used with console.log.
@@ -313,7 +322,8 @@ const memoize = (fn, timeout = 2000) => {
 
 export {
   maybeToArray,
-  pathToUrl,
+  pathToInternalPublicUrl,
+  pathToInternalBaseUrl,
   getHash,
   isNullish,
   isObject,
