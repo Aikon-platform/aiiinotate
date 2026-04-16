@@ -117,7 +117,7 @@ function addSchemas(fastify, makeSchemaUri) {
     type: "object",
     required: [ "@type", "default" ],
     properties: {
-      "@type": { type: "string", enum: ["oa:Choice"] },
+      "@type": { type: "string", enum: [ "oa:Choice" ] },
       default: { $ref: makeSchemaUri("oaOrIiifSelector") },
       item: { $ref: makeSchemaUri("oaOrIiifSelector") }
     }
@@ -304,7 +304,7 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("annotationList"),
     type: "object",
-    required: ["@id", "@type", "@context", "resources"],
+    required: [ "@id", "@type", "@context", "resources" ],
     properties: {
       "@id": { type: "string" },
       "@context": { type: "string" },
@@ -336,12 +336,12 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("manifestMongo"),
     type: "object",
-    required: ["@id", "@type", "manifestShortId", "canvasIds"],
+    required: [ "@id", "@type", "manifestShortId", "canvasIds" ],
     properties: {
       "@id": { type: "string" },
-      "@type": { type: "string", enum: ["sc:Manifest"] },
+      "@type": { type: "string", enum: [ "sc:Manifest" ] },
       manifestShortId: { type: "string" },
-      canvasIds: { type: "array", items: { type: "string" }}
+      canvasIds: { type: "array", items: { type: "string" } }
     }
   })
 
@@ -349,7 +349,7 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("manifestPublic"),
     type: "object",
-    required: ["@id", "sequences"],
+    required: [ "@id", "sequences" ],
     properties: {
       "@id": { type: "string" },
       sequences: {
@@ -391,7 +391,7 @@ function addSchemas(fastify, makeSchemaUri) {
         type: "array",
         items: {
           type: "object",
-          required: ["@id"],
+          required: [ "@id" ],
           properties: {
             "@id": { type: "string" },
             "@type": { type: "string", enum: [ "sc:Manifest" ] },

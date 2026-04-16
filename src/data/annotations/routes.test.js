@@ -60,12 +60,12 @@ test("test annotation Routes", async (t) => {
     // test basic inserts
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     let data = [
-      [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess],
-      [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure]
+      [[ annotationListUri, annotationListUriArray, annotationList, annotationListArrayLimit ], testPostRouteCreateSuccess ],
+      [[ annotationListUriInvalid, annotationListUriArrayInvalid ], testPostRouteCreateFailure ]
     ];
-    for ( let i=0; i<data.length; i++ ) {
+    for (let i=0; i<data.length; i++) {
       let [ testData, func ] = data.at(i);
-      for ( let i=0; i<testData.length; i++ ) {
+      for (let i=0; i<testData.length; i++) {
         await func(t, "/annotations/2/createMany?throwOnXywhError=true", testData.at(i));
       }
     }
@@ -82,9 +82,9 @@ test("test annotation Routes", async (t) => {
           return annotation
         });
 
-    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    data = [[ testPostRouteCreateFailure, true ], [ testPostRouteCreateSuccess, false ]];
     for (let i=0; i<data.length; i++) {
-      const [func, v] = data.at(i);
+      const [ func, v ] = data.at(i);
       func(t, `/annotations/2/createMany?throwOnCanvasIndexError=${v}`, annotationListWithTargetErrors)
     }
   })
@@ -92,11 +92,11 @@ test("test annotation Routes", async (t) => {
   await t.test("test route /annotations/:iiifPresentationVersion/create", async (t) => {
     //NOTE: we can't do Promise.all because it causes a data race that can cause a failure of unique constraints (i.e., on manifests '@id')
     let data = [
-      [fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess],
-      [fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure],
+      [ fastify.fixtures.annotations2Valid, testPostRouteCreateSuccess ],
+      [ fastify.fixtures.annotations2Invalid, testPostRouteCreateFailure ],
     ]
-    for ( const [ testData, func ] of data ) {
-      for ( let i=0; i<testData.length; i++ ) {
+    for (const [ testData, func ] of data) {
+      for (let i=0; i<testData.length; i++) {
         await func(t, "/annotations/2/create?throwOnXywhError=true", testData.at(i));
       }
     };
@@ -104,7 +104,7 @@ test("test annotation Routes", async (t) => {
     // test SVG to XYWH conversion
     // 1. insert and assert there was no mistake
     // 2. retrieve the inserted annotation and check its xywh coordinates.
-    for ( const ann of  fastify.fixtures.annotations2SvgValid ) {
+    for (const ann of  fastify.fixtures.annotations2SvgValid) {
       let r, rBody;
       r = await injectPost(fastify, "/annotations/2/create", ann);
       rBody = await JSON.parse(r.body);
@@ -123,9 +123,9 @@ test("test annotation Routes", async (t) => {
     let annotationError;
     annotationError = structuredClone(fastify.fixtures.annotations2Valid.at(0));
     annotationError.on = `https://test/${uuid4()}#xywh=100,100,300,300`;
-    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    data = [[ testPostRouteCreateFailure, true ], [ testPostRouteCreateSuccess, false ]];
     for (let i=0; i<data.length; i++) {
-      const [func, v] = data.at(i);
+      const [ func, v ] = data.at(i);
       await func(t, `/annotations/2/create?throwOnCanvasIndexError=${v}`, annotationError)
     }
 
@@ -140,9 +140,9 @@ test("test annotation Routes", async (t) => {
         "@type": "iiif:ImageApiSelector",
         "region": "50,50,1250,1850"      }
     }
-    data = [[testPostRouteCreateFailure, true], [testPostRouteCreateSuccess, false]];
+    data = [[ testPostRouteCreateFailure, true ], [ testPostRouteCreateSuccess, false ]];
     for (let i=0; i<data.length; i++) {
-      const [func, v] = data.at(i);
+      const [ func, v ] = data.at(i);
       await func(t, `/annotations/2/create?throwOnXywhError=${v}`, annotationError);
     }
 
@@ -174,7 +174,7 @@ test("test annotation Routes", async (t) => {
       idToUpdate = getRandomItem(insertedIds),  // get a random item
       annotation = await fastify.mongo.db.collection("annotations2").findOne(
         { "@id": idToUpdate },
-        { projection: { _id: 0 }}
+        { projection: { _id: 0 } }
       );
 
     await updatePipeline(annotation, true);
@@ -211,7 +211,7 @@ test("test annotation Routes", async (t) => {
     )["@id"];
     await Promise.all(
       // if shouldExist, search an annotation that exists, otherwise, search an annotation that does not exist. test accordingly.
-      [true, false].map(async (shouldExist) => {
+      [ true, false ].map(async (shouldExist) => {
         const
           annotationIdQuery =
             shouldExist
@@ -224,7 +224,7 @@ test("test annotation Routes", async (t) => {
           body = await r.json();
 
         t.assert.deepStrictEqual(r.statusCode, 200);
-        if ( shouldExist ) {
+        if (shouldExist) {
           t.assert.deepStrictEqual(body["@id"]===annotationId, true);
         } else {
           t.assert.deepStrictEqual(Object.keys(body).length === 0, true);
@@ -247,13 +247,13 @@ test("test annotation Routes", async (t) => {
       expectedCanvasUriCount = expectedOnCount(annotationArray, "full", canvasUri),
       expectedManifestShortIdCount = expectedOnCount(annotationArray, "manifestShortId", manifestShortId),
       mapper = [
-        ["uri", annotationId, expectedAnnotationIdCount],
-        ["canvasUri", canvasUri, expectedCanvasUriCount],
-        ["manifestShortId", manifestShortId, expectedManifestShortIdCount]
+        [ "uri", annotationId, expectedAnnotationIdCount ],
+        [ "canvasUri", canvasUri, expectedCanvasUriCount ],
+        [ "manifestShortId", manifestShortId, expectedManifestShortIdCount ]
       ];
 
     await Promise.all(
-      mapper.map(async ([filterKey, filterVal, expectedCount]) => {
+      mapper.map(async ([ filterKey, filterVal, expectedCount ]) => {
         const
           r = await fastify.inject({
             method: "GET",

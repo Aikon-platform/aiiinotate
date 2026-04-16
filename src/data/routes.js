@@ -52,14 +52,14 @@ function commonRoutes(fastify, options, done) {
             q: { type: "string" },
             motivation: {
               type: "string",
-              enum: ["painting", "non-painting", "commenting", "describing", "tagging", "linking"]
+              enum: [ "painting", "non-painting", "commenting", "describing", "tagging", "linking" ]
             },
             canvasMin: {
               type: "integer",
               minimum: 0
             },
             canvasMax: {
-              type: ["integer","null"],
+              type: [ "integer","null" ],
               minimum: 0
             },
             onlyIds: {
@@ -98,7 +98,7 @@ function commonRoutes(fastify, options, done) {
         { iiifSearchVersion, manifestShortId } = request.params,
         { q, motivation, canvasMin, canvasMax, onlyIds, page, pageSize } = request.query;
 
-      if ( iiifSearchVersion===1 ) {
+      if (iiifSearchVersion===1) {
         return await annotations2.search({
           queryUrl,
           manifestShortId,
@@ -147,7 +147,7 @@ function commonRoutes(fastify, options, done) {
               ? validatorRouteAnnotationDeleteSchema
               : validatorRouteManifestDeleteSchema,
           error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
-        if ( !validator(query) ) {
+        if (!validator(query)) {
           returnError(request, reply, error, {}, 400);
         }
         return;
@@ -157,7 +157,7 @@ function commonRoutes(fastify, options, done) {
       const { collectionName, iiifPresentationVersion } = request.params;
 
       try {
-        if ( collectionName==="annotations" ) {
+        if (collectionName==="annotations") {
           const deleteFilter = request.query;
           return iiifPresentationVersion === 2
             ? await annotations2.deleteAnnotations(deleteFilter)

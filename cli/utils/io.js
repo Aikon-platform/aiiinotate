@@ -69,7 +69,7 @@ async function parseImportInputFile(file) {
     fileRead(file)
       .split("\n")
       .filter(l => !l.match(/^\s*$/g));
-  return [...new Set(fileArrayValidate(fileArr))];
+  return [ ...new Set(fileArrayValidate(fileArr)) ];
 }
 
 export {

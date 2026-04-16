@@ -29,7 +29,7 @@ const assertObjectKeys = (t, obj, expectedKeys) =>
  */
 const assertObjectKeysInsert = (t, obj) => {
   t.assert.deepStrictEqual(
-    Object.keys(obj).every((k) => ["insertedCount", "insertedIds", "preExistingIds", "fetchErrorIds", "rejectedIds"].includes(k)),
+    Object.keys(obj).every((k) => [ "insertedCount", "insertedIds", "preExistingIds", "fetchErrorIds", "rejectedIds" ].includes(k)),
     true
   );
   t.assert.deepStrictEqual(
@@ -43,7 +43,7 @@ const assertObjectKeysInsert = (t, obj) => {
  * @returns {void}
  */
 const assertObjectKeysUpdate = (t, obj) =>
-  assertObjectKeys(t, obj, ["matchedCount", "modifiedCount", "upsertedCount", "upsertedId"]);
+  assertObjectKeys(t, obj, [ "matchedCount", "modifiedCount", "upsertedCount", "upsertedId" ]);
 
 /**
  * @param {NodeTestType} t
@@ -51,7 +51,7 @@ const assertObjectKeysUpdate = (t, obj) =>
  * @returns {void}
  */
 const assertObjectKeysDelete = (t, obj) =>
-  assertObjectKeys(t, obj, ["deletedCount"]);
+  assertObjectKeys(t, obj, [ "deletedCount" ]);
 
 /**
  * @param {NodeTestType} t
@@ -59,7 +59,7 @@ const assertObjectKeysDelete = (t, obj) =>
  * @returns {void}
  */
 const assertObjectKeysError = (t, obj) =>
-  assertObjectKeys(t, obj, ["message", "info", "method", "url", "requestBody"]);
+  assertObjectKeys(t, obj, [ "message", "info", "method", "url", "requestBody" ]);
 
 /**
  * @param {NodeTestType} t
@@ -181,9 +181,9 @@ const testPostRouteCurry = (fastify) =>
           funcInvalid = assertPostInvalidResponse;
 
         let funcValid;
-        if ( op==="insert" ) {
+        if (op==="insert") {
           funcValid = assertCreateValidResponse;
-        } else if ( op==="update" ) {
+        } else if (op==="update") {
           funcValid = assertUpdateValidResponse;
         } else {
           throw new Error(`testPostRouteCurry: unimplemented value of 'op': '${op}'.`)
@@ -241,17 +241,17 @@ const injectTestAnnotations = async (fastify, t, annotationList) => {
     expectedInsertedCount = annotationList.resources.length,
     { insertedCount, insertedIds } = rBody;
   t.assert.deepStrictEqual(insertedCount, expectedInsertedCount);
-  return [insertedCount, insertedIds];
+  return [ insertedCount, insertedIds ];
 }
 
 const testGetPaginated = async (fastify, t, iiifSearchVersion, route, expectedGetCount) => {
-  if ( iiifSearchVersion===2 ) {
+  if (iiifSearchVersion===2) {
     let
       routeNextPage = route,
       totalCount = 0,
       r,
       rBody;
-    while ( routeNextPage ) {
+    while (routeNextPage) {
       r = await injectGet(fastify, routeNextPage);
       t.assert.deepStrictEqual(r.statusCode, 200);
       rBody = JSON.parse(r.body);

@@ -23,11 +23,11 @@ const collectionNames = [
 export const up = async (db, client) => {
   // check if a collection exists before recreating it, otherwise you get NameSpaceExists errors.
   const existingCollectionNames =
-    ( await db.listCollections().toArray() ).map(coll => coll.name);
+    (await db.listCollections().toArray()).map(coll => coll.name);
 
   // create a mongo collection: https://github.com/seppevs/migrate-mongo/#creating-a-new-migration-script
-  for (const colName of collectionNames ) {
-    if ( !existingCollectionNames.includes(colName) ) {
+  for (const colName of collectionNames) {
+    if (!existingCollectionNames.includes(colName)) {
       db.createCollection(colName);
     }
   }

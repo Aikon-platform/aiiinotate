@@ -54,15 +54,15 @@ const addKeyValueToObjIfHasKey = (objIn, objOut, key, newKey) =>
  * @returns {object}
  */
 const mergeObjects = (objA, objB, raiseOnConflict=false) => {
-  if ( !isObject(objA) || !isObject(objB) ) {
+  if (!isObject(objA) || !isObject(objB)) {
     throw new Error(`mergeObjects: objA and objB must be javascript objects (not arrays), got types '${typeof objA}' for objA and '${typeof objB}' for objB.`)
   }
   // avoid wird side effects
   const objMerge = structuredClone(objA);
   const objBMerger = structuredClone(objB);
 
-  for ( const key of Object.keys(objBMerger) ) {
-    if ( raiseOnConflict && objMerge[key] != null ) {
+  for (const key of Object.keys(objBMerger)) {
+    if (raiseOnConflict && objMerge[key] != null) {
       throw new Error(`mergeObjects: objA and objB have conflicting key: '${key}'.`)
     }
     objMerge[key] = objBMerger[key];
@@ -100,9 +100,9 @@ const getHash = (str, seed=0) => {
  */
 const getFirstNonEmptyPair = (obj) => {
   let [ key,val ] = [ undefined, undefined ];
-  [ key, val ] = Object.entries(obj).find(([k,v]) => v != null);
-  if ( key!== undefined && val!==undefined ) {
-    return [key, val];
+  [ key, val ] = Object.entries(obj).find(([ k,v ]) => v != null);
+  if (key!== undefined && val!==undefined) {
+    return [ key, val ];
   }
   return undefined;
 }
@@ -115,7 +115,7 @@ const getFirstNonEmptyPair = (obj) => {
  * @param {any} expectedTypeVal
  */
 const throwIfValueError = (obj, typeKey, expectedTypeVal) => {
-  if ( obj[typeKey] !== expectedTypeVal ) {
+  if (obj[typeKey] !== expectedTypeVal) {
     throw new Error(`expected value '${expectedTypeVal}' for key '${typeKey}', got: '${obj[typeKey]}' in object ${inspectObj(obj)}`);
   };
 }
@@ -126,7 +126,7 @@ const throwIfValueError = (obj, typeKey, expectedTypeVal) => {
  * @param {string|number} key
  */
 const throwIfKeyUndefined = (obj, key) => {
-  if ( !objectHasKey(obj, key) ) {
+  if (!objectHasKey(obj, key)) {
     throw new Error(`key '${key}' not found in object ${inspectObj(obj)}`);
   }
 }
@@ -139,14 +139,14 @@ const throwIfKeyUndefined = (obj, key) => {
  * @returns {boolean}
  */
 const arrayEqualsShallow = (a1, a2, sort=false) => {
-  if ( !Array.isArray(a1) || !Array.isArray(a2) ) {
+  if (!Array.isArray(a1) || !Array.isArray(a2)) {
     throw new Error(`Incorrect type: 'a1', 'a2' must be arrays, got '${typeof a1}' and '${typeof a2}' on a1='${a1}' and a2='${a2}'`)
   }
-  if ( sort ) {
+  if (sort) {
     a1 = a1.sort();
     a2 = a2.sort();
   }
-  if ( a1.length!==a2.length ) {
+  if (a1.length!==a2.length) {
     return false;
   }
   return a1.every((el, i) => a2[i]===el);
@@ -161,8 +161,8 @@ const arrayEqualsShallow = (a1, a2, sort=false) => {
  */
 const maybeToArray = (x, convertedFlag=false) =>
   convertedFlag
-    ? Array.isArray(x) ? [x, false] : [[x], true]
-    : Array.isArray(x) ? x : [x];
+    ? Array.isArray(x) ? [ x, false ] : [[ x ], true ]
+    : Array.isArray(x) ? x : [ x ];
 
 /**
  * build a URL to this aiiinotate instance.
@@ -184,15 +184,15 @@ const pathToAiiinotateBaseUrl = pathToAiiinotateUrl(false);
  */
 const inspectObj = (obj, maxLines=100) => {
   const
-    str = util.inspect(obj, {showHidden: false, depth: null, colors: true}),
+    str = util.inspect(obj, { showHidden: false, depth: null, colors: true }),
     strArr = str.split("\n"),
     strLen = strArr.length;
   // if maxLines === -1, return the full `str`
-  if ( maxLines < 0 ) {
+  if (maxLines < 0) {
     return str;
   }
   // remove the middle lines if `str` is too long
-  if ( strLen > maxLines ) {
+  if (strLen > maxLines) {
     const
       startProportion = 0.8,
       startSlice = strArr.slice(0, Math.round(0.8 * maxLines)),
@@ -233,7 +233,7 @@ const ajv = new Ajv({
  * @returns {import("#types").AjvValidateFunctionType}
  */
 const ajvCompile = (schema) => {
-  if ( objectHasKey(schema, "$id") || objectHasKey(schema, "$ref") ) {
+  if (objectHasKey(schema, "$id") || objectHasKey(schema, "$ref")) {
     const err = new Error(`'schema' has not been resolved. use 'fastify.schemasResolver()' to resolve the schema before compiling it, on schema: ${inspectObj(schema)}`);
     // logging is necessary to be sure that the error will be displayed
     logger.error(err.message);
@@ -249,7 +249,7 @@ const ajvCompile = (schema) => {
  */
 const visibleLog = (data, prefix) => {
   console.log("<".repeat(100));
-  if ( prefix ) console.log(prefix);
+  if (prefix) console.log(prefix);
   console.log(inspectObj(data));
   console.log(">".repeat(100));
 }
@@ -261,16 +261,16 @@ const visibleLog = (data, prefix) => {
  * @returns {any}
  */
 const recursiveSort = (x) => {
-  if ( Array.isArray(x) ) {
+  if (Array.isArray(x)) {
     x = x.sort();
-    for ( let i=0; i<x.length; i++ ) {
+    for (let i=0; i<x.length; i++) {
       x[i] = recursiveSort(x[i]);
     }
     return x;
-  } else if ( isObject(x) ) {
+  } else if (isObject(x)) {
     const xSorted = {};
     const keys = Object.keys(x).sort();
-    for ( let i=0; i<keys.length; i++ ) {
+    for (let i=0; i<keys.length; i++) {
       let
         k = keys[i],
         v = x[k];
@@ -303,13 +303,13 @@ const memoize = (fn, timeout = 2000) => {
     // since `map` is a key-value store, we need to stringify `n` to ensure it can be used as a key
     // to ensure consistency, we sort our objects/array before stringifying
     const key = JSON.stringify(recursiveSort(n));
-    if ( cache.has(key) ) {
+    if (cache.has(key)) {
       return cache.get(key);
     } else {
       const result = await fn(n);  // apply the original arguments to `n`, not the sorted key.
       cache.set(key, result);
       // after `timeout` ms, clear the cache of `key`
-      if ( timeout > 0 ) {
+      if (timeout > 0) {
         setTimeout(
           () => cache.delete(key),
           timeout

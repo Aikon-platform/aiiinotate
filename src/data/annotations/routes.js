@@ -27,7 +27,7 @@ const validateAnnotationVersion = (iiifPresentationVersion, annotationData, isLi
   throwIfKeyUndefined(annotationData, expectedTypeKey);
   const expectedTypeVal = (
     isListOrPage
-      ? { "2": "sc:AnnotationList", "3":"AnnotationPage"}
+      ? { "2": "sc:AnnotationList", "3":"AnnotationPage" }
       : { "2": "oa:Annotation", "3": "Annotation" }
   )[iiifPresentationVersion];
   throwIfValueError(annotationData, expectedTypeKey, expectedTypeVal);
@@ -219,7 +219,7 @@ function annotationsRoutes(fastify, options, done) {
           const
             { action } = request.params,
             { throwOnCanvasIndexError } = request.querystring;
-          if ( action==="update" && throwOnCanvasIndexError ) {
+          if (action==="update" && throwOnCanvasIndexError) {
             returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.");
           }
           return;
@@ -237,7 +237,7 @@ function annotationsRoutes(fastify, options, done) {
       try {
         validateAnnotationVersion(iiifPresentationVersion, annotation);
         // insert or update
-        if ( iiifPresentationVersion === 2 ) {
+        if (iiifPresentationVersion === 2) {
           return action==="create"
             ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError)
             : await annotations2.updateAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError);
@@ -310,7 +310,7 @@ function annotationsRoutes(fastify, options, done) {
         validateAnnotationArrayVersion(iiifPresentationVersion, annotationsArray);
 
         // insert
-        if ( iiifPresentationVersion === 2 ) {
+        if (iiifPresentationVersion === 2) {
           await Promise.all(annotationsArray.map(
             async (annotationList) => {
               const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError, throwOnXywhError);

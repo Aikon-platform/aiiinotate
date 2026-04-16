@@ -69,7 +69,7 @@ class Manifests2 extends CollectionAbstract {
    * @returns {void}
    */
   #validateManifest(manifest) {
-    if ( !this.validatorManifest(manifest) ) {
+    if (!this.validatorManifest(manifest)) {
       throw this.insertError("validateManifest: invalid manifest structure", manifest);
     }
   }
@@ -128,10 +128,10 @@ class Manifests2 extends CollectionAbstract {
   async insertManifest(manifest) {
     manifest = this.#validateAndCleanManifest(manifest);
     const manifestExists = await this.exists({ "@id": manifest["@id"] });
-    if ( !manifestExists ) {
+    if (!manifestExists) {
       return this.insertOne(manifest);
     } else {
-      return formatInsertResponse({ preExistingIds: [manifest["@id"]] });
+      return formatInsertResponse({ preExistingIds: [ manifest["@id"] ] });
     }
   }
 
@@ -153,7 +153,7 @@ class Manifests2 extends CollectionAbstract {
       try {
         cleanManifestArray.push(this.#validateAndCleanManifest(manifest));
       } catch (err) {
-        if ( throwOnError ) {
+        if (throwOnError) {
           throw err;
         }
         // returns a mapping of `{manifestUri: errorMessage}`
@@ -165,14 +165,14 @@ class Manifests2 extends CollectionAbstract {
     // NOTE: i have attempted to move this to `insertManifestsFromUriArray` but it leads to what I suspect is a data race causing unique constaints fails.
     //  TLDR: don't move or disable this check.
     let cleanIds = cleanManifestArray.map((manifest) => manifest["@id"]);
-    [cleanIds, preExistingIds] = await this.#filterManifestIdsInCollection(cleanIds);
+    [ cleanIds, preExistingIds ] = await this.#filterManifestIdsInCollection(cleanIds);
 
     // remove pre-inserted IDs of manifests from cleanManifestArray
     cleanManifestArray = cleanManifestArray.filter((manifest) => cleanIds.includes(manifest["@id"]));
 
     // insert. if there has been an error but throwOnError === "false", complete the response object with description of the errors
     // no need for try..except, no errors should happen here.
-    if ( cleanManifestArray.length ) {
+    if (cleanManifestArray.length) {
       const result = await this.insertMany(cleanManifestArray);
       result.preExistingIds = preExistingIds;
       result.rejectedIds = invalidManifestArray;
@@ -222,13 +222,13 @@ class Manifests2 extends CollectionAbstract {
       manifestUriArray.map(async (manifestUri) => {
         try {
           const r = await this.#fetchManifestFromUri(manifestUri);
-          if ( ! r.error ) {
+          if (! r.error) {
             manifestArray.push(r);
           } else {
             fetchErrorIds.push(manifestUri);
           }
         } catch (err) {
-          if ( throwOnError ) {
+          if (throwOnError) {
             throw err;
           }
           fetchErrorIds.push(manifestUri);
@@ -236,11 +236,11 @@ class Manifests2 extends CollectionAbstract {
       })
     );
 
-    if ( fetchErrorIds.length ){
+    if (fetchErrorIds.length){
       const errMsg = `error inserting ${fetchErrorIds.length} manifests: ${fetchErrorIds}`
-      if ( throwOnError ) {
+      if (throwOnError) {
         throw this.insertError(errMsg)
-      } else if ( fetchErrorIds.length ) {
+      } else if (fetchErrorIds.length) {
         this.fastify.log.error(errMsg, fetchErrorIds);
       }
     }
@@ -261,8 +261,8 @@ class Manifests2 extends CollectionAbstract {
    */
   // NOTE: could be refactored with `annotations2.delete`: both functions are the same, only the filter changes
   async deleteManifest(deleteKey, deleteVal) {
-    const allowedDeleteKey = ["uri", "manifestShortId"];
-    if ( !allowedDeleteKey.includes(deleteKey) ) {
+    const allowedDeleteKey = [ "uri", "manifestShortId" ];
+    if (!allowedDeleteKey.includes(deleteKey)) {
       throw this.deleteError(`${this.funcName(this.deleteManifest)}: expected one of ${allowedDeleteKey}, got '${deleteKey}'`);
     }
 
@@ -301,7 +301,7 @@ class Manifests2 extends CollectionAbstract {
         ? preExistingIds.push(manifestUri)
         : toInsertIds.push(manifestUri)
     );
-    return [toInsertIds, preExistingIds];
+    return [ toInsertIds, preExistingIds ];
   }
 
   /**
@@ -354,7 +354,7 @@ class Manifests2 extends CollectionAbstract {
       const manifestIndexArray = await this.collection
         .find(
           { manifestShortId: manifestShortId },
-          { limit: 1, project: {_id: 0} }
+          { limit: 1, project: { _id: 0 } }
         )
         .limit(1);
       return manifestIndexArray.length ? manifestIndexArray[1] : {}

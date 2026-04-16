@@ -17,8 +17,8 @@ function addSchemas(fastify, makeSchemaUri) {
       "@type": { type: "string" },
       motivation: { anyOf: [
         { type: "string", enum: [ "oa:Annotation" ] },
-        { type: "array", items: { type: "string" }}
-      ]},
+        { type: "array", items: { type: "string" } }
+      ] },
       on: {
         anyOf: [
           { type: "string" },
@@ -28,7 +28,7 @@ function addSchemas(fastify, makeSchemaUri) {
             items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ]},
+            ] },
             minItems: 1
           }
         ]
@@ -42,11 +42,11 @@ function addSchemas(fastify, makeSchemaUri) {
     required: [ "id", "type", "motivation", "target" ],
     properties: {
       id: { type: "string" },
-      type: { type: "string", enum: ["Annotation"] },
+      type: { type: "string", enum: [ "Annotation" ] },
       motivation: { anyOf: [
         { type: "string" },
         { type: "array", items: { type: "string" } },
-      ]},
+      ] },
       target: {
         anyOf: [
           { type: "string" },
@@ -56,7 +56,7 @@ function addSchemas(fastify, makeSchemaUri) {
             items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ]},
+            ] },
             minItems: 1
           }
         ]
@@ -75,7 +75,7 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationListOrPageUri"),
     type: "object",
-    required: ["uri"],
+    required: [ "uri" ],
     properties: {
       "uri": { type: "string" },
     }
@@ -90,11 +90,11 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationList"),
     type: "object",
-    required: ["@id", "@type", "resources"],
+    required: [ "@id", "@type", "resources" ],
     properties: {
       "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
       "@id": { type: "string" },
-      "@type": { type: "string", enum: ["sc:AnnotationList"] },
+      "@type": { type: "string", enum: [ "sc:AnnotationList" ] },
       "resources": {
         type: "array",
         items: { $ref: makeSchemaUri("routeAnnotation2") }
@@ -105,11 +105,11 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationPage"),
     type: "object",
-    required: ["@id", "@type", "items"],
+    required: [ "@id", "@type", "items" ],
     properties: {
       "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
       "id": { type: "string" },
-      "type": { type: "string", enum: ["AnnotationPage"] },
+      "type": { type: "string", enum: [ "AnnotationPage" ] },
       "items": {
         type: "array",
         items: { $ref: makeSchemaUri("routeAnnotation3") }
@@ -145,7 +145,7 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationFilterTag"),
     type: "object",
-    required: ["tag", "manifestShortId"],
+    required: [ "tag", "manifestShortId" ],
     properties: {
       manifestShortId: {
         type: "string", description: "delete all annotations for a single manifest"
@@ -163,19 +163,19 @@ function addSchemas(fastify, makeSchemaUri) {
     oneOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["manifestShortId"],
+        required: [ "manifestShortId" ],
         properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["canvasUri"],
+        required: [ "canvasUri" ],
         properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } },
         additionalProperties: false
       }
@@ -199,7 +199,7 @@ function addSchemas(fastify, makeSchemaUri) {
     anyOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string" } }
       },
       { $ref: fastify.schemasPresentation2.makeSchemaUri("manifestPublic") },
@@ -214,13 +214,13 @@ function addSchemas(fastify, makeSchemaUri) {
     oneOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["manifestShortId"],
+        required: [ "manifestShortId" ],
         properties: { manifestShortId: { type: "string" } },
         additionalProperties: false
       }
@@ -267,7 +267,7 @@ function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("routeResponseUpdate"),
     type: "object",
-    required: ["matchedCount", "modifiedCount", "upsertedCount"],
+    required: [ "matchedCount", "modifiedCount", "upsertedCount" ],
     properties: {
       matchedCount: { type: "integer" },
       modifiedCount: { type: "integer" },

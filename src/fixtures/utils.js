@@ -17,7 +17,7 @@ const availableFiles = fs.readdirSync(dataDir);
  * @returns {object}
  */
 const readFileToObject = (fn) => {
-  if ( !availableFiles.includes(fn) ) {
+  if (!availableFiles.includes(fn)) {
     throw new Error(`file not found: ${fn}`);
   }
   return JSON.parse(fs.readFileSync(path.join(dataDir, fn), { encoding: "utf8" }));

@@ -27,16 +27,16 @@ async function importData(importFunc, datatype, fileArr) {
 
   let totalImports = 0
   const
-    pb = new ProgressBar({ desc: `importing ${datatype}s`, total: fileArr.length}),
+    pb = new ProgressBar({ desc: `importing ${datatype}s`, total: fileArr.length }),
     importErrors = [];
 
-  for ( let [i, file] of fileArr.entries() ) {
+  for (let [ i, file ] of fileArr.entries()) {
     i += 1
     const
       data = JSON.parse(fileRead(file)),
-      [statusCode, resultPromise] = await importFunc(data),
+      [ statusCode, resultPromise ] = await importFunc(data),
       result = await resultPromise;
-    if ( statusCode <= 299 ) {
+    if (statusCode <= 299) {
       totalImports += result.insertedCount;
     } else {
       console.log(result);
@@ -44,7 +44,7 @@ async function importData(importFunc, datatype, fileArr) {
     }
     pb.update(i)
   }
-  return [totalImports, importErrors]
+  return [ totalImports, importErrors ]
 }
 
 ////////////////////////////////////////
@@ -62,7 +62,7 @@ async function action(command, datatype, options) {
   const inputFile = options.file;
 
   if (iiifVersion===3) {
-    notImplementedExit(`CLI imports for IIIF presentation V3 is not implemented`);
+    notImplementedExit("CLI imports for IIIF presentation V3 is not implemented");
   }
 
   const fastifyClient = new FastifyClient();
@@ -71,9 +71,9 @@ async function action(command, datatype, options) {
 
   // run
   const fileArr = await parseImportInputFile(inputFile);
-  const [totalImports, importErrors] = await importData(importFunc, datatype, fileArr);
+  const [ totalImports, importErrors ] = await importData(importFunc, datatype, fileArr);
 
-  if ( importErrors.length ) {
+  if (importErrors.length) {
     logger.info(`There were problems importing ${datatype}s from the following ${importErrors.length} files: ${inspectObj(importErrors, -1)}`)
   }
   logger.info(`Imported ${totalImports} ${datatype}s into aiiinotate !`);
@@ -88,11 +88,11 @@ function makeImportCommand() {
 
   const datatypeArg =
     new Argument("datatype", "type of data to import: manifests or annotations")
-      .choices(["manifest", "annotation"]);
+      .choices([ "manifest", "annotation" ]);
 
   const versionOpt =
     new Option("-i, --iiif-version <version>", "IIIF version")
-      .choices(["2", "3"])
+      .choices([ "2", "3" ])
       .argParser(parseNumber)
       .makeOptionMandatory();
 

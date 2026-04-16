@@ -23,13 +23,13 @@ const formatInsertResponse = ({
     insertedCount: insertedIds?.length || 0,
     insertedIds: insertedIds || [],
   };
-  if ( fetchErrorIds?.length ) {
+  if (fetchErrorIds?.length) {
     out.fetchErrorIds = fetchErrorIds;
   }
-  if ( rejectedIds?.length ) {
+  if (rejectedIds?.length) {
     out.rejectedIds = rejectedIds;
   }
-  if ( preExistingIds?.length ) {
+  if (preExistingIds?.length) {
     out.preExistingIds = preExistingIds;
   };
   return out;
@@ -94,7 +94,7 @@ const returnError = (request, reply, err, requestBody={}, statusCode=500) => {
     method: request.method,
     url: request.url
   };
-  if ( requestBody !== undefined ) {
+  if (requestBody !== undefined) {
     error.requestBody = requestBody
   }
   reply

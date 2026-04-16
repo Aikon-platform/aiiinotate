@@ -29,7 +29,7 @@ const circleBbox = (attrs) => {
 
   if (isNaN(cx) || isNaN(cy) || isNaN(r)) return null;
 
-  return [cx - r, cy - r, cx + r, cy + r];
+  return [ cx - r, cy - r, cx + r, cy + r ];
 }
 
 /**
@@ -44,7 +44,7 @@ const ellipseBbox = (attrs) => {
 
   if (isNaN(cx) || isNaN(cy) || isNaN(rx) || isNaN(ry)) return null;
 
-  return [cx - rx, cy - ry, cx + rx, cy + ry];
+  return [ cx - rx, cy - ry, cx + rx, cy + ry ];
 }
 
 /**
@@ -59,7 +59,7 @@ const rectBbox = (attrs) => {
 
   if (isNaN(x) || isNaN(y) || isNaN(width) || isNaN(height)) return null;
 
-  return [x, y, x + width, y + height];
+  return [ x, y, x + width, y + height ];
 }
 
 /**
@@ -114,7 +114,7 @@ const polylineBbox = (attrs) => {
     }
   }
 
-  return minX === Infinity ? null : [minX, minY, maxX, maxY];
+  return minX === Infinity ? null : [ minX, minY, maxX, maxY ];
 }
 
 /**
@@ -158,12 +158,12 @@ const applyTransform = (bbox, transformStr) => {
   let match;
 
   while ((match = regex.exec(transformStr)) !== null) {
-    const [, func, args] = match;
+    const [ , func, args ] = match;
     const nums = args.split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
     transforms.push({ func: func.toLowerCase(), nums });
   }
 
-  let [x1, y1, x2, y2] = bbox;
+  let [ x1, y1, x2, y2 ] = bbox;
 
   for (const { func, nums } of transforms) {
     switch (func) {
@@ -194,7 +194,7 @@ const applyTransform = (bbox, transformStr) => {
       case "matrix": {
         // a c e, b d f
         if (nums.length >= 6) {
-          const [a, b, c, d, e, f] = nums;
+          const [ a, b, c, d, e, f ] = nums;
           const x = x1 * a + y1 * c + e;
           const y = x1 * b + y1 * d + f;
           const x2new = x2 * a + y2 * c + e;
@@ -209,7 +209,7 @@ const applyTransform = (bbox, transformStr) => {
     }
   }
 
-  return [x1, y1, x2, y2];
+  return [ x1, y1, x2, y2 ];
 }
 
 /**
@@ -259,7 +259,7 @@ const extractAllBboxes = (svgString) => {
 
   let match;
   while ((match = elementRegex.exec(svgString)) !== null) {
-    const [fullMatch, tagName, attrs] = match;
+    const [ fullMatch, tagName, attrs ] = match;
     const normalizedTag = tagName.toLowerCase();
 
     if (normalizedTag === "g") {
@@ -309,8 +309,8 @@ const computeXywh = (svgString) => {
   }
 
   // Compute union
-  const [minX, minY, maxX, maxY] = bboxes.reduce(
-    ([x1, y1, x2, y2], [nx1, ny1, nx2, ny2]) => [
+  const [ minX, minY, maxX, maxY ] = bboxes.reduce(
+    ([ x1, y1, x2, y2 ], [ nx1, ny1, nx2, ny2 ]) => [
       Math.min(x1, nx1),
       Math.min(y1, ny1),
       Math.max(x2, nx2),
@@ -318,7 +318,7 @@ const computeXywh = (svgString) => {
     ]
   );
 
-  return [minX, minY, maxX - minX, maxY - minY];
+  return [ minX, minY, maxX - minX, maxY - minY ];
 }
 
 /**
@@ -341,7 +341,7 @@ async function svgStringToXywh(svgString) {
 
     try {
       // sanity checks
-      if ( !(typeof svgString === "string" || svgString instanceof String) || !svgString?.length ) {
+      if (!(typeof svgString === "string" || svgString instanceof String) || !svgString?.length) {
         rej(new Error("svgStringToXywh: SVG must be a string"))
       }
       if (svgString.length > 10000000) {

@@ -8,20 +8,23 @@ import stylistic from "@stylistic/eslint-plugin"
 /** https://eslint.org/docs/latest/use/configure/rules */
 export default defineConfig([
   {
-    files: ["**/*.{js,mjs,cjs}"],
+    files: [ "**/*.{js,mjs,cjs}" ],
     plugins: {
       "js": js,
       "@stylistic": stylistic
     },
-    extends: ["js/recommended"],
-    languageOptions: { globals: {...globals.browser, ...globals.node} },
+    extends: [ "js/recommended" ],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: {
       "no-unused-vars": "off",
-      "quotes": ["error", "double"],
-      "@stylistic/indent": ["error", 2],
+      "quotes": [ "error", "double" ],
+      "@stylistic/indent": [ "error", 2 ],
+      "space-in-parens": [ "error", "never" ],
+      "array-bracket-spacing": [ "error", "always", { objectsInArrays: false, arraysInArrays: false }],
+      "@stylistic/object-curly-spacing": [ "error", "always", { objectsInObjects: true, arraysInObjects: true }]
     },
   },
-  { files: ["**/*.json"], plugins: { json }, language: "json/json", extends: ["json/recommended"] },
-  { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
-  globalIgnores(["package-lock.json"]),
+  { files: [ "**/*.json" ], plugins: { json }, language: "json/json", extends: [ "json/recommended" ] },
+  { files: [ "**/*.css" ], plugins: { css }, language: "css/css", extends: [ "css/recommended" ] },
+  globalIgnores([ "package-lock.json" ]),
 ]);

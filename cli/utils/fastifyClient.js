@@ -66,10 +66,10 @@ class FastifyClient {
    * @type {(iiifVersion: 2|3, datatype: "manifest"|"annotation") => (data: object) => [Number, Promise<object>] }
    */
   importData(iiifVersion, datatype) {
-    if ( !["2","3"].includes(`${iiifVersion}`) ) {
+    if (![ "2","3" ].includes(`${iiifVersion}`)) {
       throw new Error(`fastifyClient.importData: "iiifVersion" must by 2 or 3, got "${iiifVersion}"`);
     }
-    if ( !["manifest","annotation"].includes(datatype) ) {
+    if (![ "manifest","annotation" ].includes(datatype)) {
       throw new Error(`fastifyClient.importData: "datatype" must by "manifest" or "annotation", got "${datatype}"`);
     }
 

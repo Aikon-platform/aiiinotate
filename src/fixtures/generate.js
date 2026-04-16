@@ -10,7 +10,7 @@ import { PUBLIC_URL } from "#constants";
  * @returns {Array}
  */
 const fillArray = (length, itemFunc) =>
-  Array.from({length: length}, itemFunc)
+  Array.from({ length: length }, itemFunc)
 
 /** @returns {string} - matches "int,int,int.int" */
 const makeXywh = () =>
@@ -171,7 +171,7 @@ const generateIiif2ManifestAndAnnotationsList = (nCanvas, nAnnotations) => {
       manifestShortId, canvasArray
     );
 
-  return [manifest, annotationList];
+  return [ manifest, annotationList ];
 }
 
 export {

@@ -57,10 +57,10 @@ const _getSchema = (fastify, namespace) =>
  * @param {{ namespace: string, addSchemasFunc: Function }} options
  */
 const addSchemasDecorator = (fastify, options) => {
-  if ( !(options.namespace || "").length ) {
+  if (!(options.namespace || "").length) {
     throw new Error(`addSchemasDecorator requires options.namespace to be set ! Got '${options.namespace}'`);
   }
-  if ( !options.addSchemasFunc || typeof options.addSchemasFunc !== "function" ) {
+  if (!options.addSchemasFunc || typeof options.addSchemasFunc !== "function") {
     throw new Error(`addSchemasDecorator requires options.addSchemasFunc to be a function ! Got '${options.addSchemasFunc}'`)
   }
 
@@ -79,15 +79,15 @@ const addSchemasDecorator = (fastify, options) => {
 function schemas(fastify, options, done) {
 
   const schemasData = [
-    ["schemasPresentation2", addSchemasPresentation2],
-    ["schemasPresentation3", addSchemasPresentation3],
-    ["schemasBase", addSchemasBase],
-    ["schemasRoutes", addSchemasRoutes],
+    [ "schemasPresentation2", addSchemasPresentation2 ],
+    [ "schemasPresentation3", addSchemasPresentation3 ],
+    [ "schemasBase", addSchemasBase ],
+    [ "schemasRoutes", addSchemasRoutes ],
   ]
 
   fastify.register(schemasResolver);
 
-  for ( let [schemasNamespace, addSchemasFunc] of schemasData ) {
+  for (let [ schemasNamespace, addSchemasFunc ] of schemasData) {
     addSchemasDecorator(fastify, {
       namespace: schemasNamespace,
       addSchemasFunc: addSchemasFunc,

@@ -28,15 +28,15 @@ import logger from "#utils/logger.js";
  * @returns {string}
  */
 const getManifestShortId = (iiifUri) => {
-  const keywords = ["manifest", "manifest.json", "sequence", "canvas", "annotation", "list", "range", "layer", "res"]
+  const keywords = [ "manifest", "manifest.json", "sequence", "canvas", "annotation", "list", "range", "layer", "res" ]
   let manifestShortId;
 
   const iiifUriArr = iiifUri.split("/");
 
   // if it follows the IIIF recommended URI patterns
-  for ( let i=0; i < keywords.length; i++ ) {
-    if ( iiifUriArr.includes(keywords[i]) ) {
-      manifestShortId = iiifUriArr.at( iiifUriArr.indexOf(keywords[i]) - 1 );
+  for (let i=0; i < keywords.length; i++) {
+    if (iiifUriArr.includes(keywords[i])) {
+      manifestShortId = iiifUriArr.at(iiifUriArr.indexOf(keywords[i]) - 1);
       break;
     }
   }
@@ -68,7 +68,7 @@ const getAnnotationTarget = (annotation) => {
   const getSingleAnnotationTarget = (_target) => {
     let _targetOut;
 
-    if ( typeof(_target) === "string" ) {
+    if (typeof(_target) === "string") {
       // remove the fragment if necesary to get the full Canvas Id
       const hashIdx = _target.indexOf("#");
       _targetOut = hashIdx === -1
@@ -79,7 +79,7 @@ const getAnnotationTarget = (annotation) => {
       // it's a SpecificResource => get the full image's id.
       _targetOut = _target["full"];
     }
-    if ( isNullish(_targetOut) ) {
+    if (isNullish(_targetOut)) {
       throw new Error(`${getAnnotationTarget.name}: 'annotation.on' is not a valid IIIF 2.1 annotation target (with annotation=${_target})`)
     }
     return _targetOut;
@@ -138,9 +138,9 @@ const svgSelectorToXywh = (svgSelector) => {
 /** @returns {Promise<number[]?>} */
 const choiceSelectorToXywh = async (choiceSelector) => {
   let xywh;
-  for ( const selector of [choiceSelector.item, choiceSelector.default] ) {
+  for (const selector of [ choiceSelector.item, choiceSelector.default ]) {
     xywh = await selectorToXywh(selector);
-    if ( xywh?.length ) {
+    if (xywh?.length) {
       break;
     }
   }
@@ -150,18 +150,18 @@ const choiceSelectorToXywh = async (choiceSelector) => {
 /** @returns {Promise<number[]?>} */
 const selectorToXywh = async (selector) => {
   const mapper = [
-    ["oa:Choice", choiceSelectorToXywh],
-    ["oa:SvgSelector", svgSelectorToXywh],
-    ["oa:FragmentSelector", fragmentSelectorToXywh],
-    ["Choice", choiceSelectorToXywh],
-    ["SvgSelector", svgSelectorToXywh],
-    ["FragmentSelector", fragmentSelectorToXywh],
+    [ "oa:Choice", choiceSelectorToXywh ],
+    [ "oa:SvgSelector", svgSelectorToXywh ],
+    [ "oa:FragmentSelector", fragmentSelectorToXywh ],
+    [ "Choice", choiceSelectorToXywh ],
+    [ "SvgSelector", svgSelectorToXywh ],
+    [ "FragmentSelector", fragmentSelectorToXywh ],
   ]
   let xywh;
-  for ( const [selectorName, func] of mapper ) {
-    if ( selector["@type"] === selectorName ) {
+  for (const [ selectorName, func ] of mapper) {
+    if (selector["@type"] === selectorName) {
       xywh = await func(selector);
-      if ( xywh?.length ) {
+      if (xywh?.length) {
         break
       }
     }
@@ -182,7 +182,7 @@ const normalizeSelectorType = (selector) => {
 }
 
 const stringToSpecificResource = (target) => {
-  let [full, fragment] = target.split("#");
+  let [ full, fragment ] = target.split("#");
   return {
     "@id": target,
     "@type": "oa:SpecificResource",
@@ -205,9 +205,9 @@ const makeSingleTarget = async (target) => {
   let specificResource;
 
   // 1. convert to SpecificResource
-  if ( typeof(target) === "string" && !isNullish(target) ) {
+  if (typeof(target) === "string" && !isNullish(target)) {
     specificResource = stringToSpecificResource(target);
-  } else if ( isObject(target) && target["@type"] === "oa:SpecificResource" && !isNullish(target["full"]) ) {
+  } else if (isObject(target) && target["@type"] === "oa:SpecificResource" && !isNullish(target["full"])) {
     specificResource = target;
     specificResource.selector = normalizeSelectorType(specificResource.selector);
 
@@ -246,7 +246,7 @@ const makeTarget = async (annotation) => {
 const makeAnnotationId = (annotation, manifestShortId) => {
   // we consider that all targets point to the same canvas and manifest => extract canvas and manifest info from the 1st target.
   const targetArray = getAnnotationTarget(annotation);
-  if ( targetArray.length < 1 ) {
+  if (targetArray.length < 1) {
     throw new Error(`${makeAnnotationId.name}: could not extract target from annotation`)
   }
   const
@@ -255,7 +255,7 @@ const makeAnnotationId = (annotation, manifestShortId) => {
   // if manifestShortId hasn't aldready been extracted, re-extract it
   manifestShortId = manifestShortId || getManifestShortId(firstTarget);
 
-  if ( isNullish(manifestShortId) || isNullish(canvasId) ) {
+  if (isNullish(manifestShortId) || isNullish(canvasId)) {
     throw new Error(`${makeAnnotationId.name}: could not make an 'annotationId' (with manifestShortId=${manifestShortId}, annotation=${annotation})`)
   }
 
@@ -290,7 +290,7 @@ const toAnnotationList = ({
   hasNext,
   label
 }) => {
-  if ( isNullish(annotationListId) ) {
+  if (isNullish(annotationListId)) {
     throw new Error("toAnnotationList: 'annotationListId' must be defined");
   }
 
@@ -300,16 +300,16 @@ const toAnnotationList = ({
     "@id": annotationListId || "",  // NOTE: MUST be defined according to IIIF presentation API (but not always defined in SAS)
     resources: resources
   }
-  if ( label ) {
+  if (label) {
     annotationList.label = label
   }
-  if ( page ) {
+  if (page) {
     const annotationListUrl = new URL(annotationListId);
-    if ( page > 1 ) {
+    if (page > 1) {
       annotationListUrl.searchParams.set("page", page-1);
       annotationList.prev = annotationListUrl.href;
     }
-    if ( hasNext ) {
+    if (hasNext) {
       annotationListUrl.searchParams.set("page", page+1);
       annotationList.next = annotationListUrl.href;
     }

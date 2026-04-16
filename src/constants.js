@@ -36,15 +36,15 @@ const env_mapper = {
   MONGODB_CONNSTRING : MONGODB_CONNSTRING,
   MONGODB_CONNSTRING_TEST : MONGODB_CONNSTRING_TEST,
 }
-if ( Object.values(env_mapper).some(e => e==null) ) {
+if (Object.values(env_mapper).some(e => e==null)) {
   console.error("SETUP ERROR: Some environment variables are undefined ! Exiting...");
   console.log(inspect(env_mapper));
   process.exit(1);
 }
 
 // enforce value constraints on variables
-const allowedLogTargets = ["file", "stdout", "stdout+file", "off"];
-if ( !allowedLogTargets.includes(LOG_TARGET) ) {
+const allowedLogTargets = [ "file", "stdout", "stdout+file", "off" ];
+if (!allowedLogTargets.includes(LOG_TARGET)) {
   console.error(`SETUP ERROR: env variable AIIINOTATE_LOG_TARGET must be set to one of ${allowedLogTargets.map(x => "\"" + x + "\"").join(", ")}. Got "${LOG_TARGET}". Exiting...`)
   process.exit(1);
 }

@@ -34,15 +34,15 @@ const fileLogTargets = [
 
 const makePinoLogger = () => {
   // disable logging entierly
-  if ( LOG_TARGET==="off" ) {
+  if (LOG_TARGET==="off") {
     return pino({ enabled: false });
   }
 
   // otherwise, generate a specific logger based on the value of "LOG_TARGET"
   const logTarget = {
-    stdout: [stdoutLogTarget],
-    file: [...fileLogTargets],
-    "stdout+file": [stdoutLogTarget, ...fileLogTargets]
+    stdout: [ stdoutLogTarget ],
+    file: [ ...fileLogTargets ],
+    "stdout+file": [ stdoutLogTarget, ...fileLogTargets ]
   }[LOG_TARGET];
 
   return pino({

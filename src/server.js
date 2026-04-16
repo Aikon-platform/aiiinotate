@@ -9,7 +9,7 @@ import { PORT, HOST } from "#constants";
  * @param {import("#types").ServeModeType} serveMode
  */
 async function server (serveMode) {
-  if (["dev", "prod"].includes(serveMode)) {
+  if ([ "dev", "prod" ].includes(serveMode)) {
     serveMode = "default";
   }
 

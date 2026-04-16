@@ -3,7 +3,7 @@ import test from "node:test";
 import build from "#src/app.js";
 import { visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
-import { testPostRouteCurry, injectPost, injectTestManifest, assertStatusCode, assertObjectKeys} from "#utils/testUtils.js";
+import { testPostRouteCurry, injectPost, injectTestManifest, assertStatusCode, assertObjectKeys } from "#utils/testUtils.js";
 import { PORT, HOST } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -39,12 +39,12 @@ test("test manifests Routes", async (t) => {
 
   await t.test("test route /manifests/:iiifPresentationVersion/create", async (t) => {
     const data = [
-      [ [manifest2Valid, manifest2ValidUri], testPostRouteCreateSuccess ],
-      [ [manifest2Invalid, manifest2InvalidUri], testPostRouteCreateFailure ]
+      [[ manifest2Valid, manifest2ValidUri ], testPostRouteCreateSuccess ],
+      [[ manifest2Invalid, manifest2InvalidUri ], testPostRouteCreateFailure ]
     ];
-    for ( let i=0; i<data.length; i++ ) {
+    for (let i=0; i<data.length; i++) {
       const [ testData, func ] = data.at(i);
-      for ( let j=0; j<testData.length; j++ ) {
+      for (let j=0; j<testData.length; j++) {
         const payload = testData.at(j);
         await func(t, "/manifests/2/create", payload);
         // for some reason, it is necessary to call `emptyCollections` explicitly here to avoid a JSONSchema validation error.

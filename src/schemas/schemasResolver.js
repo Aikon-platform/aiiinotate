@@ -19,34 +19,34 @@ function schemasResolver (fastify, schema) {
   const funcName = schemasResolver.name;
 
   // no need to process strings, booleans or numbers
-  if ( typeof schema==="string" || typeof schema==="number" || typeof schema==="boolean" ) {
+  if (typeof schema==="string" || typeof schema==="number" || typeof schema==="boolean") {
     return schema
   }
   // convert each item in arrays
-  else if ( Array.isArray(schema) ) {
+  else if (Array.isArray(schema)) {
     return schema.map((item) => schemasResolver(fastify, item));
   }
   // convert each key-value pair. this is actually the main part that will delta to the above branches.
-  else if ( schema.constructor === Object ) {
+  else if (schema.constructor === Object) {
     const out = {};
 
-    for ( let [k,v] of Object.entries(schema) ) {
+    for (let [ k,v ] of Object.entries(schema)) {
       // $id is not allowed => remove it
-      if ( k==="$id" ) {
+      if (k==="$id") {
         continue
       }
       // $refs must be resolved => replace the kv pair { $ref: schemaUri } with the corresponding schemas and process convert those schemas to mongo.
-      else if ( k==="$ref" ) {
+      else if (k==="$ref") {
         return schemasResolver(fastify, fastify.getSchema(v))
       }
       // convert JsonSchema integer types to bsonType: int
-      else if ( k==="type" && v==="integer" )
+      else if (k==="type" && v==="integer")
         out.bsonType = "int";
       // failsafe for other JsonSchema fields that are unimplemented by Mongo.
       // NOTE: "format" is also a JsonSchema keyword, but the "format" keyword
       // is used in our annotations, so we don't raise if it is encounetered.
       // this filter could be fine-tuned to work only at top-level of schemas. for now, we allow "format¨.
-      else if ( ["$schema", "$default", "definitions"].includes(k) ) {
+      else if ([ "$schema", "$default", "definitions" ].includes(k)) {
         throw new Error(`${funcName}: JSONSchema field '${k}' conversion to Mongo schema is not implemented ! in schema: ${schema}`);
       }
       // it's a "normal" value => process it.
