@@ -6,6 +6,7 @@ const PAGE_SIZE = parseInt(process.env.AIIINOTATE_PAGE_SIZE);
 // one of "file"|"stdout"|"stdout+file"|"off"
 const LOG_TARGET = process.env.AIIINOTATE_LOG_TARGET;
 const LOG_DIR = process.env.AIIINOTATE_LOG_DIR;
+const LOG_LEVEL = process.env.AIIINOTATE_LOG_LEVEL;
 
 const PORT = process.env.AIIINOTATE_PORT;
 const HOST = process.env.AIIINOTATE_HOST;
@@ -21,9 +22,10 @@ const MONGODB_CONNSTRING_TEST = process.env.MONGODB_CONNSTRING_TEST;
 // ensure that all env variables are defined.
 const env_mapper = {
   LOG_TARGET : LOG_TARGET,
+  LOG_LEVEL: LOG_LEVEL,
+  LOG_DIR : LOG_DIR,
   STRICT_MODE : STRICT_MODE,
   PAGE_SIZE : PAGE_SIZE,
-  LOG_DIR : LOG_DIR,
   PORT : PORT,
   HOST : HOST,
   SCHEME : SCHEME,
@@ -49,9 +51,10 @@ if ( !allowedLogTargets.includes(LOG_TARGET) ) {
 
 export {
   LOG_TARGET,
+  LOG_DIR,
+  LOG_LEVEL,
   STRICT_MODE,
   PAGE_SIZE,
-  LOG_DIR,
   PORT,
   HOST,
   SCHEME,
