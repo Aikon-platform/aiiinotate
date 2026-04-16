@@ -1,26 +1,6 @@
-import fastifyPlugin from "fastify-plugin"
-
-import { PUBLIC_URL } from "#constants";
-
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
-/** @param {"search"|"presentation"} slug */
-const makeSchemaUri = (slug) =>
-  `${PUBLIC_URL}/schemas/${slug}/version`;
-
-/**
- * @param {FastifyInstanceType} fastify
- * @param {"search"|"presentation"} slug
- */
-const getSchema = (fastify, slug) =>
-  fastify.getSchema(makeSchemaUri(slug));
-
-function addSchemas(fastify, options, done) {
-
-  // fastify.decorate("makeSchemaUri", makeSchemaUri);
-  // fastify.decorate("getSchema", (slug) => getSchema(fastify, slug));
-
-  // schemas are defined on the global `fastify` instance
+function addSchemas(fastify, makeSchemaUri) {
   fastify.addSchema({
     $id: makeSchemaUri("presentation"),
     type: "integer",
@@ -33,17 +13,7 @@ function addSchemas(fastify, options, done) {
     enum: [1, 2],
     description: "IIIF search API versions"
   });
-
-  // functions `makeSchemaUri` and `getSchema`
-  // are defined in an object that is used to decorate the global `fastify` instance,
-  // this namespacing the functions and allowing each plugin
-  // in this module to have functions with the same name.
-  fastify.decorate("schemasBase", {
-    makeSchemaUri: makeSchemaUri,
-    getSchema: (slug) => getSchema(fastify, slug)
-  }) ;
-
-  done()
+  return fastify
 }
 
-export default fastifyPlugin(addSchemas);
+export default addSchemas;

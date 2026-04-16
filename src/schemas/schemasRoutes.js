@@ -1,33 +1,9 @@
 /**
  * schemas for routes. these schemas are more permissive than the database schemas, defined for example in `presentation2`.
  */
-
-import fastifyPlugin from "fastify-plugin";
-
-import { PUBLIC_URL } from "#constants";
-
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
-
-/** @param {string} slug */
-const makeSchemaUri = (slug) =>
-  `${PUBLIC_URL}/schemas/routes/${slug}`;
-
-/**
- * @param {FastifyInstanceType} fastify
- * @param {"search"|"presentation"} slug
- */
-const getSchema = (fastify, slug) =>
-  fastify.getSchema(makeSchemaUri(slug));
-
-
-/**
- *
- * @param {FastifyInstanceType} fastify
- * @param {object?} options
- * @param {function} done
- */
-function addSchemas(fastify, options, done) {
+function addSchemas(fastify, makeSchemaUri) {
 
   ////////////////////////////////////////////////////////
   // ANNOTATIONS ROUTES
@@ -334,16 +310,9 @@ function addSchemas(fastify, options, done) {
     }
   })
 
-  ////////////////////////////////////////////////////////
-
-  fastify.decorate("schemasRoutes", {
-    makeSchemaUri: makeSchemaUri,
-    getSchema: (slug) => getSchema(fastify, slug)
-  });
-
-  done();
+  return fastify
 }
 
 
-export default fastifyPlugin(addSchemas);
+export default addSchemas;
 

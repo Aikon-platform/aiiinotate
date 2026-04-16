@@ -1,8 +1,3 @@
-import fastifyPlugin from "fastify-plugin";
-
-import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
-import { PUBLIC_URL } from "#constants";
-
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
 // TODO: schemas are maybe wayyy too strict.
@@ -54,20 +49,7 @@ const embeddedBodyTypeValues = [
   "Tag",
 ]
 
-/** @param {string} slug */
-const makeSchemaUri = (slug) =>
-  `${PUBLIC_URL}/schemas/presentation/${IIIF_PRESENTATION_2}/${slug}`
-
-/**
- * @param {FastifyInstanceType} fastify
- * @param {"search"|"presentation"} slug
- */
-const getSchema = (fastify, slug) =>
-  fastify.getSchema(makeSchemaUri(slug))
-
-
-function addSchemas(fastify, options, done) {
-
+function addSchemas(fastify, makeSchemaUri) {
 
   /////////////////////////////////////////////
   // SPECIFIC RESOURCES
@@ -419,19 +401,10 @@ function addSchemas(fastify, options, done) {
     }
   });
 
-  /////////////////////////////////////////////
-  // DONE
-
-  fastify.decorate("schemasPresentation2", {
-    makeSchemaUri: makeSchemaUri,
-    getSchema: (slug) => getSchema(fastify, slug)
-  })
-
-  done();
+  return fastify;
 }
 
 
 
 
-
-export default fastifyPlugin(addSchemas)
+export default addSchemas;
