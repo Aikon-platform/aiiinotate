@@ -2,6 +2,7 @@
 
 /** @typedef {import("fastify").FastifyInstance} FastifyInstanceType */
 /** @typedef {import("fastify").FastifyReply} FastifyReplyType */
+/** @typedef {import("fastify").FastifySchema} FastifySchemaType */
 
 /** @typedef {import("mongodb").Db} MongoDbType */
 /** @typedef {import("mongodb").ObjectId } MongoObjectId */

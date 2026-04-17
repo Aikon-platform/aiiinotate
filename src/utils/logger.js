@@ -3,7 +3,7 @@ import fs from "fs";
 
 import pino from "pino";
 
-import { LOG_TARGET, LOG_DIR } from "#constants";
+import { LOG_TARGET, LOG_DIR, LOG_LEVEL } from "#constants";
 
 // a LOG_DIR is defined and it doesn't exist
 if (LOG_DIR?.length && !fs.existsSync(LOG_DIR)) {
@@ -34,19 +34,19 @@ const fileLogTargets = [
 
 const makePinoLogger = () => {
   // disable logging entierly
-  if ( LOG_TARGET==="off" ) {
+  if (LOG_TARGET==="off") {
     return pino({ enabled: false });
   }
 
   // otherwise, generate a specific logger based on the value of "LOG_TARGET"
   const logTarget = {
-    stdout: [stdoutLogTarget],
-    file: [...fileLogTargets],
-    "stdout+file": [stdoutLogTarget, ...fileLogTargets]
+    stdout: [ stdoutLogTarget ],
+    file: [ ...fileLogTargets ],
+    "stdout+file": [ stdoutLogTarget, ...fileLogTargets ]
   }[LOG_TARGET];
 
   return pino({
-    level: process.env.LOG_LEVEL || "debug",
+    level: LOG_LEVEL,
     transport: {
       targets: logTarget,
     },

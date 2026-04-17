@@ -79,8 +79,8 @@ const defaultConfig = {
 }
 
 const setConfig = (mode) => {
-  const allowedModes = ["test", "default"];
-  if ( ! allowedModes.includes(mode) ) {
+  const allowedModes = [ "test", "default" ];
+  if (! allowedModes.includes(mode)) {
     throw new Error(`app.build: 'mode' param expected one of ${allowedModes}, got ${mode}`)
   }
   return mode==="test" ? testConfig : defaultConfig;
@@ -100,7 +100,7 @@ async function build(mode="default") {
   // NOTE: we allow all origins => restrict ?
   fastify.register(cors, {
     origin: "*",
-    methods: ["GET", "HEAD", "POST", "DELETE"]
+    methods: [ "GET", "HEAD", "POST", "DELETE" ]
   });
 
   await fastify.register(db, mongoConfig);

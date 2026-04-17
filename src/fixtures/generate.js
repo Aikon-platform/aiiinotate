@@ -1,7 +1,7 @@
 import { v4 as uuid4 } from "uuid";
 
 import { getRandomItem } from "#utils/utils.js";
-import { BASE_URL } from "#constants";
+import { PUBLIC_URL } from "#constants";
 
 /**
  * generate an array of length `length` filled with values returned by `itemFunc`
@@ -10,7 +10,7 @@ import { BASE_URL } from "#constants";
  * @returns {Array}
  */
 const fillArray = (length, itemFunc) =>
-  Array.from({length: length}, itemFunc)
+  Array.from({ length: length }, itemFunc)
 
 /** @returns {string} - matches "int,int,int.int" */
 const makeXywh = () =>
@@ -24,7 +24,7 @@ const makeManifestShortId = () =>
   `wit${makeRandomNumber()}_pdf${makeRandomNumber()}_anno${makeRandomNumber()}`;
 
 const makeBaseUrl = (manifestShortId) =>
-  `${BASE_URL}/data/2/${manifestShortId}`;
+  `${PUBLIC_URL}/data/2/${manifestShortId}`;
 
 const makeAnnotationId = (manifestShortId) =>
   `${makeBaseUrl(manifestShortId)}/annotation/a_${uuid4()}`;
@@ -171,7 +171,7 @@ const generateIiif2ManifestAndAnnotationsList = (nCanvas, nAnnotations) => {
       manifestShortId, canvasArray
     );
 
-  return [manifest, annotationList];
+  return [ manifest, annotationList ];
 }
 
 export {

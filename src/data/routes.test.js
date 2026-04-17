@@ -6,6 +6,7 @@ import build from "#src/app.js";
 import { getRandomItem, visibleLog } from "#utils/utils.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { testPostRouteCurry, testDeleteRouteCurry, injectTestManifest, injectTestAnnotations, assertErrorValidResponse, assertDeleteValidResponse, testGetPaginated } from "#utils/testUtils.js";
+import { PORT, HOST } from "#constants";
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").NodeTestType} NodeTestType */
@@ -26,7 +27,7 @@ test("test common routes", async (t) => {
 
   // NOTE: it is necessary to run the app because internally there are fetches to external data.
   try {
-    await fastify.listen({ port: process.env.AIIINOTATE_PORT, host: process.env.AIIINOTATE_HOST });
+    await fastify.listen({ port: PORT, host: HOST });
   } catch (err) {
     console.log("FASTIFY ERROR", err);
     throw err;
@@ -40,9 +41,9 @@ test("test common routes", async (t) => {
 
     const manifestShortIdArray = [ ...new Set(
       annotationList.resources.map(annotation => getManifestShortId(annotation.on))
-    )];
+    ) ];
     let route, expectedCount, pageSize;
-    for ( const manifestShortId of manifestShortIdArray ) {
+    for (const manifestShortId of manifestShortIdArray) {
       expectedCount = annotationList.resources.filter(annotation => annotation.on.includes(manifestShortId)).length;
       pageSize = Math.max(Math.floor(expectedCount / 10), 1);
       route = `/search-api/1/manifests/${manifestShortId}/search?pageSize=${pageSize}`;
@@ -57,14 +58,14 @@ test("test common routes", async (t) => {
 
     await t.test("test preValidation hook for queryString validation", async (t) => {
       const data = [
-        ["/manifests/2/delete?canvasUri=xxx", false],    // canvasUri is only allowed if `collectionName==="annotations"` => will fail.
-        ["/annotations/2/delete?tag=xxx", false],  // if using tag, manifestShortId must also be defined
-        ["/manifests/2/delete?tag=xxx&manifestShortId=xxx", false],  // tag is not allowed with `manifests`
-        ["/annotations/2/delete?tag=xxx&manifestShortId=xxx", true],
-        ["/manifests/2/delete?manifestShortId=xxx", true],
+        [ "/manifests/2/delete?canvasUri=xxx", false ],    // canvasUri is only allowed if `collectionName==="annotations"` => will fail.
+        [ "/annotations/2/delete?tag=xxx", false ],  // if using tag, manifestShortId must also be defined
+        [ "/manifests/2/delete?tag=xxx&manifestShortId=xxx", false ],  // tag is not allowed with `manifests`
+        [ "/annotations/2/delete?tag=xxx&manifestShortId=xxx", true ],
+        [ "/manifests/2/delete?manifestShortId=xxx", true ],
       ];
-      for ( let i=0; i<data.length; i++ ) {
-        const [url, expectSuccess] = data.at(i);
+      for (let i=0; i<data.length; i++) {
+        const [ url, expectSuccess ] = data.at(i);
         const r = await fastify.inject({
           method: "DELETE",
           url: url
@@ -83,8 +84,8 @@ test("test common routes", async (t) => {
           [ "manifestShortId", getManifestShortId(manifest["@id"]) ]
         ];
 
-      for ( let i=0; i<deleteQuery.length; i++ ) {
-        const [deleteBy, deleteKey] = deleteQuery.at(i);
+      for (let i=0; i<deleteQuery.length; i++) {
+        const [ deleteBy, deleteKey ] = deleteQuery.at(i);
         await injectTestManifest(fastify, t, manifest);
         await testDeleteRoute(t, `/manifests/2/delete?${deleteBy}=${deleteKey}`, 1);
         await fastify.emptyCollections();
@@ -97,7 +98,7 @@ test("test common routes", async (t) => {
         // validFilter is false => delete data that doesn't exist (test that nothing is deleted by accident)
         await Promise.all(
           // all 3 possible ways to delete data
-          ["manifestShortId", "canvasUri", "uri"].map(
+          [ "manifestShortId", "canvasUri", "uri" ].map(
             async (deleteBy) =>
               await t.test(`validFilter: ${validFilter}, deleteBy: ${deleteBy}`, async (t) => {
 
@@ -132,7 +133,7 @@ test("test common routes", async (t) => {
 
       await t.test("test route /annotations/:iiifPresentationVersion/delete with param 'tag'", async (t) => {
         const
-          tags = ["tag1", "tag2", "tag3"],
+          tags = [ "tag1", "tag2", "tag3" ],
           // outputs one of the tags at random
           selectTag = () => tags[Math.floor(Math.random() * 3)],
           testTag = selectTag(),

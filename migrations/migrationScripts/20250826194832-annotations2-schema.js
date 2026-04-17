@@ -21,7 +21,7 @@ export const up = async (db, client) => {
     },
     r = await db.command(commandDoc);
 
-  if ( r.ok !== 1 ) {
+  if (r.ok !== 1) {
     throw new Error(`command failed with error: ${r}`);
   }
 };
@@ -36,7 +36,7 @@ export const down = async (db, client) => {
     collMod: "annotations2",
     validator: {}
   });
-  if ( r.ok !== 1 ) {
+  if (r.ok !== 1) {
     throw new Error(`command failed with error: ${r}`);
   }
 };

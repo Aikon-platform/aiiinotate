@@ -62,12 +62,24 @@ class FastifyClient {
   }
 
   /**
-   * @param {object} annotationList - IIIF 2 annotationList
-   * @returns {[number, Promise<InsertResponseType>]} - [ statusCode, response ]
+   * function to interact with all annotation createMany + manifest create routes.
+   * @type {(iiifVersion: 2|3, datatype: "manifest"|"annotation") => (data: object) => [Number, Promise<object>] }
    */
-  async importAnnotationList(annotationList) {
-    const r = await this.injectPost("/annotations/2/createMany", annotationList);
-    return [ r.statusCode, r.json() ];
+  importData(iiifVersion, datatype) {
+    if (![ "2","3" ].includes(`${iiifVersion}`)) {
+      throw new Error(`fastifyClient.importData: "iiifVersion" must by 2 or 3, got "${iiifVersion}"`);
+    }
+    if (![ "manifest","annotation" ].includes(datatype)) {
+      throw new Error(`fastifyClient.importData: "datatype" must by "manifest" or "annotation", got "${datatype}"`);
+    }
+
+    const routeSuffix = datatype==="manifest" ? "create" : "createMany";
+    const route = `/${datatype}s/${iiifVersion}/${routeSuffix}`;
+
+    return async (data) => {
+      const r = await this.injectPost(route, data);
+      return [ r.statusCode, r.json() ];
+    }
   }
 }
 

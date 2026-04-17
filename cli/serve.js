@@ -4,7 +4,7 @@ import { Command, Option, Argument } from "commander";
 
 /** @typedef {import("#types").ServeModeType} ServeModeType */
 
-const serveModeValues = ["dev", "prod"];
+const serveModeValues = [ "dev", "prod" ];
 
 /**
  * @param {import('commander').Command} command

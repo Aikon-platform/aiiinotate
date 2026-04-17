@@ -1,6 +1,6 @@
 /** create indexes for manifests2 collection */
 
-import {createIndex, removeIndex} from "../manageIndex.js";
+import { createIndex, removeIndex } from "../manageIndex.js";
 
 const indexes = [
   {
@@ -16,7 +16,7 @@ const indexes = [
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
-  for ( const { colName, indexSpec, indexOptions } of indexes ) {
+  for (const { colName, indexSpec, indexOptions } of indexes) {
     const result = await createIndex(db, colName, indexSpec, indexOptions);
     console.log("created index:", result);
   }
@@ -28,7 +28,7 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-  for ( const { colName, indexSpec, indexOptions } of indexes ) {
+  for (const { colName, indexSpec, indexOptions } of indexes) {
     const result = await removeIndex(db, colName, indexOptions);
     console.log("dropped index:", result);
   }

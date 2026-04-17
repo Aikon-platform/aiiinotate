@@ -5,6 +5,7 @@ import { v4 as uuid4 } from "uuid";
 import build from "#src/app.js";
 import { getManifestShortId, getCanvasShortId, getAnnotationTarget, makeTarget, makeAnnotationId, toAnnotationList } from "#utils/iiif2Utils.js";
 import { objectHasKey, visibleLog } from "#utils/utils.js";
+import { PUBLIC_URL } from "#constants";
 
 // hash-validating regex
 const hashRgx = /^\d+$/;
@@ -96,7 +97,7 @@ test("test 'iiif2Utils' functions", async (t) => {
     const escapeRegExp = (string) =>
       string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 
-    const rgx = new RegExp(`^${escapeRegExp(process.env.AIIINOTATE_BASE_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
+    const rgx = new RegExp(`^${escapeRegExp(PUBLIC_URL)}/data/2/[^(\\s|/)]+/annotation/[^\\.]+$`);
     annotations2Valid.map((annotation) =>
       t.assert.strictEqual(rgx.test(makeAnnotationId(annotation)), true));
     annotations2Invalid.map((annotation) =>
@@ -108,11 +109,11 @@ test("test 'iiif2Utils' functions", async (t) => {
      * @param {"prev"|"next"} val
      * @returns {(_annotationList: object) => string?} */
     const getPage = (val) => {
-      if ( !["prev", "next"].includes(val) ) {
+      if (![ "prev", "next" ].includes(val)) {
         throw new Error(`'getPage': invalid value for 'val': '${val}'`);
       }
       return (_annotationList) => {
-        if ( objectHasKey(annotationList, val) ) {
+        if (objectHasKey(annotationList, val)) {
           return new URL(annotationList[val]).searchParams.get("page")
         }
         return undefined;
@@ -129,7 +130,7 @@ test("test 'iiif2Utils' functions", async (t) => {
     ];
     let annotationList;
 
-    for ( const { page, hasNext, prevNum, nextNum } of data ) {
+    for (const { page, hasNext, prevNum, nextNum } of data) {
       annotationList = toAnnotationList({
         resources: [],
         annotationListId: testUrl.href,

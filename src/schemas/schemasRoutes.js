@@ -1,33 +1,9 @@
 /**
  * schemas for routes. these schemas are more permissive than the database schemas, defined for example in `presentation2`.
  */
-
-import fastifyPlugin from "fastify-plugin";
-
-import { BASE_URL } from "#constants";
-
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 
-
-/** @param {string} slug */
-const makeSchemaUri = (slug) =>
-  `${BASE_URL}/schemas/routes/${slug}`;
-
-/**
- * @param {FastifyInstanceType} fastify
- * @param {"search"|"presentation"} slug
- */
-const getSchema = (fastify, slug) =>
-  fastify.getSchema(makeSchemaUri(slug));
-
-
-/**
- *
- * @param {FastifyInstanceType} fastify
- * @param {object?} options
- * @param {function} done
- */
-function addSchemas(fastify, options, done) {
+function addSchemas(fastify, makeSchemaUri) {
 
   ////////////////////////////////////////////////////////
   // ANNOTATIONS ROUTES
@@ -41,8 +17,8 @@ function addSchemas(fastify, options, done) {
       "@type": { type: "string" },
       motivation: { anyOf: [
         { type: "string", enum: [ "oa:Annotation" ] },
-        { type: "array", items: { type: "string" }}
-      ]},
+        { type: "array", items: { type: "string" } }
+      ] },
       on: {
         anyOf: [
           { type: "string" },
@@ -52,7 +28,7 @@ function addSchemas(fastify, options, done) {
             items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ]},
+            ] },
             minItems: 1
           }
         ]
@@ -66,11 +42,11 @@ function addSchemas(fastify, options, done) {
     required: [ "id", "type", "motivation", "target" ],
     properties: {
       id: { type: "string" },
-      type: { type: "string", enum: ["Annotation"] },
+      type: { type: "string", enum: [ "Annotation" ] },
       motivation: { anyOf: [
         { type: "string" },
         { type: "array", items: { type: "string" } },
-      ]},
+      ] },
       target: {
         anyOf: [
           { type: "string" },
@@ -80,7 +56,7 @@ function addSchemas(fastify, options, done) {
             items: { anyOf: [
               { type: "string" },
               { type: "object" }
-            ]},
+            ] },
             minItems: 1
           }
         ]
@@ -99,7 +75,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationListOrPageUri"),
     type: "object",
-    required: ["uri"],
+    required: [ "uri" ],
     properties: {
       "uri": { type: "string" },
     }
@@ -114,11 +90,11 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationList"),
     type: "object",
-    required: ["@id", "@type", "resources"],
+    required: [ "@id", "@type", "resources" ],
     properties: {
       "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
       "@id": { type: "string" },
-      "@type": { type: "string", enum: ["sc:AnnotationList"] },
+      "@type": { type: "string", enum: [ "sc:AnnotationList" ] },
       "resources": {
         type: "array",
         items: { $ref: makeSchemaUri("routeAnnotation2") }
@@ -129,11 +105,11 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationPage"),
     type: "object",
-    required: ["@id", "@type", "items"],
+    required: [ "@id", "@type", "items" ],
     properties: {
       "@context": { type: "string" },  // i don't specify the value because @context may be an URI that points to a JSON that contains several namespaces other than "http://iiif.io/api/presentation/2/context.json"
       "id": { type: "string" },
-      "type": { type: "string", enum: ["AnnotationPage"] },
+      "type": { type: "string", enum: [ "AnnotationPage" ] },
       "items": {
         type: "array",
         items: { $ref: makeSchemaUri("routeAnnotation3") }
@@ -169,7 +145,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeAnnotationFilterTag"),
     type: "object",
-    required: ["tag", "manifestShortId"],
+    required: [ "tag", "manifestShortId" ],
     properties: {
       manifestShortId: {
         type: "string", description: "delete all annotations for a single manifest"
@@ -187,19 +163,19 @@ function addSchemas(fastify, options, done) {
     oneOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string", description: "delete the annotation with this '@id'" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["manifestShortId"],
+        required: [ "manifestShortId" ],
         properties: { manifestShortId: { type: "string", description: "delete all annotations for a single manifest" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["canvasUri"],
+        required: [ "canvasUri" ],
         properties: { canvasUri: { type: "string", description: "delete all annotations for a single canvas" } },
         additionalProperties: false
       }
@@ -223,7 +199,7 @@ function addSchemas(fastify, options, done) {
     anyOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string" } }
       },
       { $ref: fastify.schemasPresentation2.makeSchemaUri("manifestPublic") },
@@ -238,13 +214,13 @@ function addSchemas(fastify, options, done) {
     oneOf: [
       {
         type: "object",
-        required: ["uri"],
+        required: [ "uri" ],
         properties: { uri: { type: "string" } },
         additionalProperties: false
       },
       {
         type: "object",
-        required: ["manifestShortId"],
+        required: [ "manifestShortId" ],
         properties: { manifestShortId: { type: "string" } },
         additionalProperties: false
       }
@@ -291,7 +267,7 @@ function addSchemas(fastify, options, done) {
   fastify.addSchema({
     $id: makeSchemaUri("routeResponseUpdate"),
     type: "object",
-    required: ["matchedCount", "modifiedCount", "upsertedCount"],
+    required: [ "matchedCount", "modifiedCount", "upsertedCount" ],
     properties: {
       matchedCount: { type: "integer" },
       modifiedCount: { type: "integer" },
@@ -334,16 +310,9 @@ function addSchemas(fastify, options, done) {
     }
   })
 
-  ////////////////////////////////////////////////////////
-
-  fastify.decorate("schemasRoutes", {
-    makeSchemaUri: makeSchemaUri,
-    getSchema: (slug) => getSchema(fastify, slug)
-  });
-
-  done();
+  return fastify
 }
 
 
-export default fastifyPlugin(addSchemas);
+export default addSchemas;
 

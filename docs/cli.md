@@ -64,17 +64,20 @@ aiiinotate migrate revert-all
 
 ## `import`: import data
 
+The CLI can be used to import IIIF annotations or to index IIIF manifests in aiiinotate.
+
 ```bash
 # in prod
-aiiinotate import -i 2 -f <path/to/import/file.txt>
+aiiinotate import <manifests|annotations> -i 2 -f <path/to/import/file.txt>
 ```
 
 Where:
+- `<manifests|annotations>` is the kind of data to import: manifests or annotations
 - `-i` `--iiif-version` (`2|3`) is the IIIF Presentation API version of the data to import:
-    - if `-i 3`, we import IIIF presentation 3.x annotations
-    - if `-i 2`, we import IIIF presentation 2.x annotations
+    - if `-i 3`, we import IIIF presentation 3.x data
+    - if `-i 2`, we import IIIF presentation 2.x data
 - `-f --file` is a relative or absolute path the the import file. This import file:
-    - contains a list of paths to annotation lists or annotation pages
+    - contains a list of paths to annotation lists, annotation pages or manifests
     - with 1 path per line
     - paths can be relative or absolute
 

@@ -1,6 +1,6 @@
 import fastifyPlugin from "fastify-plugin"
 
-import { pathToUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToAiiinotatePublicUrl, ajvCompile, inspectObj, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { returnError, makeResponseSchema, makeResponsePostSchema, addPagination } from "#utils/routeUtils.js";
 
 /** @typedef {import("#types").Manifests2InstanceType} Manifests2InstanceType */
@@ -52,14 +52,14 @@ function commonRoutes(fastify, options, done) {
             q: { type: "string" },
             motivation: {
               type: "string",
-              enum: ["painting", "non-painting", "commenting", "describing", "tagging", "linking"]
+              enum: [ "painting", "non-painting", "commenting", "describing", "tagging", "linking" ]
             },
             canvasMin: {
               type: "integer",
               minimum: 0
             },
             canvasMax: {
-              type: ["integer","null"],
+              type: [ "integer","null" ],
               minimum: 0
             },
             onlyIds: {
@@ -94,11 +94,11 @@ function commonRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        queryUrl = pathToUrl(request.url),
+        queryUrl = pathToAiiinotatePublicUrl(request.url),
         { iiifSearchVersion, manifestShortId } = request.params,
         { q, motivation, canvasMin, canvasMax, onlyIds, page, pageSize } = request.query;
 
-      if ( iiifSearchVersion===1 ) {
+      if (iiifSearchVersion===1) {
         return await annotations2.search({
           queryUrl,
           manifestShortId,
@@ -147,7 +147,7 @@ function commonRoutes(fastify, options, done) {
               ? validatorRouteAnnotationDeleteSchema
               : validatorRouteManifestDeleteSchema,
           error = new Error(`Error validating DELETE route on collection '${collectionName}' with queryString '${inspectObj(query)}'`);
-        if ( !validator(query) ) {
+        if (!validator(query)) {
           returnError(request, reply, error, {}, 400);
         }
         return;
@@ -157,7 +157,7 @@ function commonRoutes(fastify, options, done) {
       const { collectionName, iiifPresentationVersion } = request.params;
 
       try {
-        if ( collectionName==="annotations" ) {
+        if (collectionName==="annotations") {
           const deleteFilter = request.query;
           return iiifPresentationVersion === 2
             ? await annotations2.deleteAnnotations(deleteFilter)

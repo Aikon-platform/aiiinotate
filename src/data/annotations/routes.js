@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin"
 
 import { STRICT_MODE } from "#constants";
-import { pathToUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
+import { pathToAiiinotatePublicUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
 
 
@@ -27,7 +27,7 @@ const validateAnnotationVersion = (iiifPresentationVersion, annotationData, isLi
   throwIfKeyUndefined(annotationData, expectedTypeKey);
   const expectedTypeVal = (
     isListOrPage
-      ? { "2": "sc:AnnotationList", "3":"AnnotationPage"}
+      ? { "2": "sc:AnnotationList", "3":"AnnotationPage" }
       : { "2": "oa:Annotation", "3": "Annotation" }
   )[iiifPresentationVersion];
   throwIfValueError(annotationData, expectedTypeKey, expectedTypeVal);
@@ -108,7 +108,7 @@ function annotationsRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        queryUrl = pathToUrl(request.url),
+        queryUrl = pathToAiiinotatePublicUrl(request.url),
         { iiifPresentationVersion } = request.params,
         { canvasUri, page, pageSize } = request.query;
 
@@ -180,7 +180,7 @@ function annotationsRoutes(fastify, options, done) {
     },
     async (request, reply) => {
       const
-        annotationUri = pathToUrl(request.url),
+        annotationUri = pathToAiiinotatePublicUrl(request.url),
         { iiifPresentationVersion } = request.params;
       try {
         return iiifPresentationVersion === 2
@@ -219,7 +219,7 @@ function annotationsRoutes(fastify, options, done) {
           const
             { action } = request.params,
             { throwOnCanvasIndexError } = request.querystring;
-          if ( action==="update" && throwOnCanvasIndexError ) {
+          if (action==="update" && throwOnCanvasIndexError) {
             returnError(request, reply, "'throwOnCanvasIndexError' is only allowed when ':action' is 'create'.");
           }
           return;
@@ -237,7 +237,7 @@ function annotationsRoutes(fastify, options, done) {
       try {
         validateAnnotationVersion(iiifPresentationVersion, annotation);
         // insert or update
-        if ( iiifPresentationVersion === 2 ) {
+        if (iiifPresentationVersion === 2) {
           return action==="create"
             ? await annotations2.insertAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError)
             : await annotations2.updateAnnotation(annotation, throwOnCanvasIndexError, throwOnXywhError);
@@ -310,7 +310,7 @@ function annotationsRoutes(fastify, options, done) {
         validateAnnotationArrayVersion(iiifPresentationVersion, annotationsArray);
 
         // insert
-        if ( iiifPresentationVersion === 2 ) {
+        if (iiifPresentationVersion === 2) {
           await Promise.all(annotationsArray.map(
             async (annotationList) => {
               const r = await annotations2.insertAnnotationList(annotationList, throwOnCanvasIndexError, throwOnXywhError);

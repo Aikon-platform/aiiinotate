@@ -9,7 +9,7 @@ import { formatInsertResponse, formatDeleteResponse, formatUpdateResponse } from
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
 /** @typedef {import("#types").DataOperationsType } DataOperationsType */
 
-const allowedCollectionNames = ["manifests2", "manifests3", "annotations2", "annotations3"];
+const allowedCollectionNames = [ "manifests2", "manifests3", "annotations2", "annotations3" ];
 
 class CollectionAbstractError extends Error {
   /**
@@ -63,7 +63,7 @@ class CollectionAbstract {
    */
   constructor(fastify, collectionName) {
 
-    if ( !allowedCollectionNames.includes(collectionName) ) {
+    if (!allowedCollectionNames.includes(collectionName)) {
       throw new abstractError(`invalid 'collectionName': expected one of ${allowedCollectionNames}, got '${collectionName}'`);
     }
 
@@ -75,7 +75,7 @@ class CollectionAbstract {
           : collectionName === "manifests2"
             ? { validator: { $jsonSchema: fastify.schemasPresentation2.getSchema("manifestMongo") } }
           // else: manifets3.
-            : { validator: { /** TODO */ }};
+            : { validator: { /** TODO */ } };
 
     const iiifPresentationVersion = collectionName.endsWith("2") ? 2 : 3;
 
@@ -111,7 +111,7 @@ class CollectionAbstract {
 
   /** @param {Function} func */
   funcName(func) {
-    if ( typeof func !== "function" ) {
+    if (typeof func !== "function") {
       throw new Error(`${this.className()}.${this.funcName.name} : expected 'func' to be a function, got '${typeof func}' (func = ${func})`);
     }
     return `${this.className()}.${func.name}`

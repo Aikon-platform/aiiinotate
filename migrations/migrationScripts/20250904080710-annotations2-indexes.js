@@ -2,7 +2,7 @@
  * create and manage indexes for the collection `annotations2`
  */
 
-import {createIndex, removeIndex} from "../manageIndex.js";
+import { createIndex, removeIndex } from "../manageIndex.js";
 
 
 // all filters on arrays are MultiKey index => it NOT a Sort index, but an Equality index (useful for filters)
@@ -50,7 +50,7 @@ const indexes = [
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
-  for ( const { colName, indexSpec, indexOptions } of indexes ) {
+  for (const { colName, indexSpec, indexOptions } of indexes) {
     const result = await createIndex(db, colName, indexSpec, indexOptions);
     console.log("created index:", result);
   }
@@ -62,7 +62,7 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-  for ( const { colName, indexSpec, indexOptions } of indexes ) {
+  for (const { colName, indexSpec, indexOptions } of indexes) {
     const result = await removeIndex(db, colName, indexOptions);
     console.log("dropped index:", result);
   }

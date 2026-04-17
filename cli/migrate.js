@@ -16,7 +16,7 @@ import { execSync } from "node:child_process"
 import { Command, Option, Argument } from "commander";
 
 /** @typedef {"make"|"apply"|"revert"|"revert-all"} MigrateOpType */
-const allowedMigrateOp = ["make", "apply", "revert", "revert-all"];
+const allowedMigrateOp = [ "make", "apply", "revert", "revert-all" ];
 
 const
   // path to current dirctory
@@ -26,7 +26,7 @@ const
   dirMigrationsScripts = path.resolve(dirMigrations, "migrationScripts"),
   migrationsConfigMain = path.resolve(dirMigrations, "migrate-mongo-config-main.js"),
   migrationsConfigTest = path.resolve(dirMigrations, "migrate-mongo-config-test.js"),
-  migrationConfigs = [migrationsConfigMain, migrationsConfigTest];
+  migrationConfigs = [ migrationsConfigMain, migrationsConfigTest ];
 
 /** return a date in YYYYMMDDhhmmss format */
 function formatDate(date) {
@@ -47,7 +47,7 @@ function formatDate(date) {
  * @param {string} migrationName
  */
 function migrateMake(migrationName) {
-  if ( migrationName == null ) {
+  if (migrationName == null) {
     throw new Error(`migration name must be a string. got ${migrationName}`);
   }
   fs.copyFileSync(

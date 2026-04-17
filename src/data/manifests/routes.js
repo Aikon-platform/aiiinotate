@@ -100,7 +100,7 @@ function manifestsRoutes(fastify, options, done) {
         { iiifPresentationVersion } = request.params,
         manifestData = request.body;
       try {
-        if ( objectHasKey(manifestData, "uri") ) {
+        if (objectHasKey(manifestData, "uri")) {
           return iiifPresentationVersion === 2
             ? await manifests2.insertManifestFromUri(manifestData.uri)
             : manifests3.notImplementedError();

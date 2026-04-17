@@ -16,8 +16,6 @@ import { Command, Option } from "commander";
 import makeImportCommand from "#cli/import.js";
 import makeMigrateCommand from "#cli/migrate.js";
 import makeServeCommand from "#cli/serve.js";
-import loadEnv from "#cli/utils/env.js";
-
 
 function makeCli() {
 
@@ -38,7 +36,6 @@ function makeCli() {
     .addCommand(makeMigrateCommand());
 
   cli.parse(process.argv);
-  return cli;
 }
 
 makeCli();

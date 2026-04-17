@@ -11,15 +11,16 @@ const cwd = process.cwd();  // directory the script is run from
  */
 const toAbsPath = (f) => path.isAbsolute(f) ? f : path.join(cwd, f);
 
-/** @returns {boolean} true if file `f` exists, false otherwise */
+/**
+ * @returns {[string, boolean]} - [<absolute file path>, <success?>]
+ */
 const fileOk = (f) => {
   f = toAbsPath(f);
   try {
-    fs.accessSync(f, fs.constants.R_OK);
-    return true;
+    fs.accessSync(f, fs.constants.R_OK);  // will throw if there's a problem opening.
+    return [ f, fs.lstatSync(f).isFile() ];
   } catch (e) {
-    console.error(`io.fileOk: file does not exist or could not be read: ${f}`);
-    return false
+    return [ f, false ]
   }
 }
 
@@ -43,13 +44,17 @@ const fileRead = (f) => {
  * @returns { string[] } array of absolute filepaths
  */
 function fileArrayValidate (fileArr) {
-  // convert to absolute filepaths
-  const success = fileArr.every(fileOk);
-  if (!success) {
-    console.error("io.fileArrayValidate: some files could not be accessed. exiting...");
+  // array of [<absolute filepath>, <success opening file?>]
+  fileArr = fileArr.map(fileOk);
+  const successCount = fileArr.filter(x => x[1]).length;
+  if (successCount!==fileArr.length) {
+    console.error(
+      `io.fileArrayValidate: ${fileArr.length - successCount} files could not be accessed. exiting...`,
+      fileArr.filter(x => !x[1]).map(x => x[0])
+    );
     process.exit(1);
   }
-  return fileArr
+  return fileArr.map(x => x[0]);
 }
 
 /**
@@ -59,12 +64,19 @@ function fileArrayValidate (fileArr) {
  * @returns {Promise<string[]>}
  */
 async function parseImportInputFile(file) {
+  // ensure input file exists
+  const [ fileAbs, ok ] = fileOk(file);
+  if (!ok) {
+    console.error(`could not read import file: ${file}. exiting...`);
+    process.exit(1);
+  }
+
   // read `file` split it by lines, remove empty lines
   const fileArr =
-    fileRead(file)
+    fileRead(fileAbs)
       .split("\n")
       .filter(l => !l.match(/^\s*$/g));
-  return [...new Set(fileArrayValidate(fileArr))];
+  return [ ...new Set(fileArrayValidate(fileArr)) ];
 }
 
 export {

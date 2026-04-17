@@ -18,7 +18,7 @@
  * @param {CreateIndexesOptionsType} indexOptions - indexOptions.name MUST be defined !
  */
 const validateIndexOptions = (indexOptions) => {
-  if ( indexOptions.name == null ) {
+  if (indexOptions.name == null) {
     throw new Error("indexOptions.name must be defined !")
   }
 }

@@ -180,7 +180,7 @@ npm run cli -- import <arguments>
 
 ## Test coverage
 
-aiiinotate is well tested: **over 90% test coverage** on all files ! 
+aiiinotate is well tested: **~90% test coverage** on all files ! 
 
 ```
 ℹ ----------------------------------------------------------------------------------------

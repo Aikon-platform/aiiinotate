@@ -11,7 +11,7 @@ import { MONGODB_DB, MONGODB_DB_TEST, MONGODB_CONNSTRING, MONGODB_CONNSTRING_TES
  * @param {MongoDB} db
  */
 const emptyCollections = async (db) => {
-  if ( db.databaseName !== MONGODB_DB_TEST ) {
+  if (db.databaseName !== MONGODB_DB_TEST) {
     throw new Error(`'emptyCollections' may only be used on test database defined by .env variable 'MONGODB_DB_TEST'. expected test database '${MONGODB_DB_TEST}' but working on database '${db.databaseName}'`);
   }
   await Promise.all(
@@ -41,7 +41,7 @@ async function dbConnector(fastify, options) {
     url: connString
   });
 
-  if ( options.test ) {
+  if (options.test) {
     fastify.decorate("emptyCollections", () => emptyCollections(fastify.mongo.db));
   }
 }

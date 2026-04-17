@@ -77,7 +77,7 @@ class Annotations2 extends CollectionAbstract {
    */
   #expandRouteAnnotationFilter(filterKey, filterVal) {
     const allowedFilterKeys = [ "uri", "manifestShortId", "canvasUri", "tag" ];
-    if ( !allowedFilterKeys.includes(filterKey) ) {
+    if (!allowedFilterKeys.includes(filterKey)) {
       throw new Error(`${this.funcname(this.#expandRouteAnnotationFilter)}: expected one of ${allowedFilterKeys} for param 'deleteKey', got '${filterKey}'`)
     }
     const map = {
@@ -89,8 +89,8 @@ class Annotations2 extends CollectionAbstract {
           {
             // schema accepts both oa:Tag and Tag
             $or: [
-              {"resource.@type": "oa:Tag"},
-              {"resource.@type": "Tag"}
+              { "resource.@type": "oa:Tag" },
+              { "resource.@type": "Tag" }
             ]
           },
           { "resource.chars": filterVal }
@@ -107,7 +107,7 @@ class Annotations2 extends CollectionAbstract {
    * @returns {object | null} - the resource, or `null` if the resource is either an empty Embedded Textual Body or has no `@id`
    */
   #cleanAnnotationResource(resource) {
-    if ( resource ) {
+    if (resource) {
       // 1) uniformize embedded textual body keys
       // OA allows `cnt:ContentAsText` or `dctypes:Text` for Embedded Textual Bodies, IIIF only uses `dctypes:Text`
       resource["@type"] =
@@ -118,7 +118,7 @@ class Annotations2 extends CollectionAbstract {
       // OA stores Textual Body content in `cnt:chars`, IIIF uses `chars`. `value` is sometimes also used
       resource.chars = resource.value || resource["cnt:chars"] || resource.chars;  // may be undefined
       [ "value", "cnt:chars" ].map((k) => {
-        if ( Object.keys(resource).includes(k) ) {
+        if (Object.keys(resource).includes(k)) {
           delete resource[k];
         }
       })
@@ -130,7 +130,7 @@ class Annotations2 extends CollectionAbstract {
       const
         hasTextualBody = objectHasKey(resource, "chars"),
         emptyBody = isNullish(resource.chars) || resource.chars === "<p></p>";
-      if ( isNullish(resource["@id"]) && (emptyBody || !hasTextualBody) ) {
+      if (isNullish(resource["@id"]) && (emptyBody || !hasTextualBody)) {
         return null
       }
     }
@@ -156,12 +156,12 @@ class Annotations2 extends CollectionAbstract {
       annotationTargetArray = await makeTarget(annotation),
       manifestShortId = annotationTargetArray[0].manifestShortId;
 
-    if ( throwOnXywhError && annotationTargetArray[0]?.xywh.some(x => isNaN(x)) ) {
+    if (throwOnXywhError && annotationTargetArray[0]?.xywh.some(x => isNaN(x))) {
       throw this.insertError("annotations2.#cleanAnnotation: could not extract bounding box for annotation target", annotation.on);
     }
 
     // in updates, "@id" has aldready been extracted
-    if ( !update ) {
+    if (!update) {
       annotation["@id"] = makeAnnotationId(annotation, manifestShortId);
     }
     annotation["@context"] = IIIF_PRESENTATION_2_CONTEXT["@context"];
@@ -171,7 +171,7 @@ class Annotations2 extends CollectionAbstract {
     // - motivations are an array of strings
     // - open annotation specifies that motivations should be described by the `oa:Motivation`, while IIIF 2.1 examples uses the `motivation` field => uniformizwe
     // - all values must be `sc:painting` or prefixed by `oa:`: IIIF presentation API indicates that the only allowed values are open annotation values (prefixed by `oa:`) or `sc:painting`.
-    if ( objectHasKey(annotation, "oa:Motivation") ) {
+    if (objectHasKey(annotation, "oa:Motivation")) {
       annotation.motivation = annotation["oa:Motivation"];
       delete annotation["oa:motivation"];
     }
@@ -186,13 +186,13 @@ class Annotations2 extends CollectionAbstract {
 
     // 3) process the resource. Resource can be either undefined, an array of objects or a single object. process all objects and, if there's no resource content, delete `annotation.resource`.
     let resource = annotation.resource || undefined;
-    if ( resource ) {
+    if (resource) {
       resource =
         Array.isArray(resource)
           ? resource.map((r) => this.#cleanAnnotationResource(r)).filter((r) => r !== null)
           : this.#cleanAnnotationResource(resource);
     }
-    if ( resource === null || resource === undefined || (Array.isArray(resource) && !resource.length) ) {
+    if (resource === null || resource === undefined || (Array.isArray(resource) && !resource.length)) {
       delete annotation.resource;
     } else {
       annotation.resource = resource;
@@ -209,7 +209,7 @@ class Annotations2 extends CollectionAbstract {
    */
   async #cleanAnnotationList(annotationList, throwOnXywhError=STRICT_MODE) {
     // NOTE: if `this.#cleanAnnotationList` can only be accessed from annotations routes, then this check is useless (has aldready been performed).
-    if ( this.validatorAnnotationList(annotationList) ) {
+    if (this.validatorAnnotationList(annotationList)) {
       this.errorNoAction("Annotations2.#cleanAnnotationList: could not recognize AnnotationList. see: https://iiif.io/api/presentation/2.1/#annotation-list.", annotationList)
     }
     return await Promise.all(
@@ -286,7 +286,7 @@ class Annotations2 extends CollectionAbstract {
     // 1. get all distinct manifest URIs
     const manifestUris = [];
     annotationData.map((ann) => ann.on.map((target) => {
-      if ( target.manifestUri != null && !manifestUris.includes(target.manifestUri) ) {
+      if (target.manifestUri != null && !manifestUris.includes(target.manifestUri)) {
         manifestUris.push(target.manifestUri);
       }
     }));
@@ -322,6 +322,8 @@ class Annotations2 extends CollectionAbstract {
    * - pageSize: number of annotations per page
    * - label: title of the AnnotationList.
    *
+   * returns: the paginated AnnotationList as a promise
+   *
    * NOTE: other/more performant forms of pagination than offset: https://medium.com/mongodb/mongodb-pagination-offset-based-vs-keyset-vs-pre-generated-result-pages-4177e05d88ec
    *
    * @param {{
@@ -331,7 +333,7 @@ class Annotations2 extends CollectionAbstract {
    *  pageSize: number,
    *  label: string?
    * }}
-   * @returns {object} - paginated annotation list
+   * @returns {Promise<object>} - paginated annotation list
    */
   async #paginate({
     queryUrl,
@@ -343,7 +345,6 @@ class Annotations2 extends CollectionAbstract {
     const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
 
     const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
-
     const cursor = await this.find(queryFilter, {}, true);
     const annotations = await cursor
       .sort({ "@id": 1 })
@@ -443,9 +444,9 @@ class Annotations2 extends CollectionAbstract {
     const err = (message) => this.deleteError(`${this.funcName(this.deleteAnnotations)}: ${message}`);
     try {
       let expandedDeleteFilter;
-      if ( Object.keys(deleteFilter).includes("tag") ) {
+      if (Object.keys(deleteFilter).includes("tag")) {
         // should be validated by the route's JSONSchema, but just in case.
-        if ( ! Object.keys(deleteFilter).includes("manifestShortId") ) {
+        if (! Object.keys(deleteFilter).includes("manifestShortId")) {
           throw err("Cannot delete by \"tag\" without also filtering by \"manifestShortId\" !")
         }
         const expand = (k) => this.#expandRouteAnnotationFilter(k, deleteFilter[k]);
@@ -454,7 +455,7 @@ class Annotations2 extends CollectionAbstract {
           ...expand("manifestShortId")
         }
       } else {
-        const [deleteKey, deleteVal] = getFirstNonEmptyPair(deleteFilter);
+        const [ deleteKey, deleteVal ] = getFirstNonEmptyPair(deleteFilter);
         expandedDeleteFilter = this.#expandRouteAnnotationFilter(deleteKey, deleteVal);
       }
       return this.delete(expandedDeleteFilter);
@@ -482,16 +483,16 @@ class Annotations2 extends CollectionAbstract {
     // presence of `_id` will not cause projections to fail => remove it from values.
     const projectionValues =
       Object.entries(projectionObj)
-        .filter(([k,v]) => k !== "_id")
-        .map(([k,v]) => v);
+        .filter(([ k,v ]) => k !== "_id")
+        .map(([ k,v ]) => v);
 
     // if there are projection values defined and if they're not 0 or 1, then they're invalid => throw
-    if ( projectionValues.length && projectionValues.find((x) => ![0,1].includes(x)) ) {
-      throw this.readError(`Annotations2.find: only allowed values for projection are 0 and 1. got: ${[...new Set(projectionValues)]}`)
+    if (projectionValues.length && projectionValues.find((x) => ![ 0,1 ].includes(x))) {
+      throw this.readError(`Annotations2.find: only allowed values for projection are 0 and 1. got: ${[ ...new Set(projectionValues) ]}`)
     }
     // mongo projection can be either inclusive (define only fields that will be included) or negative (define only fields that will be excluded), but not a mix of the 2. if you have more than 1 distinct values, you mixed inclusion and exclusion => throw
-    const distinctProjectionValues = [...new Set(projectionValues)]
-    if ( distinctProjectionValues.length > 1 ) {
+    const distinctProjectionValues = [ ...new Set(projectionValues) ]
+    if (distinctProjectionValues.length > 1) {
       throw this.readError(`Annotations2.find: can't mix insertion and exclusion projection in 'projectionObj'. all values must be either 0 or 1. got: ${distinctProjectionValues}`, projectionObj)
     }
     // negative projection: all fields will be included except for those specified.
@@ -499,13 +500,13 @@ class Annotations2 extends CollectionAbstract {
     // in case of positive projection, no specific processing is required: only the explicitly required fields are included.
     // in all cases, `_id` should not be included unless we explicitly ask for it.
     projectionObj._id = projectionObj._id || 0;
-    if ( distinctProjectionValues[0] === 0 ) {
+    if (distinctProjectionValues[0] === 0) {
       projectionObj["on.manifestShortId"] = projectionObj["on.manifestShortId"] || 0;
     }
 
     // 2. find, project and return
     const cursor = this.collection.find(queryObj, { projection: projectionObj });
-    if ( !asCursor ) {
+    if (!asCursor) {
       return cursor.toArray()
     } else {
       return cursor;
@@ -566,7 +567,7 @@ class Annotations2 extends CollectionAbstract {
       filtersExtra = { $and: [] };
 
     // expand query parameters
-    if ( q ) {
+    if (q) {
       filtersExtra.$and.push({
         $or: [
           { "@id": q },
@@ -575,7 +576,7 @@ class Annotations2 extends CollectionAbstract {
         ]
       });
     };
-    if ( motivation ) {
+    if (motivation) {
       filtersExtra.$and.push(
         motivation === "non-painting"
           ? { motivation: { $ne: "sc:painting" } }
@@ -584,9 +585,9 @@ class Annotations2 extends CollectionAbstract {
             : { motivation: `oa:${motivation}` }
       );
     };
-    if ( !isNaN(canvasMin) ) {
+    if (!isNaN(canvasMin)) {
       // if canvasMax is undefined, then search for canvasIdx===canvasMin
-      if ( !canvasMax ) {
+      if (!canvasMax) {
         filtersExtra.$and.push({ "on.canvasIdx": canvasMin })
       // if canvasMin and canvasMax, canvasIdx must be in [canvasMin, canvasMax] (inclusive).
       } else {
@@ -603,7 +604,7 @@ class Annotations2 extends CollectionAbstract {
         ? { ...filtersBase, ...filtersExtra }
         : filtersBase;
 
-    if ( !onlyIds ) {
+    if (!onlyIds) {
       return await this.#paginate({
         queryUrl,
         queryFilter,
@@ -613,16 +614,20 @@ class Annotations2 extends CollectionAbstract {
       })
     } else {
       // NOTE: there is no pagination if `onlyIds` is true
-      return ( await this.find(queryFilter, { "@id": 1 }) )
+      return (await this.find(queryFilter, { "@id": 1 }))
         .map((ann) => ann["@id"]);
     }
   }
 
   /**
    * find all annotations whose target (`on.full`) is `canvasUri`.
-   * @param {string} canvasUri
-   * @param {boolean} asAnnotationList
-   * @returns
+   * @param {{
+   *   queryUrl: string,
+   *   canvasUri: string,
+   *   page: Number,
+   *   pageSize: Number
+   * }} canvasUri
+   * @returns {AnnotationList}
    */
   async findByCanvasUri({
     queryUrl,
@@ -672,5 +677,5 @@ export default fastifyPlugin((fastify, options, done) => {
   done();
 }, {
   name: "annotations2",
-  dependencies: ["manifests2"]
+  dependencies: [ "manifests2" ]
 })

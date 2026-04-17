@@ -24,5 +24,5 @@ export default fastifyPlugin((fastify, options, done) => {
   done();
 }, {
   name: "annotations3",
-  dependencies: ["manifests3"]
+  dependencies: [ "manifests3" ]
 })
