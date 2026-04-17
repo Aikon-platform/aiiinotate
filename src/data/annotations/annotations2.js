@@ -345,7 +345,6 @@ class Annotations2 extends CollectionAbstract {
     const totalCount = await this.#memoizePaginationTotalCount(queryFilter);
 
     const skip = Math.max((page-1) * pageSize, 0);  // number of queried items up until the previous page included.
-
     const cursor = await this.find(queryFilter, {}, true);
     const annotations = await cursor
       .sort({ "@id": 1 })

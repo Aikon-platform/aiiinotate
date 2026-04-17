@@ -282,41 +282,67 @@ const recursiveSort = (x) => {
 }
 
 /**
- * Map cache with a timeout: after `timeout` ms have passed, clears the cache of the key `n`.
- * if `timeout` is negative, the cache will never be cleared of `n`.
+ * Map cache with a timeout and a max size:
+ * - after `timeout` ms have passed, clears the cache of the key `n`.
+ * - to avoid the cache to grow unbounded, we define a max size after which
+ *    we delete the greatest items in the cache.
  *
  * NOTE: LIMITATIONS:
- * - `memoize` converts `fn` to an async function to work with both sync/async patterns, remember to await !
- * - `fn` should accept a single agument `n`
- * - `n` should be JSON-stringify-able: a primitive, an array, or an object, but not a function, a class or class instance
+ * - `memoize` converts `fn` to an async function to work with both
+ *    sync/async patterns, remember to await !
+ * - the args applied to `fn` must be JSON-stringify-able: a primitive,
+ *    an array, or an object, but not a function, a class or class instance
  *
  * adapted from: https://dev.to/codewithjohnson/the-power-of-a-simple-cache-system-with-javascript-map-3j01
  *
  * @param {Function} fn - the function whose result will be cached
  * @param {number} timeout - timeout in ms to clear the cache of a newly assigned value
+ * @param {number} maxSize - maximm number of elements in the cache
  * @returns {async Function} - a function that takes a value and caches its result.
  */
-const memoize = (fn, timeout = 2000) => {
+const memoize = (fn, timeout = 2000, maxSize = 200) => {
+  if (timeout <= 0 || maxSize <= 0) {
+    throw new Error("memoize: 'timeout' and 'maxSize' must be greater than 0.")
+  }
   const cache = new Map();
-  return async (n) => {
-    // stringify `n` to `key`, the key to find in the cache.
-    // since `map` is a key-value store, we need to stringify `n` to ensure it can be used as a key
-    // to ensure consistency, we sort our objects/array before stringifying
-    const key = JSON.stringify(recursiveSort(n));
-    if (cache.has(key)) {
-      return cache.get(key);
-    } else {
-      const result = await fn(n);  // apply the original arguments to `n`, not the sorted key.
-      cache.set(key, result);
-      // after `timeout` ms, clear the cache of `key`
-      if (timeout > 0) {
-        setTimeout(
-          () => cache.delete(key),
-          timeout
-        )
-      }
-      return result;
+  return async (...args) => {
+    // if cache.size > cacheSize, remove the oldest items.
+    const extraCount = cache.size - maxSize;
+    if (extraCount > 0) {
+      // get the `extraCount` oldest items in the cache.
+      const deleteItems = [ ...cache.entries() ]  // convert iterator to array
+        .map(([ k, { timestamp }]) => [ k, timestamp ])
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, extraCount);
+
+      deleteItems.forEach(([ k, _ ]) => cache.delete(k));
     }
+
+    // stringify `args` to `key`, the key to find in the cache.
+    // since `map` is a key-value store, we need to stringify `args`
+    // to ensure it can be used as a key to ensure consistency,
+    // we sort our objects/array before stringifying
+    const key = JSON.stringify(recursiveSort(args));
+
+    // fetch result promise, from cache or by executing `fn`.
+    // instead of caching the result, we cache the promise:
+    // all concurrent callers awaiting the same key get the same promise
+    // instance, so `fn` is only ever called once per unique key,
+    // regardless of how many callers arrive before it resolves.
+    let promise;
+    if (cache.has(key)) {
+      promise = cache.get(key).promise;
+    } else {
+      promise = fn(...args);
+      cache.set(key, { timestamp: Date.now(), promise: promise });
+      // after `timeout` ms, clear the cache of `key`
+      setTimeout(
+        () => cache.delete(key),
+        timeout
+      )
+    }
+
+    return await promise;
   }
 }
 

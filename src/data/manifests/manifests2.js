@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { formatInsertResponse } from "#utils/routeUtils.js";
-import { inspectObj, visibleLog, ajvCompile, memoize } from "#utils/utils.js";
+import { inspectObj, visibleLog, ajvCompile, memoize, objectHasKey } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { PUBLIC_URL } from "#constants";
 
@@ -70,7 +70,11 @@ class Manifests2 extends CollectionAbstract {
    */
   #validateManifest(manifest) {
     if (!this.validatorManifest(manifest)) {
-      throw this.insertError("validateManifest: invalid manifest structure", manifest);
+      let info = {};
+      if ( objectHasKey(manifest, "@id") ) {
+        info = { "@id": manifest["@id"] };
+      }
+      throw this.insertError("validateManifest: invalid manifest structure", info);
     }
   }
 
