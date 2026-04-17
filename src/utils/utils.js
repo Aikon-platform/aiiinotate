@@ -287,6 +287,9 @@ const recursiveSort = (x) => {
  * - to avoid the cache to grow unbounded, we define a max size after which
  *    we delete the greatest items in the cache.
  *
+ * cache structure:
+ * Map<[key:string]: { timestamp: Date, promise: Promise }>
+ *
  * NOTE: LIMITATIONS:
  * - `memoize` converts `fn` to an async function to work with both
  *    sync/async patterns, remember to await !
@@ -304,7 +307,11 @@ const memoize = (fn, timeout = 2000, maxSize = 200) => {
   if (timeout <= 0 || maxSize <= 0) {
     throw new Error("memoize: 'timeout' and 'maxSize' must be greater than 0.")
   }
+
+  // each key is mapped to an object storing the timestamp of cache item cration + the function result as a promise.
+  /** @type {Map<[key:string], { timestamp: Date, promise: Promise }>} */
   const cache = new Map();
+
   return async (...args) => {
     // if cache.size > cacheSize, remove the oldest items.
     const extraCount = cache.size - maxSize;
