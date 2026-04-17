@@ -71,7 +71,7 @@ class Manifests2 extends CollectionAbstract {
   #validateManifest(manifest) {
     if (!this.validatorManifest(manifest)) {
       let info = {};
-      if ( objectHasKey(manifest, "@id") ) {
+      if (objectHasKey(manifest, "@id")) {
         info = { "@id": manifest["@id"] };
       }
       throw this.insertError("validateManifest: invalid manifest structure", info);
