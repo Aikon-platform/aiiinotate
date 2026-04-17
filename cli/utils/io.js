@@ -64,9 +64,16 @@ function fileArrayValidate (fileArr) {
  * @returns {Promise<string[]>}
  */
 async function parseImportInputFile(file) {
+  // ensure input file exists
+  const [ fileAbs, ok ] = fileOk(file);
+  if (!ok) {
+    console.error(`could not read import file: ${file}. exiting...`);
+    process.exit(1);
+  }
+
   // read `file` split it by lines, remove empty lines
   const fileArr =
-    fileRead(file)
+    fileRead(fileAbs)
       .split("\n")
       .filter(l => !l.match(/^\s*$/g));
   return [ ...new Set(fileArrayValidate(fileArr)) ];
