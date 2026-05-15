@@ -263,7 +263,8 @@ class Annotations2 extends CollectionAbstract {
       throwOnCanvasIndexError
       && targetArray.some((target) => target.canvasIdx === undefined)
     ) {
-      throw this.insertError(`${this.funcName(this.#insertManifestsAndGetCanvasIdx)}: could not get canvasIdx for annotation`);
+      const canvasUris = targetArray.map((target) => target.full)
+      throw this.insertError(`${this.funcName(this.#insertManifestsAndGetCanvasIdx)}: could not get canvasIdx for annotation (canvas URI: ${canvasUris})`);
     }
     annotation.on = targetArray;
     return annotation;
@@ -292,7 +293,6 @@ class Annotations2 extends CollectionAbstract {
     }));
 
     // 2. insert the manifests
-    // NOTE: PERFORMANCE significantly drops because of this: test running for the entire app goes from ~1000ms to ~2600ms
     const
       insertResponse = await this.manifestsPlugin.insertManifestsFromUriArray(manifestUris, throwOnCanvasIndexError),
       /** @type {string[]} concatenation of ids of newly inserted manifests and previously inserted manifests. */

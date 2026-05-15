@@ -161,7 +161,9 @@ const selectorToXywh = async (selector) => {
   for (const [ selectorName, func ] of mapper) {
     if (selector["@type"] === selectorName) {
       xywh = await func(selector);
-      if (xywh?.length) {
+      if (Array.isArray(xywh) && xywh?.length) {
+        // ensure `xywh` contains only floats + round to upper integer.
+        xywh = xywh.map(Math.ceil)
         break
       }
     }
