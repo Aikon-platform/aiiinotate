@@ -1,6 +1,6 @@
 import { v4 as uuid4 } from "uuid";
 
-import { maybeToArray, getHash, isNullish, isObject, objectHasKey, visibleLog } from "#utils/utils.js";
+import { maybeToArray, getHash, isNullish, isObject, xywhToInt, objectHasKey, visibleLog } from "#utils/utils.js";
 import { IIIF_PRESENTATION_2, IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { svgStringToXywh } from "#utils/svg.js";
 import { PUBLIC_URL } from "#constants";
@@ -161,7 +161,9 @@ const selectorToXywh = async (selector) => {
   for (const [ selectorName, func ] of mapper) {
     if (selector["@type"] === selectorName) {
       xywh = await func(selector);
-      if (xywh?.length) {
+      if (Array.isArray(xywh) && xywh?.length) {
+        // ensure `xywh` contains only floats + round to upper integer.
+        xywh = xywhToInt(xywh);
         break
       }
     }
