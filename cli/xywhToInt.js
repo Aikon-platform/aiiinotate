@@ -2,7 +2,7 @@ import { Command, Option, Argument } from "commander";
 
 import loadMongoClient from "#cli/utils/mongoClient.js";
 import ProgressBar from "#cli/utils/progressbar.js";
-import { maybeToArray } from "#src/utils/utils.js";
+import { maybeToArray, xywhToInt } from "#src/utils/utils.js";
 
 /** @typedef {import("mongodb").Db} Db */
 
@@ -26,38 +26,13 @@ import { maybeToArray } from "#src/utils/utils.js";
  */
 
 /**
- * round an xywh bounding box to integers.
- * the bouding box should be within the image (otherwise, reading the XYWH bbox into a IIIF
- * Image API URL will fail):
- * - `x` and `y` should be positive integers => round them to larger integer
- * - `x+w` and `y+h` should be smaller than the image's width and height
- *    => round them to the smallest integer.
- * this really only matters if a bbox is on the boundaries of an image.
- * @type {(xywh: number[]) => number[]}
- */
-const xywhToInt = ([x,y,w,h]) => (
-  // convert to int
-  [
-    Math.ceil(x),
-    Math.ceil(y),
-    Math.floor(w),
-    Math.floor(h)
-  ]
-  // 1st failsafe: value may be converted to `-0`, which will
-  // demand us to reupdate the documents everytime for some obscure reason
-  .map((v) => v===-0 ? 0 : v)
-  // 2nd failsafe: use Math.trunc to ensure the returned number is an int.
-  .map(Math.trunc)
-)
-
-/**
  *
  * @param {Db} db - the mongo database
  * @param {object} annotation - the annotation to update
  * @param {boolean} dryRun - if `false`, don't update the annotation in database
  */
 async function updateAnnotation(db, annotation, dryRun) {
-  let [annotationTargetArray, converted] = maybeToArray(annotation.on, true);
+  let [ annotationTargetArray, converted ] = maybeToArray(annotation.on, true);
 
   annotationTargetArray = annotationTargetArray.map((target) => {
     target.xywh = xywhToInt(target.xywh);
@@ -68,9 +43,9 @@ async function updateAnnotation(db, annotation, dryRun) {
     ? annotationTargetArray[0]
     : annotationTargetArray;
 
-    // console.log("post: ", annotation.on);
+  // console.log("post: ", annotation.on);
   // we need to do 1 update / document, since the @id filter can select 1 document at a time.
-  if ( !dryRun ) {
+  if (!dryRun) {
     await db.collection("annotations2").updateOne(
       { "@id": annotation["@id"] },
       { $set: annotation },

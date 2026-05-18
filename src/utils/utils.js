@@ -215,6 +215,32 @@ const getRandomItem = (arr) =>
   arr.at(Math.floor(Math.random() * arr.length));
 
 /**
+ * round an xywh bounding box to integers.
+ * the bouding box should be within the image (otherwise, reading the XYWH bbox into a IIIF
+ * Image API URL will fail):
+ * - `x` and `y` should be positive integers => round them to larger integer
+ * - `x+w` and `y+h` should be smaller than the image's width and height
+ *    => round them to the smallest integer.
+ * this really only matters if a bbox is on the boundaries of an image.
+ * @type {(xywh: number[]) => number[]}
+ */
+const xywhToInt = ([ x,y,w,h ]) => (
+  // convert to int
+  [
+    Math.ceil(x),
+    Math.ceil(y),
+    Math.floor(w),
+    Math.floor(h)
+  ]
+  // 1st failsafe: value may be converted to `-0`, which will
+  // demand us to reupdate the documents everytime for some obscure reason
+  // we actually compare to `0`, since comparing to `0` and `-0` is the same
+    .map((v) => v===0 ? 0 : v)
+  // 2nd failsafe: use Math.trunc to ensure the returned number is an int.
+    .map(Math.trunc)
+)
+
+/**
  * AJV instance to run JsonSchema compilation/validation anywhere in the app
  * (not just in Fastify route definition and Mongo interactions).
  * NOTE: this is a workaround since i could not get to access fastify's AJV instance, although fastify uses AJV internally.
@@ -368,6 +394,7 @@ export {
   arrayEqualsShallow,
   throwIfKeyUndefined,
   throwIfValueError,
+  xywhToInt,
   ajvCompile,
   visibleLog,
   isNonEmptyArray,
