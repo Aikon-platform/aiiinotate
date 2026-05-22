@@ -16,11 +16,11 @@ See the [docs on the aiiinotate API](https://github.com/Aikon-platform/aiiinotat
 
 ### Install
 
-1. **Install mongodb**.
+1. **install mongodb**.
     - see [dev installation script for help](./scripts/setup_mongodb.sh)
     - checkout the [official installation guide](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu)
 
-2. **Install aiiinotate**
+2. **install aiiinotate**
 ```bash
 npm install aiiinotate
 ```
@@ -52,13 +52,13 @@ For clarity, we omit env sourcing from the below commands.
 
 ### Setup the app
 
-1. **Start `mongod`**
+1. **start `mongod`**
 
 ```bash
 sudo systemctl start mongod
 ```
 
-2. **Create and configure the database**
+2. **create and configure the database**
 
 ```bash
 aiiinotate migrate apply
@@ -118,15 +118,15 @@ npm i
 
 After installing, some setup must be done
 
-1. **Setup your `.env`** file after [`config/.env.template`](./config/.env.template) and place it at `./config/.env`.
+1. **setup your `.env`** file after [`config/.env.template`](./config/.env.template) and place it at `./config/.env`.
 
-2. **Start `mongod`**
+2. **start `mongod`**
 
 ```bash
 sudo systemctl start mongod
 ```
 
-3. **Configure the database**
+3. **configure the database**
 
 ```bash
 npm run migrate apply
@@ -136,23 +136,33 @@ npm run migrate apply
 
 Remember to have your `mongodb` service running: `sudo systemctl start mongod` !
 
-- **Start the app**
+#### Start the app
 
 ```bash
 # reload enabled
 npm run dev
 ```
 
-- **Test the app**. NOTE: the tests will probably fail if you set the env variable `AIIINOTATE_STRICT_MODE` to `true`.
+#### Test the app
+
+Note that the tests will probably fail if you set the env variable `AIIINOTATE_STRICT_MODE` to `true`.
 
 ```bash
 npm run test
 ```
 
-- **Run the CLI**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info): 
-    - import data
-    - export data
-    - apply and manage database migrations
+#### Run the CLI
+
+See [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info: 
+
+```bash
+npm run cli
+```
+
+Use the CLI to:
+- import data
+- export data
+- apply and manage database migrations
 
 --- 
 
