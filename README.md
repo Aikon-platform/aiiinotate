@@ -16,9 +16,7 @@ See the [docs on the aiiinotate API](https://github.com/Aikon-platform/aiiinotat
 
 ### Install
 
-1. **install mongodb**.
-    - see [dev installation script for help](./scripts/setup_mongodb.sh)
-    - checkout the [official installation guide](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu)
+1. **install mongodb** (see [dev installation script for help](./scripts/setup_mongodb.sh) and checkout the [official installation guide](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/#std-label-install-mdb-community-ubuntu))
 
 2. **install aiiinotate**
 ```bash
@@ -35,13 +33,13 @@ Copy [`config/.env.template`](./config/.env.template) to `.env` and edit it.
 
 `aiiinotate` runs in a subproicess and won't inherit variables from a plain bash `source` call. Use either of these instead:
 
-1. `dotenvx` (recommended):
+1. **`dotenvx` (recommended)**:
 
 ```bash
 npx dotenvx run -f /path/to/.env -- aiiinotate <command>
 ```
 
-2. manual export:
+2. **manual export**:
 
 ```bash
 set -a && source /path/to/.env && set +a
