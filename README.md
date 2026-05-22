@@ -33,25 +33,20 @@ Copy [`config/.env.template`](./config/.env.template) to `.env` and edit it.
 
 #### Runtime env sourcing
 
-Once the package is installed, it must access variables from the .env file. However, running `aiiinotate <commands>` creates a subscript which means **you can't `source` an `.env` file**.
+`aiiinotate` runs in a subproicess and won't inherit variables from a plain bash `source` call. Use either of these instead:
+
+1. `dotenvx` (recommended):
 
 ```bash
-# THIS WILL FAIL: `aiiinotate` is executed in a subscript that doesn't inherit from the variables fetched in `source`.
-source /path/to/.env && aiiinotate <command>
+npx dotenvx run -f /path/to/.env -- aiiinotate <command>
 ```
 
-#### The solutions: do either:
-1. use `dotenvx` to inject variables:
-    ```bash
-    npx dotenvx run -f /path/to/.env -- aiiinotate <command>
-    ```
-2. manually export variables:
-    ```bash
-    set -a
-    source /path/to/.env
-    set +a
-    aiiinotate <command>
-    ```
+2. manual export:
+
+```bash
+set -a && source /path/to/.env && set +a
+aiiinotate <command>
+```
 
 For clarity, we omit env sourcing from the below commands.
 
@@ -89,12 +84,12 @@ aiiinotate -- <command>
 
 It will give full access to the CLI interface of Aiiinotate. Run `aiiinotate --help` for more info.
 
+Use the CLI to:
+- import data
+- export data
+- apply and manage migrations
+
 For more information, see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
-
-#### Import data
-
-See [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md).
-
 
 ---
 
@@ -154,27 +149,10 @@ npm run dev
 npm run test
 ```
 
-- **Run the CLI**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
-
-
-```bash
-npm run cli
-```
-
-- **Process migrations**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info)
-
-```bash
-# NOTE: the `--` is necessary !
-npm run migrate -- <command> <arguments?>
-```
-
-
-- **Import data**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/main/docs/cli.md) for more info)
-
-```bash
-# NOTE: the `--` is necessary !
-npm run cli -- import <arguments>
-```
+- **Run the CLI**. (see [the CLI docs](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/cli.md) for more info): 
+    - import data
+    - export data
+    - apply and manage database migrations
 
 --- 
 
