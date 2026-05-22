@@ -3,6 +3,7 @@ import fs from "fs";
 
 import ProgressBar from "#cli/utils/progressbar.js";
 
+/** @typedef {import("fs").WriteStream} WriteStreamType */
 
 const cwd = process.cwd();  // directory the script is run from
 const getCwd = () => process.cwd();
@@ -113,6 +114,47 @@ const fileWriteJson = (f, data) => {
 }
 
 /**
+ * wrapper for writer.write(data) that respects writer backpressure
+ *
+ * we wrap the .write() in a Promise that checks on the rturn of `writer.write`
+ * and drains the stream if necessary: if `writer.write()` returns
+ * false, the write buffer is full  and must be drained by the OS
+ * before continuing.
+ *
+ * this avoids:
+ * - writes that are silently dropped or reordered
+ * - corrupt/truncated JSON with no error thrown
+ *
+ * @type {(writer: WriteStreamType) => (data: string) => Promise<void> }
+ */
+const writeOrWait = (writer) =>
+  (data) =>
+    new Promise((resolve, reject) => {
+      const ok = writer.write(data, (error) => {
+        if (error) return reject(error);
+      });
+      if (ok) {
+        resolve();  // buffer has room, keep going
+      } else {
+        writer.once("drain", resolve);  // buffer full, wait for drain
+      }
+    });
+
+/**
+ * WriteStream.write is actually asyncrhonous => for the last line,
+ * we need to use `writer.end` to ensure everything has been written to file.
+ *
+ * @returns {Promise<void>}
+ */
+const endStream = (writer, data) =>
+  new Promise((resolve, reject) => {
+    writer.end(data, (error) => {
+      if (error) return reject(error);
+      resolve();
+    });
+  });
+
+/**
  * given a file path `fp` and a FindCursor `cursor`,
  * write all documents in `cursor` to a file.
  *
@@ -125,6 +167,11 @@ const fileWriteJson = (f, data) => {
  * - JSON.stringify(), used to write JSONs to file, has a maximum
  *    size for arrays and will crash if stringifying huge arrays.
  *
+ * to check that the output is a valid JSON, use:
+ * ```bash
+ * python3 -mjson.tool path/to/json > /dev/null && echo "ok" || echo "err"
+ * ````
+ *
  * @param {string|PathLike} fp
  * @param {MongoFindCursorType} cursor
  * @param {number?} totalCount
@@ -132,17 +179,22 @@ const fileWriteJson = (f, data) => {
  */
 const writeCursorToJson = async (fp, cursor, totalCount) => {
   const writer = fs.createWriteStream(fp);
+  const onceWriter = writeOrWait(writer);
 
   let pb;
   if (totalCount) {
-    pb = new ProgressBar({desc: "writing documents to file", total: totalCount});
+    pb = new ProgressBar({ desc: "writing documents to file", total: totalCount });
   } else {
     console.log("");
   }
 
+  // we are writing an array => manually write the opening "[".
+  await onceWriter("[");
   let i = 0
   for await (const doc of cursor) {
     i += 1;
+    // if previous items were written to file, write a "," separator.
+    if (i!=1) await onceWriter(", ");
     if (pb) {
       pb.update(i);
     } else {
@@ -150,13 +202,12 @@ const writeCursorToJson = async (fp, cursor, totalCount) => {
       process.stdout.cursorTo(0);
       process.stdout.write(`writing document #${i} to file`);
     }
-    writer.write(JSON.stringify(doc) + ", ");
+    await onceWriter(JSON.stringify(doc));
   }
+  // close the array with a "]" and end the stream.
+  await endStream(writer, "]");
 
-  writer.close();
-  if (!pb && i>0) {
-    console.log("");
-  }
+  if (!pb && i>0) console.log("");
   return totalCount;
 }
 

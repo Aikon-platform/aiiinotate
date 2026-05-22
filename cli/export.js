@@ -17,7 +17,7 @@ const actualCollections = exportableCollections.filter(c => c!=="all");
 const getOutDir = (outDir) => {
   let success;
   if (outDir) {
-    [outDir, success] = dirOk(outDir);
+    [ outDir, success ] = dirOk(outDir);
     if (!success) {
       console.error(`Error opening directory "${outDir}". Are you sure it exists ?`);
       process.exit(1);
