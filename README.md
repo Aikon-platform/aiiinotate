@@ -8,7 +8,7 @@ NOTE: currently, only annotations following the IIIF presentation API 2.0 and 2.
 
 ## API
 
-See the [docs on the aiiinotate API](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/endpoints.md).
+See the [docs on the aiiinotate API](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/api.md).
 
 ---
 
