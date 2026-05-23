@@ -5,23 +5,35 @@ FROM node:23.11
 ARG PORT
 ENV PORT=${PORT}
 
+# path to the .env file
+ARG ENV_PATH
+ENV ENV_PATH="$ENV_PATH"
+
 # set up environment
+ENV DIR=/aiiinotate
 ENV TERM=linux
+ENV NPM_BIN=/aiiinotate/node_modules/.bin
 SHELL ["/bin/bash", "-c"]
 
 # root of the app in the docker container
-WORKDIR /aiiinotate
+WORKDIR ${DIR}
 # copy the docker .env in the docker container
-COPY ./docker/.env /aiiinotate/.env
-# for debug: install `iproute2` which provides CLI `ss` to monitor active ports
-RUN apt update && apt install iproute2 -y
+COPY "$ENV_PATH" ${DIR}/.env
+
+# install iproute and curl for debug
+RUN apt-get update
+RUN apt install curl iproute2 -y
+
+# create a npm package in $DIR to run aiiinotate from
+RUN npm init -y
 # install the app as an NPM library. we do a global install as it saves us from issues with `$PATH`.
-RUN npm i -g aiiinotate
+RUN npm i aiiinotate
 
 # expose the used port
-EXPOSE $PORT
+EXPOSE ${PORT}
 
 # run the migrations and start the app.
+# ./node_modules/.bin/aiiinotate is to be able to use the `aiiinotate` cli without doing a global install of `aiiinotate`
 # NOTE migrations must be done in CMD: they need the mongo service to be running.
-CMD aiiinotate --env=/aiiinotate/.env -- migrate apply && \
-    aiiinotate --env=/aiiinotate/.env -- serve prod;
+CMD ${NPM_BIN}/dotenvx run -f ${DIR}/.env -- ${NPM_BIN}/aiiinotate migrate apply && \
+    ${NPM_BIN}/dotenvx run -f ${DIR}/.env -- ${NPM_BIN}/aiiinotate serve prod;
