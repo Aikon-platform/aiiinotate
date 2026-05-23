@@ -24,40 +24,40 @@ newgrp docker
 
 Note that all `docker` commands must be run from the `docker/` directory!
 
-1. Clone the repo and `cd` in it
+1. **Clone the repo** and `cd` in it
 
 ```bash
 git clone git@github.com:Aikon-platform/aiiinotate.git
 cd aiiinotate/
 ```
 
-2. Create a `.env` file at `docker/.env` (from the root of the project):
+2. **Create a `.env` file** at `docker/.env` (from the root of the project):
 ```bash
 cp ./config/.env.template ./docker/.env
 vim ./docker/.env  # do your edits
 ```
 
-3. Edit the `.env` file. Pay attention to the following values:
+3. **Edit the `.env` file**. Pay attention to the following values:
 - `MONGODB_HOST=mongo` (container name)
 - `AIIINOTATE_HOST=aiiinotate` (container name)
 - `AIIINOTATE_SCHEME=http`
 - `AIIINOTATE_LOG_TARGET=stdout` (Docker aldready collects stdout logs, so setting log target to `file` is redundant)
 - set `AIIINOTATE_PUBLIC_URL` to the URL at which your aiiinotate instance will be accessible (e.g., `aiiinotate.enpc.fr`).
 
-4. Build the containers
+4. **Build the containers**
 
 ```bash
 cd docker
 bash docker.sh build
 ```
 
-5. Start the containers
+5. **Start the containers**
 
 ```bash
 bash docker.sh start
 ```
 
-6. (Optional) import data into the running aiiinotate instance. `path/to/dir` is a path to a folder containing AnnotationLists or manifests to import.
+6. (Optional) **import data** into the running aiiinotate instance. `path/to/dir` is a path to a folder containing AnnotationLists or manifests to import.
 
 ```bash
 bash docker_aiiinotate_import.sh <manifests|annotations> path/to/dir
