@@ -28,6 +28,8 @@ npm run cli
     npm run cli -- <command> <arguments>
     ```
 
+---
+
 ## `serve`: start the app
 
 ```bash
@@ -67,7 +69,6 @@ aiiinotate migrate revert-all
 The CLI can be used to import IIIF annotations or to index IIIF manifests in aiiinotate.
 
 ```bash
-# in prod
 aiiinotate import <manifests|annotations> -i 2 -f <path/to/import/file.txt>
 ```
 
@@ -95,4 +96,37 @@ Here is an example of import file:
 ./annotations/wit72_man72_anno133.json
 ./annotations/wit75_man74_anno130.json
 ./annotations/wit2_man4_anno4.json
+```
+
+---
+
+## `export`: export data
+
+The CLI can be used to export data to JSON.
+
+```bash
+aiiinotate export <all|annotations2|manifests2|annotations3|manifests3> [-o /output/dir]?
+```
+
+Each collection will be written to its own JSON file.
+
+Exported JSON data can be imported back in a MongoDB instance using [mongoimport](https://www.mongodb.com/docs/database-tools/mongoimport/):
+
+```bash
+ mongoimport \
+   --host localhost \
+   --db <db name> \
+   --collection <collection name> \
+   --file <./path/to/export.json> \
+   --jsonArray
+```
+
+---
+
+## `xywhToInt`
+
+In versions of aiiinotate `>0.10.3`, the `xywh` bounding box extracted from incoming annotations and saved to database may contain `floats`. This causes errors when reconstructing Cantaloupe URLs from t`xywh`. This command converts all `xywh` containing floats to intgers. It is only implemented for collection `annotations2`.
+
+```bash
+aiiinotate run xywh-to-int
 ```

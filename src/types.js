@@ -13,6 +13,7 @@
 /** @typedef {import("mongodb").UpdateResult} MongoUpdateResultType */
 /** @typedef {import("mongodb").DeleteResult} MongoDeleteResultType */
 /** @typedef {import("mongodb").MongoClient} MongoClientType */
+/** @typedef {import("mongodb").FindCursor} MongoFindCursorType */
 
 /** @typedef {import("ajv").ValidateFunction} AjvValidateFunctionType */
 

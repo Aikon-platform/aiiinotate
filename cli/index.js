@@ -14,6 +14,7 @@ import { Command, Option } from "commander";
 // import dotenvx from "dotenvx";
 
 import makeImportCommand from "#cli/import.js";
+import makeExportCommand from "#cli/export.js";
 import makeMigrateCommand from "#cli/migrate.js";
 import makeServeCommand from "#cli/serve.js";
 import makeXywhToIntCommand from "#cli/xywhToInt.js";
@@ -34,6 +35,7 @@ function makeCli() {
     .description(desc)
     .addCommand(makeServeCommand())
     .addCommand(makeImportCommand())
+    .addCommand(makeExportCommand())
     .addCommand(makeMigrateCommand())
     .addCommand(makeXywhToIntCommand());
 

@@ -9,29 +9,40 @@ services:
     restart: always
     networks:
       - aiiinotate_network
+    volumes:
+      - mongodata:/data/db
     environment:
       <<: *proxy-settings
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: example
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  web:
+  aiiinotate:
     build:
       context: ..
       dockerfile: docker/Dockerfile
       args:
         PORT: ${AIIINOTATE_PORT}
+        ENV_PATH: ../docker/.env
     # NOTE: be careful to point to docker/.env, not to config/.env, otherwise you will have very, very annoying errors.
     env_file:
       - ../docker/.env
     ports:
       - "${AIIINOTATE_PORT}:${AIIINOTATE_PORT}"
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - aiiinotate_network
     environment:
       <<: *proxy-settings
     restart: always
+
+
+volumes:
+  mongodata:
 
 networks:
   aiiinotate_network:

@@ -1,4 +1,6 @@
-# Endpoints
+# API
+
+This document describes **aiiinotate**'s API.
 
 ## Introductory notes
 
