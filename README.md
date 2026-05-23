@@ -95,6 +95,8 @@ For more information, see [the CLI docs](https://github.com/Aikon-platform/aiiin
 
 See the docs [here](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/docker.md)
 
+For a Mirador integration, see [the reference implementation](github.com/paulhectork/mirador-aiiinotate/tree/main) (aiiinotate + MongoDB + Mirador 4 + MAE bundled in a single `docker-compose`)
+
 ---
 
 ## DEV USAGE
