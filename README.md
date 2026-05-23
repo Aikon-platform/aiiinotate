@@ -91,6 +91,12 @@ For more information, see [the CLI docs](https://github.com/Aikon-platform/aiiin
 
 ---
 
+## DOCKER USAGE
+
+See the docs [here](https://github.com/Aikon-platform/aiiinotate/blob/dev/docs/docker.md)
+
+---
+
 ## DEV USAGE
 
 ### Install
