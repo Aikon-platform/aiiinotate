@@ -1,6 +1,11 @@
 # aiiinotate
 
-aiiinotate is a fast and lightweight annotation server for IIIF. It relies on `nodejs/fastify` and `mongodb` and provides an API to read/write/update/delete IIIF annotations and index manifests.
+aiiinotate is a **fast and lightweight annotation server for IIIF**. aiiinotate 
+
+- relies on `nodejs/fastify` and `mongodb`
+- **provides a REST API** to read/write/update/delete IIIF annotations and index manifests.
+- **is distributed as an NPM package**, can be used through NPM or Docker
+- is **built for scalability and speed**: it [has been benchmarked](https://github.com/paulhectork/aiiinotate-benchmark) with up to 10.000.000 annotations response times for all routes are between $$\frac{1}{10}$$ and $$\frac{1}{100}$$ seconds
 
 NOTE: currently, only annotations following the IIIF presentation API 2.0 and 2.1 are supported.
 
@@ -183,6 +188,14 @@ aiiinotate is well tested: **~90% test coverage** on all files !
 ℹ all files  |  90.02 |    79.43 |   78.73 |
 ℹ ----------------------------------------------------------------------------------------
 ```
+
+---
+
+## Scalability
+
+In [benchmarks](https://github.com/paulhectork/aiiinotate-benchmark), aiiinotate response times are between 1/100th and 1/10th of a second with up to 10,000,000 annotations. 
+
+![benchmark results](./docs/includes/report_benchmark_aiiinotate_2026-05-28-02:50:48_7steps.png)
 
 ---
 
