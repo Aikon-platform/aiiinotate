@@ -5,7 +5,7 @@
 
 In [benchmarks](https://github.com/paulhectork/aiiinotate-benchmark), aiiinotate response times are between 1/100th and 1/10th of a second with up to 10,000,000 annotations. 
 
-![benchmark results](./docs/includes/report_benchmark_aiiinotate_2026-05-28-02:50:48_7steps.png)
+![benchmark results](./includes/report_benchmark_aiiinotate_2026-05-28-02:50:48_7steps.png)
 
 ## Discussion
 
