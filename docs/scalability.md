@@ -1,4 +1,3 @@
-
 # Scalability
 
 ## Results
@@ -17,7 +16,7 @@ Indeed, a big bottleneck when inserting annotations is to fetch an annotation's 
 
 When running the benchmark, all annotation URIs are on `https://localhost`, an URI on localhost that is inaccessible. The request thus fails instantly.
 
-The reason this was done is that HTTP requests are non-deterministic: if we make requests to an external server storing IIIF manifests, then we end up also benchmarking this server. This is why this step was removed from the benchmark.
+The reason this was done is that HTTP requests are non-deterministic: if we make requests to an external server storing IIIF manifests, then we end up also benchmarking this server. By fetching manifests on an inaccessible `https://localhost`, this non-deterministic process becomes deterministic and the benchmark makes more sense. 
 
 ###  >10M annotations
 
@@ -28,8 +27,8 @@ With 100M annotations stored, the database size becomes an issue. These scalabil
 - **vertical scaling**: more RAM and disk space
 - **horizontal scaling**: use a Mongo [sharded cluster](https://www.mongodb.com/docs/manual/sharding/).
 
-It should be noted that the benchmark stress tests your machine, aiiinotate and Mongo at the same time. 
+It should be noted that the benchmark stress tests your machine, aiiinotate and Mongo at the same time:
 - results presented above are obtained by running the benchmark, aiiinotate and Mongo on a single machine. All 3 are thus competing for RAM access and CPU.
-- it uses mutliple threads, fast I/O and has a high throughput: it runs a lot of queries to aiiinotate, and to the MongoDB. 
+- it uses mutliple threads, costly JSON-stringification, fast I/O and has a high throughput: it runs a lot of queries to aiiinotate, and to the MongoDB. 
 
 In real-world examples, with less throughput and when not running the benchmark itself, there should be less stress on your MongoDB server, thus less CPU usage, thus possibly more scalability.
