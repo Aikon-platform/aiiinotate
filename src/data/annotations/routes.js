@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin"
 import { STRICT_MODE } from "#constants";
 import { pathToAiiinotatePublicUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
-import { fetchRetry } from "#utils/utils.js";
+import { fetchRetry } from "#utils/fetchUtils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
