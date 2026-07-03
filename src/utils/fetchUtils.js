@@ -12,21 +12,26 @@ import { sleep, visibleLog } from "#utils/utils.js";
  * moment in the call stack. this adds an extra layer of security
  */
 class Limiter {
+  /** @param {number} maxConcurrency */
   constructor(maxConcurrency) {
     this._maxConcurrency = maxConcurrency;
     this._count = 0;
     this._limit = pLimit(this._maxConcurrency);
   }
+  /** @type {(fn:Function, args: Array) => Promise} */
   async use(fn, args) {
     this._count++;
     try {
-      return await this._limit(() => fn(...args))
+      return this._limit(() => fn(...args))
     } finally {
       this._count--
     }
   }
+  /** @type {() => number} */
   count() { return this._count }
+  /** @type {() => number} */
   pendingCount() { return this._limit.pendingCount }
+  /** @type {() => number} */
   activeCount() { return this._limit.activeCount }
 }
 
@@ -40,6 +45,7 @@ class Limiter {
  * to grow unbounded.
  */
 class LimiterPool {
+  /** @param {number} maxConcurrency */
   constructor(maxConcurrency) {
     this._maxConcurrency = maxConcurrency;
     // limiters is a map of (URL host, Limiter).
@@ -48,34 +54,46 @@ class LimiterPool {
     // it can lead to object prototype pollution
     this._limiters = new Map();
   }
-  /** add a limiter for a new host */
+  /**
+   * add a limiter for a new host
+   * @type {(host:string|URL) => void}
+   */
   add(host) {
     if (!this._limiters.has(host)) {
       this._limiters.set(host, new Limiter(this._maxConcurrency)); // pLimit(this._maxConcurrency);
     }
   }
-  /** delete a limiter for an HTTP host */
+  /**
+   * delete a limiter for an HTTP host
+   * @type {(host:string|URL) => void}
+   */
   drop(host) {
     if (Object.keys(this._limiters).includes(host)) {
       this._limiters.delete(host);
     }
   }
-  /** get a limiter by its host */
+  /**
+   * get a limiter by its host
+   * @type {() => Limiter}
+   */
   get(host) {
     if (!this._limiters.has(host)) {
       this.add(host);
     }
     return this._limiters.get(host);
   }
-  /** use a limiter and, if it becomes undefined, drop the limiter afterwards */
+  /**
+   * use a limiter and, if it becomes undefined, drop the limiter afterwards
+   * @type {(host:string|URL, fn:Function, args>Array) => Promise}
+   */
   async use(host, fn, args) {
     const limiter = this.get(host);
     try {
       return await limiter.use(fn, args);
     } finally {
       // drop the limiter if it is unused
+      // NOTE: the current limiter becomes undefined after that.
       if (limiter.count()===0 && limiter.activeCount()===0 && limiter.pendingCount()===0) {
-        // NOTE: limiter becomes undefined after that.
         this.drop(host);
       }
     }
@@ -108,14 +126,14 @@ const fetchRl = async (url, options) => {
  */
 const fetchRetry = async (url, options={}, retries=5, backoff=300) => {
   const retryCodes = [ 408, 429, 500, 502, 503, 504, 522, 524 ];
-  const r = await fetchRl(url, options);
+  // const r = await fetchRl(url, options);
   // TODO  delete
-  // let r;
-  // if (retries>3) {
-  //   r = { ok: false, status: 500, statusText: 'Internal Server Error' };
-  // } else {
-  //   r = await fetch(url, options);
-  // }
+  let r;
+  if (retries>3) {
+    r = { ok: false, status: 500, statusText: 'Internal Server Error' };
+  } else {
+    r = await fetchRl(url, options);
+  }
   if (r.ok) {
     return r
   }
