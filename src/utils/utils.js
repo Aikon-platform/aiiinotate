@@ -389,7 +389,7 @@ const memoize = (fn, timeout = 2000, maxSize = 200) => {
  * @param {number} backoff - backoff time in ms.
  * @returns {Promise<Response>}
  */
-const fetchRetry = async (url, options = {}, retries = 5, backoff = 300) => {
+const fetchRetry = async (url, options={}, retries=5, backoff=300) => {
   const retryCodes = [ 408, 429, 500, 502, 503, 504, 522, 524 ];
   const r = await fetch(url, options);
   if (r.ok) {
