@@ -3,6 +3,7 @@ import fastifyPlugin from "fastify-plugin"
 import { STRICT_MODE } from "#constants";
 import { pathToAiiinotatePublicUrl, objectHasKey, maybeToArray, throwIfKeyUndefined, throwIfValueError, getFirstNonEmptyPair, visibleLog } from "#utils/utils.js";
 import { makeResponseSchema, makeResponsePostSchema, returnError, addPagination } from "#utils/routeUtils.js";
+import { fetchRetry } from "#utils/utils.js";
 
 
 /** @typedef {import("#types").FastifyInstanceType} FastifyInstanceType */
@@ -300,8 +301,10 @@ function annotationsRoutes(fastify, options, done) {
         const asUri = body.find(item => objectHasKey(item, "uri")) !== undefined;
         if (asUri) {
           annotationsArray = await Promise.all(
-            body.map(async (item) =>
-              fetch(item.uri).then(r => r.json()))
+            body.map(async (item) => {
+              const r = await fetchRetry(item.uri);
+              return r.json()
+            })
           );
         } else {
           annotationsArray = body;
