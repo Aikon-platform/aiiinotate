@@ -1,4 +1,100 @@
+import pLimit from "p-limit";
+
 import { sleep, visibleLog } from "#utils/utils.js";
+
+
+/**
+ * Limiter is a wrapper to `p-limit` that tracks the number
+ * of concurrent processes currently used by the limiter.
+ * this is used instead of a plain `p-limit` object because
+ * there is a very small possibility that `pendingCount`
+ * and `activeCount` can become desynchronized for a small
+ * moment in the call stack. this adds an extra layer of security
+ */
+class Limiter {
+  constructor(maxConcurrency) {
+    this._maxConcurrency = maxConcurrency;
+    this._count = 0;
+    this._limit = pLimit(this._maxConcurrency);
+  }
+  async use(fn, args) {
+    this._count++;
+    try {
+      return await this._limit(() => fn(...args))
+    } finally {
+      this._count--
+    }
+  }
+  count() { return this._count }
+  pendingCount() { return this._limit.pendingCount }
+  activeCount() { return this._limit.activeCount }
+}
+
+/**
+ * LimiterPool handles rate-limiting.
+ * it stores a map of URL hosts to rate-limiters. used with `fetch`,
+ * it means that a maximum of `maxConcurrency` requests can be made
+ * at once to a given host.
+ * LimiterPool also tracks the number of requests per limiter. if a
+ * limiter is undefined, the limiter is dropped to avoid our LimiterPool
+ * to grow unbounded.
+ */
+class LimiterPool {
+  constructor(maxConcurrency) {
+    this._maxConcurrency = maxConcurrency;
+    // limiters is a map of (URL host, Limiter).
+    // we use a map instead of an object because host is user supplied
+    // and using a user-defined value as an object key is a security risk:
+    // it can lead to object prototype pollution
+    this._limiters = new Map();
+  }
+  /** add a limiter for a new host */
+  add(host) {
+    if (!this._limiters.has(host)) {
+      this._limiters.set(host, new Limiter(this._maxConcurrency)); // pLimit(this._maxConcurrency);
+    }
+  }
+  /** delete a limiter for an HTTP host */
+  drop(host) {
+    if (Object.keys(this._limiters).includes(host)) {
+      this._limiters.delete(host);
+    }
+  }
+  /** get a limiter by its host */
+  get(host) {
+    if (!this._limiters.has(host)) {
+      this.add(host);
+    }
+    return this._limiters.get(host);
+  }
+  /** use a limiter and, if it becomes undefined, drop the limiter afterwards */
+  async use(host, fn, args) {
+    const limiter = this.get(host);
+    try {
+      return await limiter.use(fn, args);
+    } finally {
+      // drop the limiter if it is unused
+      if (limiter.count()===0 && limiter.activeCount()===0 && limiter.pendingCount()===0) {
+        // NOTE: limiter becomes undefined after that.
+        this.drop(host);
+      }
+    }
+  }
+}
+
+const lp = new LimiterPool(10);
+
+/**
+ * rate-limited alternative to `fetch`
+ * NOTE: should be used instead of `fetch` when querying external services.
+ *
+ * @param {string|URL} url - url to fetch
+ * @param {RequestInit} options - fetch options
+ */
+const fetchRl = async (url, options) => {
+  const host = (new URL(url)).host
+  return lp.use(host, fetch, [ url, options ]);
+}
 
 /**
  * JS fetch with retry logic.
@@ -12,7 +108,7 @@ import { sleep, visibleLog } from "#utils/utils.js";
  */
 const fetchRetry = async (url, options={}, retries=5, backoff=300) => {
   const retryCodes = [ 408, 429, 500, 502, 503, 504, 522, 524 ];
-  const r = await fetch(url, options);
+  const r = await fetchRl(url, options);
   // TODO  delete
   // let r;
   // if (retries>3) {
