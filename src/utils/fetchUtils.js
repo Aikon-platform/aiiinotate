@@ -126,14 +126,14 @@ const fetchRl = async (url, options) => {
  */
 const fetchRetry = async (url, options={}, retries=5, backoff=300) => {
   const retryCodes = [ 408, 429, 500, 502, 503, 504, 522, 524 ];
-  // const r = await fetchRl(url, options);
-  // TODO  delete
-  let r;
-  if (retries>3) {
-    r = { ok: false, status: 500, statusText: 'Internal Server Error' };
-  } else {
-    r = await fetchRl(url, options);
-  }
+  const r = await fetchRl(url, options);
+  // // TODO  delete
+  // let r;
+  // if (retries>3) {
+  //   r = { ok: false, status: 500, statusText: "Internal Server Error" };
+  // } else {
+  //   r = await fetchRl(url, options);
+  // }
   if (r.ok) {
     return r
   }

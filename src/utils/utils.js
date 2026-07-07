@@ -362,6 +362,7 @@ const memoize = (fn, timeout = 2000, maxSize = 200) => {
     // all concurrent callers awaiting the same key get the same promise
     // instance, so `fn` is only ever called once per unique key,
     // regardless of how many callers arrive before it resolves.
+    visibleLog(cache.entries());
     let promise;
     if (cache.has(key)) {
       promise = cache.get(key).promise;

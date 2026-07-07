@@ -57,9 +57,10 @@ class Manifests2 extends CollectionAbstract {
    */
   #memoizeGetManifestCanvasIds = memoize(async (manifestUri) => {
     const doc = await this.collection
+      // findOne is enough, there's only one manifest per URI
       .findOne(
         { "@id": manifestUri },
-        { projection: { canvasIds: 1, _id: 0 } }  // findOne is enough, there's only one manifest per URI
+        { projection: { canvasIds: 1, _id: 0 } }
       );
     return doc?.canvasIds ?? [];
   }, 60_000);
