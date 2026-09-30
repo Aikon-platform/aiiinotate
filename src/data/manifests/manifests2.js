@@ -4,6 +4,7 @@ import CollectionAbstract from "#data/collectionAbstract.js";
 import { getManifestShortId } from "#utils/iiif2Utils.js";
 import { formatInsertResponse } from "#utils/routeUtils.js";
 import { inspectObj, visibleLog, ajvCompile, memoize, objectHasKey } from "#utils/utils.js";
+import { fetchRetry } from "#utils/fetchUtils.js";
 import { IIIF_PRESENTATION_2_CONTEXT } from "#utils/iiifUtils.js";
 import { PUBLIC_URL } from "#constants";
 
@@ -56,9 +57,10 @@ class Manifests2 extends CollectionAbstract {
    */
   #memoizeGetManifestCanvasIds = memoize(async (manifestUri) => {
     const doc = await this.collection
+      // findOne is enough, there's only one manifest per URI
       .findOne(
         { "@id": manifestUri },
-        { projection: { canvasIds: 1, _id: 0 } }  // findOne is enough, there's only one manifest per URI
+        { projection: { canvasIds: 1, _id: 0 } }
       );
     return doc?.canvasIds ?? [];
   }, 60_000);
@@ -114,7 +116,7 @@ class Manifests2 extends CollectionAbstract {
    */
   async #fetchManifestFromUri(manifestUri) {
     try {
-      const r = await fetch(manifestUri);
+      const r = await fetchRetry(manifestUri);
       return await r.json();
     } catch (err) {
       throw this.insertError(`error fetching manifest with URI '${manifestUri}'`);

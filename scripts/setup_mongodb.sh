@@ -18,11 +18,14 @@ float_comparison () {
 
 install_mongodb_ubuntu () {
 
-    sudo apt-get install gnupg curl
+    # NOTE: the most recent mongodb version (8.0) has since may 2026 an
+    # incompatibility with recent linux kernels => we clip mongo to v7.0.
+    # since mongo 7.0 doesn´t have a release for ubuntu 24, we use the 
+    # ubuntu 22 release (focal, see `DISTRIB` variable below)
+    # see: https://jira.mongodb.org/browse/SERVER-121912
+    MONGO_VERSION="7.0"
 
-    curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
-    sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
-    --dearmor
+    color_echo purple "NOTE: installing Mongo 7 instead of the more recent Mongo 8 to avoid incompatibility with linux kernel (see: https://jira.mongodb.org/browse/SERVER-121912)"
 
     # assert we have an 86 64 architecture
     if [ "$(arch)" != "x86_64" ];
@@ -32,20 +35,26 @@ install_mongodb_ubuntu () {
     # fetch the release name. Mongo only supports LTS versions, so if the user's Ubuntu version is not LTS, we get the name of the last LTS released before the user's version.
     source "/etc/lsb-release"
     if float_comparison "$DISTRIB_RELEASE >= 24.04";
-    then DISTRIB="noble";
+    then DISTRIB="jammy";  # noble not supported by mongo 7.0, use jammy instead
     elif float_comparison  "$DISTRIB_RELEASE >= 22.04";
     then DISTRIB="jammy";
     elif float_comparison "$DISTRIB_RELEASE >= 20.04";
     then DISTRIB="focal";
-    else echo "Your Ubuntu version ($DISTRIB_RELEASE) is not supported by MongoDB 8.0"; exit 1;
+    else echo "Your Ubuntu version ($DISTRIB_RELEASE) is not supported by MongoDB ${MONGO_VERSION}"; exit 1;
     fi;
 
-    # create list file
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu $DISTRIB/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+    sudo apt-get install -y gnupg curl
 
+    curl -fsSL "https://www.mongodb.org/static/pgp/server-${MONGO_VERSION}.asc" | \
+    sudo gpg -o "/usr/share/keyrings/mongodb-server-${MONGO_VERSION}.gpg" \
+    --dearmor
+
+    # create list file
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${MONGO_VERSION}.gpg ] https://repo.mongodb.org/apt/ubuntu $DISTRIB/mongodb-org/${MONGO_VERSION} multiverse" | sudo tee "/etc/apt/sources.list.d/mongodb-org-${MONGO_VERSION}.list"   
+    
     sudo apt-get update
 
-    sudo apt-get install -y mongodb-org
+    sudo apt-get install -y "mongodb-org=${MONGO_VERSION}.*"
 }
 
 install_mongodb_mac () {
@@ -66,5 +75,5 @@ if ! command -v mongod ; then
         brew services start mongodb-community@8.0;
     else echo "Unsupported OS: $OS"; exit 1;
     fi;
-
+  else color_echo green "MongoDB is aldready installed on your machine :)"
 fi;

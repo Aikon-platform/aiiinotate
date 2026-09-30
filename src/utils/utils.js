@@ -379,6 +379,8 @@ const memoize = (fn, timeout = 2000, maxSize = 200) => {
   }
 }
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
 export {
   maybeToArray,
   pathToAiiinotatePublicUrl,
@@ -400,4 +402,5 @@ export {
   isNonEmptyArray,
   mergeObjects,
   memoize,
+  sleep
 }
