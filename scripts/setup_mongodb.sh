@@ -22,7 +22,10 @@ install_mongodb_ubuntu () {
     # incompatibility with recent linux kernels => we clip mongo to v7.0.
     # since mongo 7.0 doesn´t have a release for ubuntu 24, we use the 
     # ubuntu 22 release (focal, see `DISTRIB` variable below)
+    # see: https://jira.mongodb.org/browse/SERVER-121912
     MONGO_VERSION="7.0"
+
+    color_echo purple "NOTE: installing Mongo 7 instead of the more recent Mongo 8 to avoid incompatibility with linux kernel (see: https://jira.mongodb.org/browse/SERVER-121912)"
 
     # assert we have an 86 64 architecture
     if [ "$(arch)" != "x86_64" ];
@@ -72,5 +75,5 @@ if ! command -v mongod ; then
         brew services start mongodb-community@8.0;
     else echo "Unsupported OS: $OS"; exit 1;
     fi;
-
+  else color_echo green "MongoDB is aldready installed on your machine :)"
 fi;
