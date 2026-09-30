@@ -38,7 +38,7 @@ class Limiter {
 /**
  * LimiterPool handles rate-limiting.
  * it stores a map of URL hosts to rate-limiters. used with `fetch`,
- * it means that a maximum of `maxConcurrency` requests can be made
+ * it ensures that a maximum of `maxConcurrency` requests can be made
  * at once to a given host.
  * LimiterPool also tracks the number of requests per limiter. if a
  * limiter is undefined, the limiter is dropped to avoid our LimiterPool
@@ -91,7 +91,9 @@ class LimiterPool {
     try {
       return await limiter.use(fn, args);
     } finally {
-      // drop the limiter if it is unused
+      // drop the limiter if it is unused. 
+      // the finally runs after the return in the try block, which ensures 
+      // that the current limiter is dropped once `use` has run.
       // NOTE: the current limiter becomes undefined after that.
       if (limiter.count()===0 && limiter.activeCount()===0 && limiter.pendingCount()===0) {
         this.drop(host);
@@ -100,7 +102,12 @@ class LimiterPool {
   }
 }
 
-const lp = new LimiterPool(10);
+/**
+ * app-wide limiter pool
+ * since it is instanciated here, never exported and used only by `fetchRl`, `limiterPool` 
+ * actually tracks requests for the whole app.  
+ */
+const limiterPool = new LimiterPool(10);
 
 /**
  * rate-limited alternative to `fetch`
@@ -111,11 +118,11 @@ const lp = new LimiterPool(10);
  */
 const fetchRl = async (url, options) => {
   const host = (new URL(url)).host
-  return lp.use(host, fetch, [ url, options ]);
+  return limiterPool.use(host, fetch, [ url, options ]);
 }
 
 /**
- * JS fetch with retry logic.
+ * JS fetch with retry logic and rate-limiting (with `fetchRl` defined above).
  * backoff time doubles with each retry.
  * returns the full fetch response object.
  * @param {string|URL} url
@@ -127,18 +134,12 @@ const fetchRl = async (url, options) => {
 const fetchRetry = async (url, options={}, retries=5, backoff=300) => {
   const retryCodes = [ 408, 429, 500, 502, 503, 504, 522, 524 ];
   const r = await fetchRl(url, options);
-  // // TODO  delete
-  // let r;
-  // if (retries>3) {
-  //   r = { ok: false, status: 500, statusText: "Internal Server Error" };
-  // } else {
-  //   r = await fetchRl(url, options);
-  // }
   if (r.ok) {
     return r
   }
   if (retries > 0 && retryCodes.includes(r.status)) {
-    visibleLog([ "RETRY", url, options, retries-1, backoff*2 ]);
+    // NOTE: i keep the visibleLog here to see if it actually works when used
+    visibleLog([ "RETRY", `url: ${url}`, `options: ${options}`, `retries: ${retries-1}`, `backoff: ${backoff*2}` ]);
     await sleep(backoff);
     return fetchRetry(url, options, retries-1, backoff*2);
   } else {
